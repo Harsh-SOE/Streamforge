@@ -9,10 +9,10 @@ import {
 } from '@gateway/infrastructure/config';
 import { LOGGER_PORT } from '@gateway/application/ports';
 import { WinstonLoggerAdapter } from '@gateway/infrastructure/logger';
+import { MeasureModule } from '@gateway/infrastructure/measure';
 
 import { WatchService } from './views.service';
 import { WatchController } from './views.controller';
-import { MeasureModule } from '@gateway/infrastructure/measure';
 
 @Module({
   imports: [

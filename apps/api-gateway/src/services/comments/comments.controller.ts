@@ -10,7 +10,7 @@ import {
 import { UserAuthPayload } from '@app/contracts/auth';
 
 import { GatewayJwtGuard } from '@gateway/infrastructure/jwt/guard';
-import { User } from '@gateway/proxies/auth/decorators';
+import { User } from '@gateway/services/auth/decorators';
 
 import { COMMENT_API, COMMENT_API_VERSION } from './api';
 import { CommentsService } from './comments.service';

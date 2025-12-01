@@ -1,6 +1,6 @@
 import { Controller, Param, Post, UseGuards, Version } from '@nestjs/common';
 
-import { User } from '@gateway/proxies/auth/decorators';
+import { User } from '@gateway/services/auth/decorators';
 import { GatewayJwtGuard } from '@gateway/infrastructure/jwt/guard';
 
 import { UserAuthPayload } from '@app/contracts/auth';

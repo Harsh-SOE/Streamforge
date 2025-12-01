@@ -12,7 +12,7 @@ import { UserAuthPayload } from '@app/contracts/auth';
 
 import { LOGGER_PORT, LoggerPort } from '@gateway/application/ports';
 import { REQUESTS_COUNTER } from '@gateway/infrastructure/measure';
-import { Auth0ProfileUser } from '@gateway/proxies/auth/types';
+import { Auth0ProfileUser } from '@gateway/services/auth/types';
 import { AppConfigService } from '@gateway/infrastructure/config';
 
 @Injectable()

@@ -1,9 +1,9 @@
 import { Response } from 'express';
 import { Controller, Get, Res, UseGuards, Version } from '@nestjs/common';
 
-import { User } from '@gateway/proxies/auth/decorators';
-import { Auth0ProfileUser } from '@gateway/proxies/auth/types';
-import { Auth0OAuthGaurd } from '@gateway/proxies/auth/guards';
+import { User } from '@gateway/services/auth/decorators';
+import { Auth0ProfileUser } from '@gateway/services/auth/types';
+import { Auth0OAuthGaurd } from '@gateway/services/auth/guards';
 
 import { AuthService } from './auth.service';
 import { AUTH_API_VERSION, AUTH_API } from './api';

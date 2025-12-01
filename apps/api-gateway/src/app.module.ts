@@ -1,19 +1,19 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 
 import { AppConfigModule } from './infrastructure/config';
-import { VideoModule } from './proxies/videos/video.module';
-import { UsersModule } from './proxies/users/users.module';
+import { VideoModule } from './services/videos/video.module';
+import { UsersModule } from './services/users/users.module';
 import { MeasureModule } from './infrastructure/measure';
-import { AuthModule } from './proxies/auth/auth.module';
-import { WatchModule } from './proxies/views/views.module';
+import { AuthModule } from './services/auth/auth.module';
+import { WatchModule } from './services/views/views.module';
 import { ResponseTimeMiddleware } from './persentation/middlewares';
-import { CommentsModule } from './proxies/comments/comments.module';
+import { CommentsModule } from './services/comments/comments.module';
 import { AppHealthModule } from './infrastructure/health/health.module';
 import { LOGGER_PORT } from './application/ports';
 import { WinstonLoggerAdapter } from './infrastructure/logger';
 import { AppJwtModule } from './infrastructure/jwt/jwt.module';
-import { ReactionModule } from './proxies/reactions/reaction.module';
-import { ChannelModule } from './proxies/channel/channel.module';
+import { ReactionModule } from './services/reactions/reaction.module';
+import { ChannelModule } from './services/channel/channel.module';
 
 @Module({
   imports: [
