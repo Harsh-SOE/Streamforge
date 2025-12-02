@@ -200,7 +200,10 @@
       "entryFile": "main",
       "sourceRoot": "apps/projection/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/projection/tsconfig.app.json"
+        "tsConfigPath": "apps/projection/tsconfig.app.json",
+        "webpack": true,
+        "watchAssets": true,
+        "webpackConfigPath": "apps/projection/webpack.config.js"
       }
     },
     "proto": {

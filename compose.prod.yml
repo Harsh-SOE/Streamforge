@@ -990,6 +990,29 @@ services:
       kafka:
         condition: service_healthy
 
+  projection:
+    image: mytube/projection/production:latest
+    container_name: projection
+    build:
+      context: .
+      dockerfile: apps/projection/Dockerfile
+    env_file:
+      - apps/projection/.env
+    environment:
+      - KAFKAJS_NO_PARTITIONER_WARNING=1
+    networks:
+      - services
+      - cache
+      - observer
+      - message-broker
+    healthcheck: *grpc-healthcheck
+    deploy: *service_resources
+    depends_on:
+      kafka:
+        condition: service_healthy
+      redis-cache:
+        condition: service_healthy
+
 #-------------------------------------------------------------------------------------------------------------#
 #                                                  VOLUMES                                                    #
 #-------------------------------------------------------------------------------------------------------------#

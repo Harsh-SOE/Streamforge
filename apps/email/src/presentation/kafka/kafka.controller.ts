@@ -1,7 +1,7 @@
 import { Controller, Inject } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
 
-import { USERS } from '@app/clients';
+import { USERS_EVENTS } from '@app/clients';
 import { CreatedUserMessageDto } from '@app/contracts/email';
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
 
@@ -14,7 +14,7 @@ export class KafkaController {
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
   ) {}
 
-  @EventPattern(USERS.USER_ONBOARDED_EVENT)
+  @EventPattern(USERS_EVENTS.USER_ONBOARDED_EVENT)
   sendEMail(@Payload() message: CreatedUserMessageDto) {
     return this.emailService.sendEMail(message);
   }
