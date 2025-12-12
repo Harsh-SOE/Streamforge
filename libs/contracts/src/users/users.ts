@@ -56,14 +56,6 @@ export interface UserVerifyPhoneNumberDto {
   phoneNumber: string;
 }
 
-export interface UserFindByIdDto {
-  id: string;
-}
-
-export interface UserFindByAuthIdDto {
-  authId: string;
-}
-
 export interface UserUpdateByIdDto {
   id: string;
   fullName?: string | undefined;
@@ -106,29 +98,6 @@ export interface UserPhoneNumberVerifiedResponse {
   verified: boolean;
 }
 
-export interface UserPayload {
-  id: string;
-  authUserId: string;
-  email: string;
-  avatar: string;
-  handle: string;
-  dob?: string | undefined;
-  phoneNumber?: string | undefined;
-  isPhoneNumberVerified: boolean;
-  notification: boolean;
-  languagePreference: string;
-  themePreference: string;
-  region: string;
-}
-
-export interface UserFoundResponse {
-  user?: UserPayload | undefined;
-}
-
-export interface UsersFoundResponse {
-  userPayload: UserPayload[];
-}
-
 export interface UserProfileUpdatedResponse {
   response: string;
   userId: string;
@@ -153,12 +122,6 @@ export interface UserServiceClient {
   changePreferredTheme(request: UserChangePreferredThemeDto): Observable<UserPreferredThemeChangedResponse>;
 
   verifyPhoneNumber(request: UserVerifyPhoneNumberDto): Observable<UserPhoneNumberVerifiedResponse>;
-
-  findAllUsers(request: Empty): Observable<UsersFoundResponse>;
-
-  findUserByAuthId(request: UserFindByAuthIdDto): Observable<UserFoundResponse>;
-
-  findOneUserById(request: UserFindByIdDto): Observable<UserFoundResponse>;
 
   updateUserProfileById(request: UserUpdateByIdDto): Observable<UserProfileUpdatedResponse>;
 }
@@ -204,16 +167,6 @@ export interface UserServiceController {
     | Observable<UserPhoneNumberVerifiedResponse>
     | UserPhoneNumberVerifiedResponse;
 
-  findAllUsers(request: Empty): Promise<UsersFoundResponse> | Observable<UsersFoundResponse> | UsersFoundResponse;
-
-  findUserByAuthId(
-    request: UserFindByAuthIdDto,
-  ): Promise<UserFoundResponse> | Observable<UserFoundResponse> | UserFoundResponse;
-
-  findOneUserById(
-    request: UserFindByIdDto,
-  ): Promise<UserFoundResponse> | Observable<UserFoundResponse> | UserFoundResponse;
-
   updateUserProfileById(
     request: UserUpdateByIdDto,
   ): Promise<UserProfileUpdatedResponse> | Observable<UserProfileUpdatedResponse> | UserProfileUpdatedResponse;
@@ -229,9 +182,6 @@ export function UserServiceControllerMethods() {
       "changePreferredLanguage",
       "changePreferredTheme",
       "verifyPhoneNumber",
-      "findAllUsers",
-      "findUserByAuthId",
-      "findOneUserById",
       "updateUserProfileById",
     ];
     for (const method of grpcMethods) {

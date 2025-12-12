@@ -10,51 +10,66 @@ import {
   UpdateProfileEvent,
 } from '@users/application/events';
 
+export interface userAggregateOption {
+  id?: string;
+  userAuthId: string;
+  handle: string;
+  email: string;
+  avatarUrl: string;
+  dob?: Date;
+  phoneNumber?: string;
+  isPhoneNumberVerified?: boolean;
+  notification?: boolean;
+  preferredTheme?: string;
+  preferredLanguage?: string;
+  region?: string;
+}
+
 export class UserAggregate extends AggregateRoot {
-  public constructor(private user: UserEntity) {
+  public constructor(private userEntity: UserEntity) {
     super();
   }
 
   public getUserSnapshot() {
-    return this.user.getSnapshot();
+    return this.userEntity.getSnapshot();
   }
 
   private getUserEntity() {
-    return this.user;
+    return this.userEntity;
   }
 
-  public static create(
-    id: string,
-    userAuthId: string,
-    handle: string,
-    email: string,
-    avatar: string,
-    dob?: Date,
-    phoneNumber?: string,
-    isPhoneNumberVerified?: boolean,
-    notification?: boolean,
-    preferredTheme?: string,
-    preferredLanguage?: string,
-    isOnBoardingComplete?: boolean,
-    region?: string,
-  ): UserAggregate {
-    const userEntity = UserEntity.create(
+  public static create(data: userAggregateOption): UserAggregate {
+    const {
       id,
-      userAuthId,
       handle,
+      userAuthId,
       email,
-      avatar,
+      avatarUrl,
       dob,
-      phoneNumber,
       isPhoneNumberVerified,
       notification,
-      preferredTheme,
+      phoneNumber,
       preferredLanguage,
+      preferredTheme,
       region,
-    );
+    } = data;
+
+    const userEntity = UserEntity.create({
+      id: id,
+      userAuthId: userAuthId,
+      handle: handle,
+      email: email,
+      avatarUrl: avatarUrl,
+      dob: dob,
+      phoneNumber: phoneNumber,
+      isPhoneNumberVerified: isPhoneNumberVerified,
+      notification: notification,
+      themePreference: preferredTheme,
+      languagePreference: preferredLanguage,
+      region: region,
+    });
     const userAggregate = new UserAggregate(userEntity);
 
-    // add an event that user was created...
     userAggregate.apply(new CreateProfileEvent(userAggregate));
 
     return userAggregate;
@@ -70,7 +85,6 @@ export class UserAggregate extends AggregateRoot {
         updatedProfile: {
           id: this.getUserSnapshot().id,
           dob: dob?.toISOString(),
-          // avatar: this.getUserSnapshot(),
           phoneNumber,
         },
       }),
@@ -83,7 +97,6 @@ export class UserAggregate extends AggregateRoot {
     }
     this.getUserEntity().verifyPhoneNumber();
 
-    // event for phone number verification here...
     this.apply(
       new PhoneNumberVerfiedEvent({
         id: this.getUserSnapshot().id,
@@ -107,7 +120,6 @@ export class UserAggregate extends AggregateRoot {
   public changeUserPreferredlanguage(newLanguage: string) {
     this.getUserEntity().updateLanguagePreference(newLanguage);
 
-    // event for language changed here...
     this.apply(
       new ChangeLanguageEvent({
         id: this.getUserSnapshot().id,
@@ -119,7 +131,6 @@ export class UserAggregate extends AggregateRoot {
   public changeUserNotificationPreference(newNotificationStatus: boolean) {
     this.getUserEntity().updateNotificationStatus(newNotificationStatus);
 
-    // event for notification status changed here...
     this.apply(
       new ChangeNotificationStatusEvent({
         id: this.getUserSnapshot().id,

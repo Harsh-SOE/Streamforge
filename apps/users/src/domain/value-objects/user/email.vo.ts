@@ -8,9 +8,8 @@ export class UserEmail {
   public constructor(private readonly value: string) {}
 
   public static create(value: string) {
-    if (!value || value.trim().length === 0) {
-      throw new Error(`Email is required`);
-    }
+    value = value.trim();
+
     const parsedEmailResult =
       UserEmail.UserEmailValidationSchema.safeParse(value);
     if (!parsedEmailResult.success) {

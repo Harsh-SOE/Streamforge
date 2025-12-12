@@ -16,7 +16,6 @@ export class UserThemePreference {
       UserThemePreference.UserThemePreferenceValidationSchema.safeParse(value);
     if (!parsedDateResult.success) {
       const errorMessage = parsedDateResult.error.message;
-      console.log(`Invalid Theme`);
       throw new InvalidThemePreferenceException({
         message: `Theme validation failed. Reason: ${errorMessage}`,
       });

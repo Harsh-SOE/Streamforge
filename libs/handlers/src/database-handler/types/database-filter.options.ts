@@ -3,6 +3,12 @@ interface BaseDatabaseOptions {
   host?: string;
 }
 
+interface DatabaseConnectionOperationOptions extends BaseDatabaseOptions {
+  operationType: 'CONNECT';
+  filter?: never;
+  entry?: never;
+}
+
 interface DatabaseCreateOperationOptions extends BaseDatabaseOptions {
   operationType: 'CREATE';
   filter?: never;
@@ -42,6 +48,7 @@ type ErrorHandlingOptions<TFallbackResult> =
   | ThrowErrorsOptions;
 
 type DatabaseOperationOptions =
+  | DatabaseConnectionOperationOptions
   | DatabaseCreateOperationOptions
   | DatabaseReadOperationOptions
   | DatabaseUpdateOperationOptions

@@ -92,6 +92,14 @@ export class AppConfigService {
     return this.configService.getOrThrow<string>('AWS_BUCKET');
   }
 
+  get REDIS_HOST() {
+    return this.configService.getOrThrow<string>('REDIS_HOST');
+  }
+
+  get REDIS_PORT() {
+    return this.configService.getOrThrow<number>('REDIS_PORT');
+  }
+
   get GRPC_OPTIONS(): GrpcOptions {
     const options: GrpcOptions = {
       transport: Transport.GRPC,

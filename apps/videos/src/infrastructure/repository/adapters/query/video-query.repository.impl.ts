@@ -75,7 +75,7 @@ export class VideoQueryRepositoryAdapter implements VideoQueryRepositoryPort {
       });
     };
 
-    const foundVideo = await this.prismaDatabaseHandler.filter(
+    const foundVideo = await this.prismaDatabaseHandler.execute(
       findVideoOperation,
       {
         operationType: 'CREATE',
@@ -108,7 +108,7 @@ export class VideoQueryRepositoryAdapter implements VideoQueryRepositoryPort {
       });
     };
 
-    const foundVideos = await this.prismaDatabaseHandler.filter(
+    const foundVideos = await this.prismaDatabaseHandler.execute(
       findVideosOperation,
       {
         operationType: 'READ',
@@ -134,7 +134,7 @@ export class VideoQueryRepositoryAdapter implements VideoQueryRepositoryPort {
       });
     };
 
-    const foundVideo = await this.prismaDatabaseHandler.filter(
+    const foundVideo = await this.prismaDatabaseHandler.execute(
       findVideoOperation,
       {
         operationType: 'CREATE',

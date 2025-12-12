@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import {
   USER_COMMAND_REROSITORY_PORT,
-  UserCommandRepositoryPort,
+  UserRepositoryPort,
 } from '@users/application/ports';
 import { UserAggregate } from '@users/domain/aggregates';
 
@@ -16,7 +16,7 @@ import { CreateProfileCommand } from './create-profile.command';
 export class CompleteSignupCommandHandler implements ICommandHandler<CreateProfileCommand> {
   constructor(
     @Inject(USER_COMMAND_REROSITORY_PORT)
-    private readonly userRepository: UserCommandRepositoryPort,
+    private readonly userRepository: UserRepositoryPort,
     private readonly eventPublisher: EventPublisher,
   ) {}
 
@@ -28,10 +28,16 @@ export class CompleteSignupCommandHandler implements ICommandHandler<CreateProfi
     const id = uuidv4();
 
     const userAggregate = this.eventPublisher.mergeObjectContext(
-      UserAggregate.create(id, authId, handle, email, avatar),
+      UserAggregate.create({
+        id: id,
+        userAuthId: authId,
+        handle: handle,
+        email: email,
+        avatarUrl: avatar,
+      }),
     );
 
-    await this.userRepository.save(userAggregate);
+    await this.userRepository.saveOneUser(userAggregate);
 
     userAggregate.commit();
 

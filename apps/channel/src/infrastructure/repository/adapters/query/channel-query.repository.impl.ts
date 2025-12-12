@@ -76,7 +76,7 @@ export class ChannelQueryRepositoryAdapter implements ChannelQueryRepositoryPort
       });
     };
 
-    const foundUser = await this.prismaDatabaseHandler.filter(
+    const foundUser = await this.prismaDatabaseHandler.execute(
       findUserOperation,
       {
         operationType: 'CREATE',
@@ -99,7 +99,7 @@ export class ChannelQueryRepositoryAdapter implements ChannelQueryRepositoryPort
       });
     };
 
-    const foundUsers = await this.prismaDatabaseHandler.filter(
+    const foundUsers = await this.prismaDatabaseHandler.execute(
       findManyUsersOperation,
       {
         operationType: 'CREATE',
@@ -119,7 +119,7 @@ export class ChannelQueryRepositoryAdapter implements ChannelQueryRepositoryPort
       });
     };
 
-    const foundUser = await this.prismaDatabaseHandler.filter(
+    const foundUser = await this.prismaDatabaseHandler.execute(
       findUserByIdOperation,
       {
         operationType: 'CREATE',

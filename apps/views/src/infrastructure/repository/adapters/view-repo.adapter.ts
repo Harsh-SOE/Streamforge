@@ -93,7 +93,7 @@ export class ViewRepositoryAdapter implements ViewRepositoryPort {
         ),
       });
 
-    const createdEntities = await this.databaseHandler.filter(
+    const createdEntities = await this.databaseHandler.execute(
       createdEntitiesFunc,
       { operationType: 'CREATE', entry: dataToCreate },
     );

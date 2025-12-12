@@ -15,7 +15,6 @@ export class UserRegion {
       UserRegion.UserRegionValidationSchema.safeParse(value);
     if (!parsedDateResult.success) {
       const errorMessage = parsedDateResult.error.message;
-      console.log(`Invalid DOB`);
       throw new InvalidRegionException({
         message: `Region failed. Reason: ${errorMessage}`,
       });

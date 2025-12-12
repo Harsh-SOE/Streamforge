@@ -28,6 +28,8 @@ import { AppConfigService } from './config.service';
         AWS_ACCESS_KEY: joi.string().required(),
         AWS_ACCESS_SECRET: joi.string().required(),
         GRAFANA_LOKI_URL: joi.string().required(),
+        REDIS_HOST: joi.string().required(),
+        REDIS_PORT: joi.number().required(),
       }),
     }),
   ],

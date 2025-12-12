@@ -94,7 +94,7 @@ export class PrismaMongoDBRepositoryAdapter implements CommentRepositoryPort {
         ),
       });
 
-    const createdEntities = await this.prismaDatabaseHandler.filter(
+    const createdEntities = await this.prismaDatabaseHandler.execute(
       createdEntitiesFunc,
       { operationType: 'CREATE', entry: dataToCreate },
     );
@@ -114,7 +114,7 @@ export class PrismaMongoDBRepositoryAdapter implements CommentRepositoryPort {
         data: { commentText: newCommentText },
       });
 
-    const updatedLike = await this.prismaDatabaseHandler.filter(
+    const updatedLike = await this.prismaDatabaseHandler.execute(
       updateLikeOperation,
       {
         operationType: 'UPDATE',
@@ -136,7 +136,7 @@ export class PrismaMongoDBRepositoryAdapter implements CommentRepositoryPort {
         data: { commentText: newCommentText },
       });
 
-    const updatedLikes = await this.prismaDatabaseHandler.filter(
+    const updatedLikes = await this.prismaDatabaseHandler.execute(
       updatedLikesOperation,
       {
         operationType: 'UPDATE',

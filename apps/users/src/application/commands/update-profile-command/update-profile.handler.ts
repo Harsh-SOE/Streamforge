@@ -5,7 +5,7 @@ import { UserProfileUpdatedResponse } from '@app/contracts/users';
 
 import {
   USER_COMMAND_REROSITORY_PORT,
-  UserCommandRepositoryPort,
+  UserRepositoryPort,
 } from '@users/application/ports';
 import { UserNotFoundException } from '@users/application/exceptions';
 
@@ -15,7 +15,7 @@ import { UpdateProfileCommand } from './update-profile.command';
 export class UpdateProfileCommandHandler implements ICommandHandler<UpdateProfileCommand> {
   constructor(
     @Inject(USER_COMMAND_REROSITORY_PORT)
-    private readonly userRepository: UserCommandRepositoryPort,
+    private readonly userRepository: UserRepositoryPort,
   ) {}
 
   async execute({
@@ -23,7 +23,7 @@ export class UpdateProfileCommandHandler implements ICommandHandler<UpdateProfil
   }: UpdateProfileCommand): Promise<UserProfileUpdatedResponse> {
     const { id, dob, phoneNumber, avatar } = userUpdateProfileDto;
 
-    const foundUserAggregate = await this.userRepository.findOneById(id);
+    const foundUserAggregate = await this.userRepository.findOneUserById(id);
 
     if (!foundUserAggregate) {
       throw new UserNotFoundException({
@@ -35,7 +35,7 @@ export class UpdateProfileCommandHandler implements ICommandHandler<UpdateProfil
 
     foundUserAggregate.updateUserProfile(birthday, phoneNumber, avatar);
 
-    await this.userRepository.updateOneById(id, foundUserAggregate);
+    await this.userRepository.updateOneUserById(id, foundUserAggregate);
 
     return {
       response: 'User profile updated successfully',

@@ -6,3 +6,5 @@ export * from './invalid-region.exception';
 export * from './invalid-language-preference.exception';
 export * from './invalid-phone-number.exception';
 export * from './invalid-theme-preference.exception';
+export * from './invalid-id.exception';
+export * from './invalid-avatar-url.exception';

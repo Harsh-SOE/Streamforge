@@ -6,168 +6,189 @@ import {
   UserThemePreference,
   UserLanguagePreference,
   UserRegion,
-  UserAvatar,
+  UserAvatarUrl,
+  UserId,
 } from '@users/domain/value-objects';
 
-export class UserEntity {
-  constructor(
-    private readonly id: string,
-    private readonly userAuthId: string,
-    private readonly handle: UserHandle,
-    private email: UserEmail,
-    private avatar: UserAvatar,
-    private dob: UserDOB,
-    private phoneNumber: UserPhoneNumber,
-    private isPhoneNumberVerified: boolean,
-    private notification: boolean,
-    private themePreference: UserThemePreference,
-    private languagePreference: UserLanguagePreference,
-    private region: UserRegion,
-  ) {}
+export interface UserEntityOptions {
+  id: UserId;
+  userAuthId: string;
+  handle: UserHandle;
+  email: UserEmail;
+  avatarUrl: UserAvatarUrl;
+  dob: UserDOB;
+  phoneNumber: UserPhoneNumber;
+  isPhoneNumberVerified: boolean;
+  notification: boolean;
+  themePreference: UserThemePreference;
+  languagePreference: UserLanguagePreference;
+  region: UserRegion;
+}
 
-  public static create(
-    id: string,
-    userAuthId: string,
-    handle: string,
-    email: string,
-    avatar: string,
-    dob?: Date,
-    phoneNumber?: string,
-    isPhoneNumberVerified?: boolean,
-    notification?: boolean,
-    preferredTheme?: string,
-    preferredLanguage?: string,
-    region?: string,
-  ): UserEntity {
-    return new UserEntity(
+export interface UserEntityCreationOptions {
+  id?: string;
+  userAuthId: string;
+  handle: string;
+  email: string;
+  avatarUrl: string;
+  dob?: Date;
+  phoneNumber?: string;
+  isPhoneNumberVerified?: boolean;
+  notification?: boolean;
+  themePreference?: string;
+  languagePreference?: string;
+  region?: string;
+}
+
+export class UserEntity {
+  constructor(private valueObjects: UserEntityOptions) {}
+
+  public static create(data: UserEntityCreationOptions): UserEntity {
+    const {
       id,
       userAuthId,
-      UserHandle.create(handle),
-      UserEmail.create(email),
-      UserAvatar.create(avatar),
-      UserDOB.create(dob),
-      UserPhoneNumber.create(phoneNumber),
-      isPhoneNumberVerified ?? false,
-      notification ?? true,
-      UserThemePreference.create(preferredTheme),
-      UserLanguagePreference.create(preferredLanguage),
-      UserRegion.create(region),
-    );
+      handle,
+      email,
+      avatarUrl,
+      dob,
+      phoneNumber,
+      isPhoneNumberVerified,
+      notification,
+      region,
+      languagePreference,
+      themePreference,
+    } = data;
+
+    return new UserEntity({
+      id: UserId.create(id),
+      handle: UserHandle.create(handle),
+      userAuthId: userAuthId,
+      email: UserEmail.create(email),
+      avatarUrl: UserAvatarUrl.create(avatarUrl),
+      dob: UserDOB.create(dob),
+      phoneNumber: UserPhoneNumber.create(phoneNumber),
+      isPhoneNumberVerified: isPhoneNumberVerified ?? false,
+      languagePreference: UserLanguagePreference.create(languagePreference),
+      notification: notification ?? false,
+      region: UserRegion.create(region),
+      themePreference: UserThemePreference.create(themePreference),
+    });
   }
 
   public getId(): string {
-    return this.id;
+    return this.valueObjects.id.getValue();
   }
 
   public getUserAuthId() {
-    return this.userAuthId;
+    return this.valueObjects.userAuthId;
   }
 
   public getUserHandle(): string {
-    return this.handle.getValue();
+    return this.valueObjects.handle.getValue();
   }
 
   public getEmail(): string {
-    return this.email.getValue();
+    return this.valueObjects.email.getValue();
   }
 
-  public getAvatar(): string {
-    return this.avatar.getValue();
+  public getAvatarUrl(): string {
+    return this.valueObjects.avatarUrl.getValue();
   }
 
   public getDob(): Date | undefined {
-    return this.dob.getValue();
+    return this.valueObjects.dob.getValue();
   }
 
   public getPhoneNumber(): string | undefined {
-    return this.phoneNumber.getValue();
+    return this.valueObjects.phoneNumber.getValue();
   }
 
   public getIsPhoneNumberVerified(): boolean {
-    return this.isPhoneNumberVerified;
+    return this.valueObjects.isPhoneNumberVerified;
   }
 
   public getNotification(): boolean {
-    return this.notification;
+    return this.valueObjects.notification;
   }
 
   public getThemePreference(): string {
-    return this.themePreference.getValue();
+    return this.valueObjects.themePreference.getValue();
   }
 
   public getLanguagePreference(): string {
-    return this.languagePreference.getValue();
+    return this.valueObjects.languagePreference.getValue();
   }
 
   public getRegion(): string {
-    return this.region.getValue();
+    return this.valueObjects.region.getValue();
   }
 
   public getSnapshot() {
     return {
-      id: this.id,
-      userAuthId: this.userAuthId,
-      handle: this.handle.getValue(),
-      email: this.email.getValue(),
-      avatar: this.avatar.getValue(),
-      dob: this.dob.getValue(),
-      phoneNumber: this.phoneNumber.getValue(),
-      isPhoneNumbetVerified: this.isPhoneNumberVerified,
-      notification: this.notification,
-      themePreference: this.themePreference.getValue(),
-      languagePreference: this.languagePreference.getValue(),
-      region: this.region.getValue(),
+      id: this.valueObjects.id.getValue(),
+      userAuthId: this.valueObjects.userAuthId,
+      handle: this.valueObjects.handle.getValue(),
+      email: this.valueObjects.email.getValue(),
+      avatarUrl: this.valueObjects.avatarUrl.getValue(),
+      dob: this.valueObjects.dob.getValue(),
+      phoneNumber: this.valueObjects.phoneNumber.getValue(),
+      isPhoneNumbetVerified: this.valueObjects.isPhoneNumberVerified,
+      notification: this.valueObjects.notification,
+      themePreference: this.valueObjects.themePreference.getValue(),
+      languagePreference: this.valueObjects.languagePreference.getValue(),
+      region: this.valueObjects.region.getValue(),
     };
   }
 
   public updateEmail(newEmail: string): void {
-    this.email = UserEmail.create(newEmail);
+    this.valueObjects.email = UserEmail.create(newEmail);
     return;
   }
 
   public updateAvatar(newAvatar: string): void {
-    this.avatar = UserAvatar.create(newAvatar);
+    this.valueObjects.avatarUrl = UserAvatarUrl.create(newAvatar);
     return;
   }
 
   public updateDOB(newDOB: Date): void {
-    this.dob = UserDOB.create(newDOB);
+    this.valueObjects.dob = UserDOB.create(newDOB);
     return;
   }
 
   public updatePhoneNumber(newPhoneNumber: string): void {
-    this.phoneNumber = UserPhoneNumber.create(newPhoneNumber);
-    this.isPhoneNumberVerified = false;
+    this.valueObjects.phoneNumber = UserPhoneNumber.create(newPhoneNumber);
+    this.valueObjects.isPhoneNumberVerified = false;
     return;
   }
 
   public verifyPhoneNumber(): void {
-    if (this.isPhoneNumberVerified) {
+    if (this.valueObjects.isPhoneNumberVerified) {
       throw new Error(`Phone number is already verified`);
     }
-    this.isPhoneNumberVerified = true;
+    this.valueObjects.isPhoneNumberVerified = true;
     return;
   }
 
-  public updateNotificationStatus(newNotificationStatus: boolean): void {
-    this.notification = newNotificationStatus;
+  public updateNotificationStatus(newNotificationStatus?: boolean): void {
+    this.valueObjects.notification = newNotificationStatus ?? false;
     return;
   }
 
   public updateThemePreference(newThemePreference: string): void {
-    this.themePreference = UserThemePreference.create(newThemePreference);
+    this.valueObjects.themePreference =
+      UserThemePreference.create(newThemePreference);
     return;
   }
 
   public updateLanguagePreference(newLanguagePreference: string): void {
-    this.languagePreference = UserLanguagePreference.create(
+    this.valueObjects.languagePreference = UserLanguagePreference.create(
       newLanguagePreference,
     );
     return;
   }
 
-  public updateRegion(newRegion: string): void {
-    this.region = UserRegion.create(newRegion);
+  public updateRegion(newRegion?: string): void {
+    this.valueObjects.region = UserRegion.create(newRegion);
     return;
   }
 }

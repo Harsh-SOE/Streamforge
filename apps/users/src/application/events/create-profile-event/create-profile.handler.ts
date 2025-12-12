@@ -17,7 +17,7 @@ export class CompleteProfileEventHandler implements IEventHandler<CreateProfileE
 
   async handle({ user }: CreateProfileEvent) {
     const userPayload = user.getUserSnapshot();
-    const { id, handle, email, avatar, userAuthId } = userPayload;
+    const { id, handle, email, avatarUrl: avatar, userAuthId } = userPayload;
 
     const userProfileCreatedEventDto: UserProfileCreatedEventDto = {
       id,

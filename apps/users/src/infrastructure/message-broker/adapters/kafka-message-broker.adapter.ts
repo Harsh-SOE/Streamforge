@@ -64,4 +64,6 @@ export class KafkaMessageBrokerAdapter
       suppressErrors: false,
     });
   }
+
+  // TODO Create a consumer message
 }

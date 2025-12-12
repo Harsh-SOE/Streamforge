@@ -3,9 +3,6 @@ import { Observable } from 'rxjs';
 
 import {
   UserServiceController,
-  UserFindByIdDto,
-  UserFoundResponse,
-  UsersFoundResponse,
   UserServiceControllerMethods,
   UserChangeNotificationStatusDto,
   UserChangePreferredLanguageDto,
@@ -20,7 +17,6 @@ import {
   UserUpdateProfileDto,
   UserCreateProfileDto,
   UserProfileCreatedResponse,
-  UserFindByAuthIdDto,
   GetPresignedUrlDto,
   GetPreSignedUrlResponse,
 } from '@app/contracts/users';
@@ -104,22 +100,5 @@ export class GrpcController implements UserServiceController {
     | Observable<UserProfileUpdatedResponse>
     | UserProfileUpdatedResponse {
     return this.userService.updateUserProfileById(userUpdateByIdDto);
-  }
-
-  findAllUsers(): Promise<UsersFoundResponse> {
-    return this.userService.findAllUsers();
-  }
-
-  findOneUserById(userFindByDto: UserFindByIdDto): Promise<UserFoundResponse> {
-    return this.userService.findOneUserById(userFindByDto);
-  }
-
-  findUserByAuthId(
-    userFindByAuthIdDto: UserFindByAuthIdDto,
-  ):
-    | Promise<UserFoundResponse>
-    | Observable<UserFoundResponse>
-    | UserFoundResponse {
-    return this.userService.findUserByAuthId(userFindByAuthIdDto);
   }
 }

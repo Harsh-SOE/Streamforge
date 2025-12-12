@@ -47,14 +47,6 @@ message UserVerifyPhoneNumberDto {
   string phoneNumber = 2;
 }
 
-message UserFindByIdDto {
-  string id = 1;
-}
-
-message UserFindByAuthIdDto {
-  string authId = 1;
-}
-
 message UserUpdateByIdDto {
   string id = 1;
   optional string fullName = 2;
@@ -97,29 +89,6 @@ message UserPhoneNumberVerifiedResponse {
   bool verified = 2;
 }
 
-message UserPayload {
-  string id = 1;
-  string authUserId = 2;
-  string email = 3;
-  string avatar = 4;
-  string handle = 5;
-  optional string dob = 6;
-  optional string phoneNumber = 7;
-  bool isPhoneNumberVerified = 8;
-  bool notification = 9;
-  string languagePreference = 10;
-  string themePreference = 11;
-  string region = 12;
-}
-
-message UserFoundResponse {
-  optional UserPayload user = 1;
-}
-
-message UsersFoundResponse {
-  repeated UserPayload userPayload = 1;
-}
-
 message UserProfileUpdatedResponse {
   string response = 1;
   string userId = 2;
@@ -136,8 +105,5 @@ service UserService {
   rpc changePreferredLanguage(UserChangePreferredLanguageDto) returns (UserPreferredLanguageChangedResponse) {}
   rpc changePreferredTheme(UserChangePreferredThemeDto) returns (UserPreferredThemeChangedResponse) {}
   rpc verifyPhoneNumber(UserVerifyPhoneNumberDto) returns (UserPhoneNumberVerifiedResponse) {}
-  rpc findAllUsers(Empty) returns (UsersFoundResponse) {}
-  rpc findUserByAuthId(UserFindByAuthIdDto) returns (UserFoundResponse) {}
-  rpc findOneUserById(UserFindByIdDto) returns (UserFoundResponse) {}
   rpc updateUserProfileById(UserUpdateByIdDto) returns (UserProfileUpdatedResponse) {}
 }

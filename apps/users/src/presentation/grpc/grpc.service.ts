@@ -8,16 +8,12 @@ import {
   UserChangePreferredLanguageDto,
   UserChangePreferredThemeDto,
   UserCreateProfileDto,
-  UserFindByAuthIdDto,
-  UserFindByIdDto,
-  UserFoundResponse,
   UserNotificationStatusChangedResponse,
   UserPhoneNumberVerifiedResponse,
   UserPreferredLanguageChangedResponse,
   UserPreferredThemeChangedResponse,
   UserProfileCreatedResponse,
   UserProfileUpdatedResponse,
-  UsersFoundResponse,
   UserUpdateByIdDto,
   UserUpdateProfileDto,
   UserVerifyPhoneNumberDto,
@@ -32,11 +28,6 @@ import {
   VerifyPhoneNumberCommand,
   GeneratePreSignedUrlCommand,
 } from '@users/application/commands';
-import {
-  FindAllUsersQuery,
-  FindUserByAuthIdQuery,
-  FindUserByIdQuery,
-} from '@users/application/queries';
 
 @Injectable()
 export class GrpcService {
@@ -115,27 +106,5 @@ export class GrpcService {
       UpdateProfileCommand,
       UserProfileUpdatedResponse
     >(new UpdateProfileCommand(userUpdateProfileByIdDto));
-  }
-
-  async findOneUserById(
-    userFindByDto: UserFindByIdDto,
-  ): Promise<UserFoundResponse> {
-    return await this.queryBus.execute<FindUserByIdQuery, UserFoundResponse>(
-      new FindUserByIdQuery(userFindByDto),
-    );
-  }
-
-  async findAllUsers(): Promise<UsersFoundResponse> {
-    return await this.queryBus.execute<FindAllUsersQuery, UsersFoundResponse>(
-      new FindAllUsersQuery(),
-    );
-  }
-
-  findUserByAuthId(
-    userFindByAuthIdDto: UserFindByAuthIdDto,
-  ): Promise<UserFoundResponse> {
-    return this.queryBus.execute<FindUserByAuthIdQuery, UserFoundResponse>(
-      new FindUserByAuthIdQuery(userFindByAuthIdDto),
-    );
   }
 }

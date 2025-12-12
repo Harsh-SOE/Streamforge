@@ -5,7 +5,7 @@ import { UserPreferredThemeChangedResponse } from '@app/contracts/users';
 
 import {
   USER_COMMAND_REROSITORY_PORT,
-  UserCommandRepositoryPort,
+  UserRepositoryPort,
 } from '@users/application/ports';
 import { UserNotFoundException } from '@users/application/exceptions';
 import { GrpcToDomainThemeEnumMapper } from '@users/infrastructure/anti-corruption';
@@ -16,7 +16,7 @@ import { ChangeThemeCommand } from './change-theme.command';
 export class ChangeThemeCommandHandler implements ICommandHandler<ChangeThemeCommand> {
   constructor(
     @Inject(USER_COMMAND_REROSITORY_PORT)
-    private readonly userRepository: UserCommandRepositoryPort,
+    private readonly userRepository: UserRepositoryPort,
   ) {}
 
   async execute({
@@ -24,7 +24,7 @@ export class ChangeThemeCommandHandler implements ICommandHandler<ChangeThemeCom
   }: ChangeThemeCommand): Promise<UserPreferredThemeChangedResponse> {
     const { id, themePerference } = userChangePreferredThemeDto;
 
-    const foundUserAggregate = await this.userRepository.findOneById(id);
+    const foundUserAggregate = await this.userRepository.findOneUserById(id);
 
     if (!foundUserAggregate) {
       throw new UserNotFoundException({
@@ -41,7 +41,7 @@ export class ChangeThemeCommandHandler implements ICommandHandler<ChangeThemeCom
 
     foundUserAggregate.changeUserPreferredTheme(domainThemePreference);
 
-    await this.userRepository.updateOneById(id, foundUserAggregate);
+    await this.userRepository.updateOneUserById(id, foundUserAggregate);
 
     return {
       response: 'Theme was changed successfully',

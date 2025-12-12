@@ -97,7 +97,7 @@ export class PrismaDatabaseHandler {
     this.operationPolicy = wrap(this.retryPolicy, this.circuitBreakerPolicy);
   }
 
-  async filter<TResult, TFallback = never>(
+  async execute<TResult, TFallback = never>(
     databaseOperation: () => Promise<TResult>,
     options: DatabaseFilterOptions<TFallback>,
   ): Promise<TResult | NonNullable<TFallback>> {

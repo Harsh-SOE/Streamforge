@@ -95,7 +95,7 @@ export class ReactionRepositoryAdapter implements ReactionRepositoryPort {
         ),
       });
 
-    const createdEntities = await this.reactionRepoFilter.filter(
+    const createdEntities = await this.reactionRepoFilter.execute(
       createdEntitiesFunc,
       { operationType: 'CREATE', entry: dataToCreate },
     );
@@ -115,7 +115,7 @@ export class ReactionRepositoryAdapter implements ReactionRepositoryPort {
         data: { reactionStatus: newReactionStatus },
       });
 
-    const updatedReaction = await this.reactionRepoFilter.filter(
+    const updatedReaction = await this.reactionRepoFilter.execute(
       updateReactionOperation,
       {
         operationType: 'UPDATE',
@@ -140,7 +140,7 @@ export class ReactionRepositoryAdapter implements ReactionRepositoryPort {
         data: { reactionStatus: newReactionStatus },
       });
 
-    const updatedReactions = await this.reactionRepoFilter.filter(
+    const updatedReactions = await this.reactionRepoFilter.execute(
       updatedReactionsOperation,
       {
         operationType: 'UPDATE',

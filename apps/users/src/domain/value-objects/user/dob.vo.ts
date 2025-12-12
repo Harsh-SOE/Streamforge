@@ -27,7 +27,6 @@ export class UserDOB {
     const parsedDateResult = UserDOB.UserDOBValidationSchema.safeParse(value);
     if (!parsedDateResult.success) {
       const errorMessage = parsedDateResult.error.message;
-      console.log(`Invalid DOB`);
       throw new InvalidDobException({
         message: `DOB validation failed. Reason: ${errorMessage}`,
       });

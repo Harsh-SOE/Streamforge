@@ -4,7 +4,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UserPhoneNumberVerifiedResponse } from '@app/contracts/users';
 import {
   USER_COMMAND_REROSITORY_PORT,
-  UserCommandRepositoryPort,
+  UserRepositoryPort,
 } from '@users/application/ports';
 import { UserNotFoundException } from '@users/application/exceptions';
 
@@ -14,7 +14,7 @@ import { VerifyPhoneNumberCommand } from './verify-phone-number.command';
 export class VerifyPhoneNumberCommandHandler implements ICommandHandler<VerifyPhoneNumberCommand> {
   constructor(
     @Inject(USER_COMMAND_REROSITORY_PORT)
-    private readonly userRepository: UserCommandRepositoryPort,
+    private readonly userRepository: UserRepositoryPort,
   ) {}
 
   async execute({
@@ -22,7 +22,7 @@ export class VerifyPhoneNumberCommandHandler implements ICommandHandler<VerifyPh
   }: VerifyPhoneNumberCommand): Promise<UserPhoneNumberVerifiedResponse> {
     const { id } = userVerifyPhoneNumberDto;
 
-    const foundUserAggregate = await this.userRepository.findOneById(id);
+    const foundUserAggregate = await this.userRepository.findOneUserById(id);
 
     if (!foundUserAggregate) {
       throw new UserNotFoundException({
@@ -32,7 +32,7 @@ export class VerifyPhoneNumberCommandHandler implements ICommandHandler<VerifyPh
 
     foundUserAggregate.verifyUserPhoneNumber();
 
-    await this.userRepository.updateOneById(id, foundUserAggregate);
+    await this.userRepository.updateOneUserById(id, foundUserAggregate);
 
     return { response: "The user's was verified successfully", verified: true };
   }

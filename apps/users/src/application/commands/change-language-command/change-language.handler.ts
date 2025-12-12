@@ -5,7 +5,7 @@ import { UserPreferredLanguageChangedResponse } from '@app/contracts/users';
 
 import {
   USER_COMMAND_REROSITORY_PORT,
-  UserCommandRepositoryPort,
+  UserRepositoryPort,
 } from '@users/application/ports';
 import { UserNotFoundException } from '@users/application/exceptions';
 
@@ -15,7 +15,7 @@ import { ChangeLanguageCommand } from './change-language.command';
 export class ChangeLanguageCommandHandler implements ICommandHandler<ChangeLanguageCommand> {
   constructor(
     @Inject(USER_COMMAND_REROSITORY_PORT)
-    private readonly userRepository: UserCommandRepositoryPort,
+    private readonly userRepository: UserRepositoryPort,
     private eventPublisher: EventPublisher,
   ) {}
 
@@ -24,7 +24,7 @@ export class ChangeLanguageCommandHandler implements ICommandHandler<ChangeLangu
   }: ChangeLanguageCommand): Promise<UserPreferredLanguageChangedResponse> {
     const { id, language } = userChangePreferredLanguageDto;
 
-    const foundUserAggregate = await this.userRepository.findOneById(id);
+    const foundUserAggregate = await this.userRepository.findOneUserById(id);
 
     if (!foundUserAggregate) {
       throw new UserNotFoundException({
@@ -37,7 +37,7 @@ export class ChangeLanguageCommandHandler implements ICommandHandler<ChangeLangu
 
     userAggregateWithEvent.changeUserPreferredlanguage(language);
 
-    await this.userRepository.updateOneById(id, userAggregateWithEvent);
+    await this.userRepository.updateOneUserById(id, userAggregateWithEvent);
 
     userAggregateWithEvent.commit();
 

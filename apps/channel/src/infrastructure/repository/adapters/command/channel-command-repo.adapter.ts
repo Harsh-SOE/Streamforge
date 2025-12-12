@@ -70,7 +70,7 @@ export class ChannelCommandRepositoryAdapter implements ChannelCommandRepository
       await this.persistanceService.channel.create({
         data: this.channelPersistanceACL.toPersistance(model),
       });
-    const createdChannel = await this.prismaDatabaseHandler.filter(
+    const createdChannel = await this.prismaDatabaseHandler.execute(
       saveChannelOperation,
       {
         operationType: 'CREATE',
@@ -102,7 +102,7 @@ export class ChannelCommandRepositoryAdapter implements ChannelCommandRepository
         ),
       });
 
-    const createdEntities = await this.prismaDatabaseHandler.filter(
+    const createdEntities = await this.prismaDatabaseHandler.execute(
       saveManyChannelsOperations,
       { operationType: 'CREATE', entry: channelsToCreate },
     );
@@ -119,7 +119,7 @@ export class ChannelCommandRepositoryAdapter implements ChannelCommandRepository
         data: this.channelPersistanceACL.toPersistance(updatedChannelModel),
       });
 
-    const updatedChannel = await this.prismaDatabaseHandler.filter(
+    const updatedChannel = await this.prismaDatabaseHandler.execute(
       updateChannelByIdOperation,
       {
         operationType: 'UPDATE',
@@ -144,7 +144,7 @@ export class ChannelCommandRepositoryAdapter implements ChannelCommandRepository
         data: this.channelPersistanceACL.toPersistance(updatedChannelModel),
       });
 
-    const updatedChannel = await this.prismaDatabaseHandler.filter(
+    const updatedChannel = await this.prismaDatabaseHandler.execute(
       updateChannelOperation,
       {
         operationType: 'UPDATE',
@@ -166,7 +166,7 @@ export class ChannelCommandRepositoryAdapter implements ChannelCommandRepository
         data: this.channelPersistanceACL.toPersistance(updatedChannelModel),
       });
 
-    const updatedChannels = await this.prismaDatabaseHandler.filter(
+    const updatedChannels = await this.prismaDatabaseHandler.execute(
       updateManyChannelsOperation,
       {
         operationType: 'UPDATE',
@@ -185,7 +185,7 @@ export class ChannelCommandRepositoryAdapter implements ChannelCommandRepository
       });
     };
 
-    const foundChannel = await this.prismaDatabaseHandler.filter(
+    const foundChannel = await this.prismaDatabaseHandler.execute(
       findChannelByIdOperation,
       {
         operationType: 'READ',
@@ -210,7 +210,7 @@ export class ChannelCommandRepositoryAdapter implements ChannelCommandRepository
       });
     };
 
-    const foundChannel = await this.prismaDatabaseHandler.filter(
+    const foundChannel = await this.prismaDatabaseHandler.execute(
       findChannelOperation,
       {
         operationType: 'READ',
@@ -230,7 +230,7 @@ export class ChannelCommandRepositoryAdapter implements ChannelCommandRepository
       });
     };
 
-    const foundChannels = await this.prismaDatabaseHandler.filter(
+    const foundChannels = await this.prismaDatabaseHandler.execute(
       findManyChannelsOperation,
       {
         operationType: 'READ',
@@ -250,7 +250,7 @@ export class ChannelCommandRepositoryAdapter implements ChannelCommandRepository
       });
     };
 
-    const deletedChannel = await this.prismaDatabaseHandler.filter(
+    const deletedChannel = await this.prismaDatabaseHandler.execute(
       deleteChannelByIdOperation,
       {
         operationType: 'DELETE',
@@ -271,7 +271,7 @@ export class ChannelCommandRepositoryAdapter implements ChannelCommandRepository
       });
     };
 
-    const deletedChannel = await this.prismaDatabaseHandler.filter(
+    const deletedChannel = await this.prismaDatabaseHandler.execute(
       deleteChannelOperation,
       {
         operationType: 'DELETE',
@@ -289,7 +289,7 @@ export class ChannelCommandRepositoryAdapter implements ChannelCommandRepository
       });
     };
 
-    const deletedChannels = await this.prismaDatabaseHandler.filter(
+    const deletedChannels = await this.prismaDatabaseHandler.execute(
       deleteManyChannelsOperation,
       {
         operationType: 'DELETE',

@@ -76,7 +76,7 @@ export class VideoCommandRepositoryAdapter implements VideoCommandRepositoryPort
         data: this.videoPersistanceACL.toPersistance(model),
       });
     this.logger.info(`Creating video:`, model.getSnapshot());
-    const createdEntity = await this.prismaDatabaseHandler.filter(
+    const createdEntity = await this.prismaDatabaseHandler.execute(
       createdEntityFunc,
       {
         operationType: 'CREATE',
@@ -108,7 +108,7 @@ export class VideoCommandRepositoryAdapter implements VideoCommandRepositoryPort
         ),
       });
 
-    const createdEntities = await this.prismaDatabaseHandler.filter(
+    const createdEntities = await this.prismaDatabaseHandler.execute(
       createdEntitiesFunc,
       { operationType: 'CREATE', entry: dataToCreate },
     );
@@ -128,7 +128,7 @@ export class VideoCommandRepositoryAdapter implements VideoCommandRepositoryPort
         data: { videoPublishStatus: newPublishStatus },
       });
 
-    const updatedLike = await this.prismaDatabaseHandler.filter(
+    const updatedLike = await this.prismaDatabaseHandler.execute(
       updateLikeOperation,
       {
         operationType: 'UPDATE',
@@ -153,7 +153,7 @@ export class VideoCommandRepositoryAdapter implements VideoCommandRepositoryPort
         data: { videoVisibiltyStatus: newVisibilityStatus },
       });
 
-    const updatedLike = await this.prismaDatabaseHandler.filter(
+    const updatedLike = await this.prismaDatabaseHandler.execute(
       updateLikeOperation,
       {
         operationType: 'UPDATE',
@@ -187,7 +187,7 @@ export class VideoCommandRepositoryAdapter implements VideoCommandRepositoryPort
         },
       });
 
-    const updatedLikes = await this.prismaDatabaseHandler.filter(
+    const updatedLikes = await this.prismaDatabaseHandler.execute(
       updatedLikesOperation,
       {
         operationType: 'UPDATE',
@@ -206,7 +206,7 @@ export class VideoCommandRepositoryAdapter implements VideoCommandRepositoryPort
       });
     };
 
-    const foundVideo = await this.prismaDatabaseHandler.filter(
+    const foundVideo = await this.prismaDatabaseHandler.execute(
       findVideoOperation,
       {
         operationType: 'CREATE',
@@ -248,7 +248,7 @@ export class VideoCommandRepositoryAdapter implements VideoCommandRepositoryPort
         },
       });
 
-    const updatedVideo = await this.prismaDatabaseHandler.filter(
+    const updatedVideo = await this.prismaDatabaseHandler.execute(
       updatedLikesOperation,
       {
         operationType: 'UPDATE',
@@ -285,7 +285,7 @@ export class VideoCommandRepositoryAdapter implements VideoCommandRepositoryPort
         },
       });
 
-    const updatedVideo = await this.prismaDatabaseHandler.filter(
+    const updatedVideo = await this.prismaDatabaseHandler.execute(
       updatedLikesOperation,
       {
         operationType: 'UPDATE',

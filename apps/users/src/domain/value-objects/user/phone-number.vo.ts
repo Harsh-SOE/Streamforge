@@ -18,11 +18,11 @@ export class UserPhoneNumber {
   public constructor(private readonly value?: string) {}
 
   public static create(value?: string) {
+    value = value?.trim();
     const parsedDateResult =
       UserPhoneNumber.UserPhoneNumberValidationSchema.safeParse(value);
     if (!parsedDateResult.success) {
       const errorMessage = parsedDateResult.error.message;
-      console.log(`Invalid DOB`);
       throw new InvalidPhoneNumberException({
         message: `Phone Number validation failed. Reason: ${errorMessage}`,
       });

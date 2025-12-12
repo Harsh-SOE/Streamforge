@@ -30,4 +30,6 @@ model User {
   region                String           @default("IN")
   createdAt             DateTime         @default(now())
   updatedAt             DateTime         @updatedAt
+
+  @@index([authUserId, handle])
 }

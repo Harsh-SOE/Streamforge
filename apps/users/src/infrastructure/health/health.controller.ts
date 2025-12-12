@@ -1,9 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Controller } from '@nestjs/common';
 import { Observable } from 'rxjs';
 
 import {
-  HealthCheckRequest,
   HealthCheckResponse,
   HealthCheckResponse_ServingStatus,
   HealthController,
@@ -13,9 +11,7 @@ import {
 @Controller()
 @HealthControllerMethods()
 export class AppHealthController implements HealthController {
-  check(
-    authHealthCheckRequest: HealthCheckRequest,
-  ):
+  check():
     | Promise<HealthCheckResponse>
     | Observable<HealthCheckResponse>
     | HealthCheckResponse {

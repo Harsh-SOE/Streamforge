@@ -11,13 +11,13 @@
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/apps/books/main",
+    "start:prod": "node dist/apps/api-gateway/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./apps/books/test/jest-e2e.json",
+    "test:e2e": "jest --config ./apps/api-gateway/test/jest-e2e.json",
     "docker:clean:images": "docker image ls -qf dangling=true | xargs -r docker image rm",
     "docker:clean:volumes": "docker volume ls -qf dangling=true | xargs -r docker volume rm",
     "docker:clean:cache": "docker builder prune --all -f",
@@ -42,6 +42,7 @@
     "@grpc/reflection": "^1.0.4",
     "@nestjs/axios": "^4.0.1",
     "@nestjs/bullmq": "^11.0.4",
+    "@nestjs/cache-manager": "^3.0.1",
     "@nestjs/common": "11",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "11",
@@ -62,6 +63,8 @@
     "auth0": "^5.0.0",
     "axios": "^1.12.2",
     "bullmq": "^5.64.1",
+    "cache-manager": "^7.2.7",
+    "cache-manager-redis-store": "^3.0.1",
     "chalk": "^5.6.2",
     "chokidar": "^4.0.3",
     "class-transformer": "^0.5.1",
@@ -102,6 +105,7 @@
     "@swc-node/register": "^1.11.1",
     "@swc/cli": "^0.7.9",
     "@swc/core": "^1.15.3",
+    "@testcontainers/postgresql": "^11.10.0",
     "@types/express": "^5.0.0",
     "@types/express-session": "^1.18.2",
     "@types/fluent-ffmpeg": "^2.1.27",
@@ -122,7 +126,8 @@
     "prisma": "6.14.0",
     "source-map-support": "^0.5.21",
     "supertest": "^7.0.0",
-    "ts-jest": "^29.2.5",
+    "testcontainers": "^11.10.0",
+    "ts-jest": "^29.4.6",
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
@@ -131,37 +136,5 @@
     "webpack": "^5.103.0",
     "webpack-cli": "^6.0.1",
     "webpack-merge": "^6.0.1"
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts"
-    ],
-    "rootDir": ".",
-    "testRegex": ".*\\.spec\\.ts$",
-    "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
-    },
-    "collectCoverageFrom": [
-      "**/*.(t|j)s"
-    ],
-    "coverageDirectory": "./coverage",
-    "testEnvironment": "node",
-    "roots": [
-      "<rootDir>/apps/",
-      "<rootDir>/libs/"
-    ],
-    "moduleNameMapper": {
-      "^@app/cache(|/.*)$": "<rootDir>/libs/cache/src/$1",
-      "^@app/clients(|/.*)$": "<rootDir>/libs/clients/src/$1",
-      "^@app/common(|/.*)$": "<rootDir>/libs/common/src/$1",
-      "^@app/contracts(|/.*)$": "<rootDir>/libs/contracts/src/$1",
-      "^@app/counters(|/.*)$": "<rootDir>/libs/counters/src/$1",
-      "^@app/exceptions(|/.*)$": "<rootDir>/libs/exceptions/src/$1",
-      "^@app/handlers(|/.*)$": "<rootDir>/libs/handlers/src/$1",
-      "^@app/proto(|/.*)$": "<rootDir>/libs/proto/src/$1",
-      "^@app/utils(|/.*)$": "<rootDir>/libs/utils/src/$1"
-    }
   }
 }

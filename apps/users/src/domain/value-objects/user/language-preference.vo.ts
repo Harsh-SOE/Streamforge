@@ -21,7 +21,6 @@ export class UserLanguagePreference {
       );
     if (!parsedDateResult.success) {
       const errorMessage = parsedDateResult.error.message;
-      console.log(`Invalid DOB`);
       throw new InvalidLanguaugePreferenceException({
         message: `Language validation failed. Reason: ${errorMessage}`,
       });
