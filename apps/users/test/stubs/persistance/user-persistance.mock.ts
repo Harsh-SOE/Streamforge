@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { ThemePreferences, User } from '@peristance/user';
+import { ThemePreferences, User } from '@persistance/users';
 
 export const persistedUserStub: User = {
   id: uuidv4(),

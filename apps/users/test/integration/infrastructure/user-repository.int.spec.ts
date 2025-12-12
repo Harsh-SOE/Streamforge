@@ -14,7 +14,7 @@ import { UserAggregatePersistanceACL } from '@users/infrastructure/anti-corrupti
 import { UserAggregate } from '@users/domain/aggregates';
 import { UserPrismaClient } from '@users/infrastructure/repository/client';
 
-import { PrismaClient } from '@peristance/user';
+import { PrismaClient } from '@persistance/users';
 
 describe('UserRepositoryAdapter (Integration)', () => {
   let container: StartedPostgreSqlContainer;
