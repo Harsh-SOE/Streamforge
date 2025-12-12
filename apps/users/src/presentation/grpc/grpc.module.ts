@@ -17,7 +17,7 @@ import {
   AppConfigModule,
   AppConfigService,
 } from '@users/infrastructure/config';
-import { UserCommandHandlers } from '@users/application/commands';
+import { UserCommandHandlers } from '@users/application/use-cases/commands';
 import { UserEventHandlers } from '@users/application/events';
 import { MeasureModule } from '@users/infrastructure/measure';
 import { UserRepositoryAdapter } from '@users/infrastructure/repository/adapters';

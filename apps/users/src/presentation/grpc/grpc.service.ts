@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { CommandBus } from '@nestjs/cqrs';
 
 import {
   GetPresignedUrlDto,
@@ -27,14 +27,11 @@ import {
   UpdateProfileCommand,
   VerifyPhoneNumberCommand,
   GeneratePreSignedUrlCommand,
-} from '@users/application/commands';
+} from '@users/application/use-cases/commands';
 
 @Injectable()
 export class GrpcService {
-  constructor(
-    private readonly commandBus: CommandBus,
-    private readonly queryBus: QueryBus,
-  ) {}
+  constructor(private readonly commandBus: CommandBus) {}
 
   async generatePreSignedUrl(
     getPresignedUrlDto: GetPresignedUrlDto,
