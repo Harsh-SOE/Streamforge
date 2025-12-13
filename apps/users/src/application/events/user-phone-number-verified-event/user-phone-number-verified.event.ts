@@ -1,8 +1,5 @@
-export class UserPhoneNumberVerfiedEvent {
-  public constructor(
-    public readonly phoneNumberVerfiedEventDto: {
-      id: string;
-      phoneNumber: string;
-    },
-  ) {}
+import { UserPhoneNumberEventDto } from '@app/contracts/users';
+
+export class UserPhoneNumberVerifiedEvent {
+  public constructor(public readonly userPhoneNumberEventDto: UserPhoneNumberEventDto) {}
 }

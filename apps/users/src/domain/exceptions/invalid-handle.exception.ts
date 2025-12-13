@@ -7,8 +7,7 @@ export interface InvalidHandleExceptionOptions {
 
 export class InvalidHandleException extends DomainException {
   public constructor(options: InvalidHandleExceptionOptions) {
-    const { message = `Invalid handle status was received`, meta } =
-      options || {};
+    const { message = `Invalid handle status was received`, meta } = options || {};
     super({
       code: 'INVALID_INPUT_EXCEPTION',
       message: message,

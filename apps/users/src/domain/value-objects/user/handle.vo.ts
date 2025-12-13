@@ -16,8 +16,7 @@ export class UserHandle {
   public constructor(private readonly value: string) {}
 
   public static create(value: string) {
-    const parsedUrlResult =
-      UserHandle.UserHandleValidationSchema.safeParse(value);
+    const parsedUrlResult = UserHandle.UserHandleValidationSchema.safeParse(value);
     if (!parsedUrlResult.success) {
       const errorMessage = parsedUrlResult.error.message;
       throw new InvalidHandleException({

@@ -11,10 +11,7 @@ import {
 @Controller()
 @HealthControllerMethods()
 export class AppHealthController implements HealthController {
-  check():
-    | Promise<HealthCheckResponse>
-    | Observable<HealthCheckResponse>
-    | HealthCheckResponse {
+  check(): Promise<HealthCheckResponse> | Observable<HealthCheckResponse> | HealthCheckResponse {
     return { status: HealthCheckResponse_ServingStatus.SERVING };
   }
 }

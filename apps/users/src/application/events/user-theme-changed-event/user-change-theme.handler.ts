@@ -17,14 +17,14 @@ export class UserThemeChangedHandler implements IEventHandler<UserThemeChangedEv
     private readonly messageBroker: KafkaMessageBrokerAdapter,
   ) {}
 
-  public async handle({ changeThemeEventDto }: UserThemeChangedEvent) {
-    const { id, theme } = changeThemeEventDto;
+  public async handle({ userThemeChangedEventDto }: UserThemeChangedEvent) {
+    const { id, theme } = userThemeChangedEventDto;
 
     this.logger.info(`User with id:${id} chaanged its theme to ${theme}`);
 
     await this.messageBroker.publishMessage(
       USERS_EVENTS.USER_THEME_CHANGED_EVENT,
-      JSON.stringify(changeThemeEventDto),
+      JSON.stringify(userThemeChangedEventDto),
     );
   }
 }

@@ -1,9 +1,5 @@
-import { UserUpdateProfileDto } from '@app/contracts/users';
+import { UserProfileUpdatedEventDto } from '@app/contracts/users';
 
 export class UserProfileUpdatedEvent {
-  public constructor(
-    public readonly userUpdateProfileDto: {
-      updatedProfile: UserUpdateProfileDto;
-    },
-  ) {}
+  public constructor(public readonly userProfileUpdatedEventDto: UserProfileUpdatedEventDto) {}
 }

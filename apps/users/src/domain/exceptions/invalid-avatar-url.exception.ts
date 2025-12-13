@@ -7,8 +7,7 @@ export interface InvalidAvatarUrlExceptionOptions {
 
 export class InvalidAvatarUrlException extends DomainException {
   public constructor(options: InvalidAvatarUrlExceptionOptions) {
-    const { message = `Invalid avatarUrl status was received`, meta } =
-      options || {};
+    const { message = `Invalid avatarUrl status was received`, meta } = options || {};
     super({
       code: 'INVALID_INPUT_EXCEPTION',
       message: message,

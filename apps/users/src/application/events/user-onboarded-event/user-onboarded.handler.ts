@@ -4,7 +4,6 @@ import { EventsHandler, IEventHandler } from '@nestjs/cqrs';
 import { USERS_EVENTS } from '@app/clients';
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
 import { MESSAGE_BROKER, MessageBrokerPort } from '@app/ports/message-broker';
-import { UserProfileCreatedEventDto } from '@app/contracts/users';
 
 import { UserOnboardingEvent } from './user-onboarded.event';
 
@@ -15,21 +14,12 @@ export class UserProfileHandler implements IEventHandler<UserOnboardingEvent> {
     @Inject(MESSAGE_BROKER) private readonly messageBroker: MessageBrokerPort,
   ) {}
 
-  async handle({ user }: UserOnboardingEvent) {
-    const userPayload = user.getUserSnapshot();
-    const { id, handle, email, avatarUrl: avatar, userAuthId } = userPayload;
+  async handle({ userProfileCreatedEventDto }: UserOnboardingEvent) {
+    const { email } = userProfileCreatedEventDto;
 
     this.logger.info(
-      `User with email:${email}, created a profile: ${JSON.stringify(user)}`,
+      `User with email:${email}, created a profile: ${JSON.stringify(userProfileCreatedEventDto)}`,
     );
-
-    const userProfileCreatedEventDto: UserProfileCreatedEventDto = {
-      id,
-      userAuthId,
-      email,
-      handle,
-      avatar,
-    };
 
     await this.messageBroker.publishMessage(
       USERS_EVENTS.USER_ONBOARDED_EVENT,

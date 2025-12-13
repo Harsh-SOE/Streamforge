@@ -16,9 +16,7 @@ export class UserLanguagePreference {
     }
 
     const parsedDateResult =
-      UserLanguagePreference.UserLanguagePreferenceValidationSchema.safeParse(
-        value,
-      );
+      UserLanguagePreference.UserLanguagePreferenceValidationSchema.safeParse(value);
     if (!parsedDateResult.success) {
       const errorMessage = parsedDateResult.error.message;
       throw new InvalidLanguaugePreferenceException({

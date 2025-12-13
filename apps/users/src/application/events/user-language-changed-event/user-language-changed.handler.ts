@@ -17,16 +17,14 @@ export class UserLanguageChangedHandler implements IEventHandler<UserLanguageCha
     private readonly messageBroker: KafkaMessageBrokerAdapter,
   ) {}
 
-  public async handle({ langaugeChangedEventDto }: UserLanguageChangedEvent) {
-    const { id, langauge } = langaugeChangedEventDto;
+  public async handle({ userLanguageChangedEventDto }: UserLanguageChangedEvent) {
+    const { id, language } = userLanguageChangedEventDto;
 
-    this.logger.info(
-      `User with id:${id} changed its language to '${langauge}'`,
-    );
+    this.logger.info(`User with id:${id} changed its language to '${language}'`);
 
     await this.messageBroker.publishMessage(
       USERS_EVENTS.USER_LANGUAGE_CHANGED_EVENT,
-      JSON.stringify(langaugeChangedEventDto),
+      JSON.stringify(userLanguageChangedEventDto),
     );
   }
 }

@@ -1,1 +1,1 @@
-export * from './user-notification-status-chnaged.event';
+export * from './user-notification-status-changed.event';

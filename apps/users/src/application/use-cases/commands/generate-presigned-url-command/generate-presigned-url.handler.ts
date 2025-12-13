@@ -1,10 +1,7 @@
 import { Inject } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
-import {
-  GetPresignedUrlDto,
-  GetPreSignedUrlResponse,
-} from '@app/contracts/users';
+import { GetPresignedUrlDto, GetPreSignedUrlResponse } from '@app/contracts/users';
 
 import { USERS_STORAGE_PORT, UsersStoragePort } from '@users/application/ports';
 
@@ -20,16 +17,12 @@ export class GeneratePreSignedUrlHandler implements ICommandHandler<
     private readonly storageAdapter: UsersStoragePort,
   ) {}
 
-  public async execute({
-    fileName,
-    userId,
-  }: GetPresignedUrlDto): Promise<GetPreSignedUrlResponse> {
+  public async execute({ fileName, userId }: GetPresignedUrlDto): Promise<GetPreSignedUrlResponse> {
     if (!fileName) {
       fileName = `video-${new Date().toISOString()}-${userId}.mp4`;
     }
 
-    const presignedUrl =
-      await this.storageAdapter.getPresignedUrlForUserAvatar(fileName);
+    const presignedUrl = await this.storageAdapter.getPresignedUrlForUserAvatar(fileName);
 
     return {
       response: 'Presigned url generated successfully',

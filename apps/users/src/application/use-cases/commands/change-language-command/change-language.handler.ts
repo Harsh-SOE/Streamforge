@@ -3,10 +3,7 @@ import { Inject } from '@nestjs/common';
 
 import { UserPreferredLanguageChangedResponse } from '@app/contracts/users';
 
-import {
-  USER_REROSITORY_PORT,
-  UserRepositoryPort,
-} from '@users/application/ports';
+import { USER_REROSITORY_PORT, UserRepositoryPort } from '@users/application/ports';
 import { UserNotFoundException } from '@users/application/exceptions';
 
 import { ChangeLanguageCommand } from './change-language.command';
@@ -32,10 +29,9 @@ export class ChangeLanguageCommandHandler implements ICommandHandler<ChangeLangu
       });
     }
 
-    const userAggregateWithEvent =
-      this.eventPublisher.mergeObjectContext(foundUserAggregate);
+    const userAggregateWithEvent = this.eventPublisher.mergeObjectContext(foundUserAggregate);
 
-    userAggregateWithEvent.changeUserPreferredlanguage(language);
+    userAggregateWithEvent.changeUserPreferredLanguage(language);
 
     await this.userRepository.updateOneUserById(id, userAggregateWithEvent);
 

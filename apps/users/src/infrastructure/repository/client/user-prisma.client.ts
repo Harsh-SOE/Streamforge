@@ -6,10 +6,7 @@ import { LoggerPort } from '@app/ports/logger';
 import { PrismaClient } from '@persistance/users';
 
 @Injectable()
-export class UserPrismaClient
-  extends PrismaClient
-  implements OnModuleInit, OnModuleDestroy
-{
+export class UserPrismaClient extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   public constructor(
     private readonly prismaDatabaseHandler: PrismaDatabaseHandler,
     private readonly logger: LoggerPort,
@@ -27,8 +24,7 @@ export class UserPrismaClient
   }
 
   public async onModuleDestroy() {
-    const disconnectFromDatabaseOperation = async () =>
-      await this.$disconnect();
+    const disconnectFromDatabaseOperation = async () => await this.$disconnect();
 
     await this.prismaDatabaseHandler.execute(disconnectFromDatabaseOperation, {
       operationType: 'CONNECT',

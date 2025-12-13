@@ -1,5 +1,5 @@
-import { UserAggregate } from '@users/domain/aggregates';
+import { UserProfileCreatedEventDto } from '@app/contracts/users';
 
 export class UserOnboardingEvent {
-  public constructor(public readonly user: UserAggregate) {}
+  public constructor(public readonly userProfileCreatedEventDto: UserProfileCreatedEventDto) {}
 }

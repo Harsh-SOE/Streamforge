@@ -10,8 +10,7 @@ export class UserEmail {
   public static create(value: string) {
     value = value.trim();
 
-    const parsedEmailResult =
-      UserEmail.UserEmailValidationSchema.safeParse(value);
+    const parsedEmailResult = UserEmail.UserEmailValidationSchema.safeParse(value);
     if (!parsedEmailResult.success) {
       const errorMessage = parsedEmailResult.error.message;
       throw new InvalidEmailException({

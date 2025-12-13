@@ -2,7 +2,7 @@ import { UserGrpcThemePreferences } from '@app/contracts/users';
 
 import { DomainThemePreference } from '@users/domain/enums';
 
-export const DomainToGrpcThemePreferenceACL: Record<
+export const DomainToTransportThemePreferenceACL: Record<
   DomainThemePreference,
   UserGrpcThemePreferences
 > = {

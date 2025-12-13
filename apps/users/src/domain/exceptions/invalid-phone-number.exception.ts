@@ -7,8 +7,7 @@ export interface InvalidPhoneNumberExceptionOptions {
 
 export class InvalidPhoneNumberException extends DomainException {
   public constructor(options: InvalidPhoneNumberExceptionOptions) {
-    const { message = `Invalid phone number was received`, meta } =
-      options || {};
+    const { message = `Invalid phone number was received`, meta } = options || {};
     super({
       code: 'INVALID_INPUT_EXCEPTION',
       message: message,

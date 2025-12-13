@@ -1,13 +1,12 @@
-import { GrpcOptions, KafkaOptions, Transport } from '@nestjs/microservices';
-import { ReflectionService } from '@grpc/reflection';
-import * as protoLoader from '@grpc/proto-loader';
-import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
-import * as grpc from '@grpc/grpc-js';
+import { ConfigService } from '@nestjs/config';
+import { GrpcOptions, KafkaOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
+import * as grpc from '@grpc/grpc-js';
+import * as protoLoader from '@grpc/proto-loader';
+import { HealthImplementation, protoPath as HealthCheckProto } from 'grpc-health-check';
 
 import { USER_PACKAGE_NAME } from '@app/contracts/users';
-import { GRPC_HEALTH_V1_PACKAGE_NAME } from '@app/contracts/health';
 
 @Injectable()
 export class AppConfigService {
@@ -105,17 +104,19 @@ export class AppConfigService {
     const options: GrpcOptions = {
       transport: Transport.GRPC,
       options: {
-        protoPath: [
-          join(__dirname, 'proto/users.proto'),
-          join(__dirname, 'proto/health.proto'),
-        ],
-        package: [USER_PACKAGE_NAME, GRPC_HEALTH_V1_PACKAGE_NAME],
+        protoPath: [join(__dirname, 'proto/users.proto'), HealthCheckProto],
+        package: [USER_PACKAGE_NAME],
         url: `0.0.0.0:${this.GRPC_PORT}`,
         onLoadPackageDefinition(
           pkg: protoLoader.PackageDefinition,
           server: Pick<grpc.Server, 'addService'>,
         ) {
-          new ReflectionService(pkg).addToServer(server);
+          const healthImpl = new HealthImplementation({
+            '': 'UNKNOWN',
+          });
+
+          healthImpl.addToServer(server);
+          healthImpl.setStatus('', 'SERVING');
         },
       },
     };

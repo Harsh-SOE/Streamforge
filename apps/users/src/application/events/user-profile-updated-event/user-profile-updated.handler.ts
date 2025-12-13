@@ -17,17 +17,16 @@ export class UserProfileUpdatedHandler implements IEventHandler<UserProfileUpdat
     private readonly messageBroker: KafkaMessageBrokerAdapter,
   ) {}
 
-  public async handle({ userUpdateProfileDto }: UserProfileUpdatedEvent) {
-    const { updatedProfile } = userUpdateProfileDto;
-    const { id } = updatedProfile;
+  public async handle({ userProfileUpdatedEventDto }: UserProfileUpdatedEvent) {
+    const { id } = userProfileUpdatedEventDto;
 
     this.logger.info(
-      `User with id:${id}, updated its profile to: ${JSON.stringify(updatedProfile)}`,
+      `User with id:${id}, updated its profile to: ${JSON.stringify(userProfileUpdatedEventDto)}`,
     );
 
     await this.messageBroker.publishMessage(
       USERS_EVENTS.USER_PROFILE_UPDATED_EVENT,
-      JSON.stringify(updatedProfile),
+      JSON.stringify(userProfileUpdatedEventDto),
     );
   }
 }

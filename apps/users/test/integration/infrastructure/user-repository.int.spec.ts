@@ -1,10 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { v4 as uuidv4 } from 'uuid';
 import { execSync } from 'child_process';
-import {
-  PostgreSqlContainer,
-  StartedPostgreSqlContainer,
-} from '@testcontainers/postgresql';
+import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 
 import { UserRepositoryAdapter } from '@users/infrastructure/repository/adapters';
 import { PrismaDatabaseHandler } from '@app/handlers/database-handler';
@@ -29,15 +26,12 @@ describe('UserRepositoryAdapter (Integration)', () => {
 
     console.log(`Connecting to ${databaseUrl}...`);
 
-    execSync(
-      `npx prisma migrate deploy --schema apps/users/prisma/schema.prisma`,
-      {
-        env: {
-          ...process.env,
-          DATABASE_URL: databaseUrl,
-        },
+    execSync(`npx prisma migrate deploy --schema apps/users/prisma/schema.prisma`, {
+      env: {
+        ...process.env,
+        DATABASE_URL: databaseUrl,
       },
-    );
+    });
 
     console.log(`Migrations applied successfully`);
 

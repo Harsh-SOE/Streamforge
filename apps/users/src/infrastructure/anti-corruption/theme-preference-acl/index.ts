@@ -1,2 +1,2 @@
-export * from './domain-grpc.mapper';
-export * from './grpc-domain.mapper';
+export * from './domain-transport.mapper';
+export * from './transport-domain.mapper';

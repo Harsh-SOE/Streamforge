@@ -13,10 +13,7 @@ import {
   USER_REROSITORY_PORT,
   USERS_STORAGE_PORT,
 } from '@users/application/ports';
-import {
-  AppConfigModule,
-  AppConfigService,
-} from '@users/infrastructure/config';
+import { AppConfigModule, AppConfigService } from '@users/infrastructure/config';
 import { UserCommandHandlers } from '@users/application/use-cases/commands';
 import { UserEventHandlers } from '@users/application/events';
 import { MeasureModule } from '@users/infrastructure/measure';
@@ -27,6 +24,7 @@ import { WinstonLoggerAdapter } from '@users/infrastructure/logger';
 import { AwsS3StorageAdapter } from '@users/infrastructure/storage/adapters';
 import { RedisCacheAdapter } from '@users/infrastructure/cache/adapters';
 import { UserPrismaClient } from '@users/infrastructure/repository/client';
+import { UserKafkaClient } from '@users/infrastructure/message-broker/client';
 
 import { GrpcService } from './grpc.service';
 import { GrpcController } from './grpc.controller';
@@ -54,6 +52,7 @@ import { GrpcController } from './grpc.controller';
     KafkaMessageBrokerHandler,
     PrismaDatabaseHandler,
     UserPrismaClient,
+    UserKafkaClient,
     {
       provide: USER_REROSITORY_PORT,
       useClass: UserRepositoryAdapter,

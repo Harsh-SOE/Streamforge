@@ -1,6 +1,6 @@
+import { Cache } from 'cache-manager';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';
-import { Cache } from 'cache-manager';
 
 import { UserCachePort } from '@users/application/ports';
 
@@ -12,11 +12,7 @@ export class RedisCacheAdapter implements UserCachePort {
     return await this.cacheManager.get(key);
   }
 
-  public async setInCache(
-    key: string,
-    value: string,
-    ttl: number,
-  ): Promise<boolean> {
+  public async setInCache(key: string, value: string, ttl: number): Promise<boolean> {
     await this.cacheManager.set(key, value, ttl);
     return true;
   }
@@ -32,15 +28,11 @@ export class RedisCacheAdapter implements UserCachePort {
     return true;
   }
 
-  public async getMultipleValuesFromCache(
-    keys: Array<string>,
-  ): Promise<string[]> {
+  public async getMultipleValuesFromCache(keys: Array<string>): Promise<string[]> {
     return (await this.cacheManager.mget(keys)) as string[];
   }
 
-  public async deleteMultipleValuesFromCache(
-    keys: Array<string>,
-  ): Promise<boolean> {
+  public async deleteMultipleValuesFromCache(keys: Array<string>): Promise<boolean> {
     await this.cacheManager.mdel(keys);
     return true;
   }

@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { GrpcOptions } from '@nestjs/microservices';
 
 import { AppModule } from './app.module';
-import { AppConfigService } from './infrastructure/config/config.service';
+import { AppConfigService } from './infrastructure/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

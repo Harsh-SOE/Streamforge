@@ -10,8 +10,7 @@ export class UserAvatarUrl {
   public static create(value: string) {
     value = value.trim();
 
-    const parsedUrlResult =
-      UserAvatarUrl.UserAvatarUrlValidationSchema.safeParse(value);
+    const parsedUrlResult = UserAvatarUrl.UserAvatarUrlValidationSchema.safeParse(value);
     if (!parsedUrlResult.success) {
       const errorMessage = parsedUrlResult.error.message;
       throw new InvalidAvatarUrlException({

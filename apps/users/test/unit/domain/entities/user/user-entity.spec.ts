@@ -59,9 +59,7 @@ describe('UserEntity', () => {
     });
 
     it('should throw InvalidEmailException if invalid email was provided', () => {
-      expect(() => userEntity.updateEmail('invalid-email')).toThrow(
-        InvalidEmailException,
-      );
+      expect(() => userEntity.updateEmail('invalid-email')).toThrow(InvalidEmailException);
     });
 
     it('should throw InvalidEmailException if empty email was provided', () => {
@@ -73,24 +71,16 @@ describe('UserEntity', () => {
   describe('UserAvatar', () => {
     it('should update avatarUrl when valid AvatarUrl was provided', () => {
       userEntity.updateAvatar('https://test-avatar.com?avatar=updated-avatar');
-      expect(userEntity.getAvatarUrl()).toBe(
-        'https://test-avatar.com?avatar=updated-avatar',
-      );
+      expect(userEntity.getAvatarUrl()).toBe('https://test-avatar.com?avatar=updated-avatar');
     });
 
     it('should throw InvalidAvatarUrlException if invalid avatar was provided', () => {
-      expect(() => userEntity.updateAvatar('invalid-avatar')).toThrow(
-        InvalidAvatarUrlException,
-      );
+      expect(() => userEntity.updateAvatar('invalid-avatar')).toThrow(InvalidAvatarUrlException);
     });
 
     it('should throw InvalidAvatarUrlException if empty avatarUrl was provided', () => {
-      expect(() => userEntity.updateAvatar('')).toThrow(
-        InvalidAvatarUrlException,
-      );
-      expect(() => userEntity.updateAvatar('  ')).toThrow(
-        InvalidAvatarUrlException,
-      );
+      expect(() => userEntity.updateAvatar('')).toThrow(InvalidAvatarUrlException);
+      expect(() => userEntity.updateAvatar('  ')).toThrow(InvalidAvatarUrlException);
     });
   });
 
@@ -117,18 +107,14 @@ describe('UserEntity', () => {
     });
 
     it('should throw InvalidPhoneNumberException when invalid PhoneNumber was provided', () => {
-      expect(() =>
-        userEntity.updatePhoneNumber('invalid-phone-number'),
-      ).toThrow(InvalidPhoneNumberException);
+      expect(() => userEntity.updatePhoneNumber('invalid-phone-number')).toThrow(
+        InvalidPhoneNumberException,
+      );
     });
 
     it('should throw InvalidPhoneNumberException when empty PhoneNumber was provided', () => {
-      expect(() => userEntity.updatePhoneNumber('')).toThrow(
-        InvalidPhoneNumberException,
-      );
-      expect(() => userEntity.updatePhoneNumber('  ')).toThrow(
-        InvalidPhoneNumberException,
-      );
+      expect(() => userEntity.updatePhoneNumber('')).toThrow(InvalidPhoneNumberException);
+      expect(() => userEntity.updatePhoneNumber('  ')).toThrow(InvalidPhoneNumberException);
     });
 
     it('should update the phoneNumber by trimming spaces', () => {
@@ -161,9 +147,9 @@ describe('UserEntity', () => {
     });
 
     it('should throw InvalidLanguaugePreferenceException on invalid language', () => {
-      expect(() =>
-        userEntity.updateLanguagePreference('invalid-language'),
-      ).toThrow(InvalidLanguaugePreferenceException);
+      expect(() => userEntity.updateLanguagePreference('invalid-language')).toThrow(
+        InvalidLanguaugePreferenceException,
+      );
     });
 
     it('should throw InvalidLanguaugePreferenceException on empty language', () => {

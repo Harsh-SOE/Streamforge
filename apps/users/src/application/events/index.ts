@@ -13,10 +13,3 @@ export const UserEventHandlers = [
   UserProfileUpdatedHandler,
   UserPhoneNumberVerfiedHandler,
 ];
-
-// export * from './user-language-changed-event/user-language-changed.handler';
-// export * from './user-notification-status-changed-event/user-notification-status-changed.handler';
-// export * from './user-onboarded-event/user-onboarded.handler';
-// export * from './user-phone-number-verified-event/user-phone-number-verified.handler';
-// export * from './user-profile-updated-event/user-profile-updated.handler';
-// export * from './user-theme-changed-event/user-change-theme.handler';

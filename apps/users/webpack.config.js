@@ -9,11 +9,7 @@ module.exports = (options, webpack) => {
       new CopyWebpackPlugin({
         patterns: [
           {
-            from: path.join(__dirname, 'proto/users.proto'),
-            to: path.join(__dirname, '../../dist/apps/users/proto'),
-          },
-          {
-            from: path.join(__dirname, 'proto/health.proto'),
+            from: path.join('libs/proto/users.proto'),
             to: path.join(__dirname, '../../dist/apps/users/proto'),
           },
           {

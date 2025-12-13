@@ -18,8 +18,6 @@ describe('UserEmailValueObject', () => {
   });
 
   it('should throw InvalidEmailException for invalid email', () => {
-    expect(() => UserEmail.create('invalid-email')).toThrow(
-      InvalidEmailException,
-    );
+    expect(() => UserEmail.create('invalid-email')).toThrow(InvalidEmailException);
   });
 });

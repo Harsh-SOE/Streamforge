@@ -1,10 +1,5 @@
-import { DomainThemePreference } from '@users/domain/enums';
+import { UserThemeChangedEventDto } from '@app/contracts/users';
 
 export class UserThemeChangedEvent {
-  public constructor(
-    public readonly changeThemeEventDto: {
-      id: string;
-      theme: DomainThemePreference;
-    },
-  ) {}
+  public constructor(public readonly userThemeChangedEventDto: UserThemeChangedEventDto) {}
 }

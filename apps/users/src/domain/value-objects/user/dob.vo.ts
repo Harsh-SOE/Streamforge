@@ -13,8 +13,7 @@ export class UserDOB {
         const currentYear = currentDate.getFullYear();
         let ageInYear = currentYear - dob.getFullYear();
         const hasBirthdayPassed =
-          dob.getMonth() <= currentDate.getMonth() ||
-          dob.getDate() <= currentDate.getDate();
+          dob.getMonth() <= currentDate.getMonth() || dob.getDate() <= currentDate.getDate();
         if (!hasBirthdayPassed) ageInYear--;
         return ageInYear >= 18;
       },

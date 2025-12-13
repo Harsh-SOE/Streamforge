@@ -3,10 +3,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { UserProfileUpdatedResponse } from '@app/contracts/users';
 
-import {
-  USER_REROSITORY_PORT,
-  UserRepositoryPort,
-} from '@users/application/ports';
+import { USER_REROSITORY_PORT, UserRepositoryPort } from '@users/application/ports';
 import { UserNotFoundException } from '@users/application/exceptions';
 
 import { UpdateProfileCommand } from './update-profile.command';
@@ -33,7 +30,11 @@ export class UpdateProfileCommandHandler implements ICommandHandler<UpdateProfil
 
     const birthday = dob ? new Date(dob) : undefined;
 
-    foundUserAggregate.updateUserProfile(birthday, phoneNumber, avatar);
+    foundUserAggregate.updateUserProfile({
+      dob: birthday,
+      phoneNumber: phoneNumber,
+      avatar,
+    });
 
     await this.userRepository.updateOneUserById(id, foundUserAggregate);
 

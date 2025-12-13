@@ -2,10 +2,7 @@ import { Inject } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { UserPhoneNumberVerifiedResponse } from '@app/contracts/users';
-import {
-  USER_REROSITORY_PORT,
-  UserRepositoryPort,
-} from '@users/application/ports';
+import { USER_REROSITORY_PORT, UserRepositoryPort } from '@users/application/ports';
 import { UserNotFoundException } from '@users/application/exceptions';
 
 import { VerifyPhoneNumberCommand } from './verify-phone-number.command';

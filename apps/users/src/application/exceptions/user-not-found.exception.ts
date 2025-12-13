@@ -7,8 +7,7 @@ export interface UserNotFoundExceptionOptions {
 
 export class UserNotFoundException extends ApplicationException {
   public constructor(options: UserNotFoundExceptionOptions) {
-    const { message = `user was not found in the database`, meta } =
-      options || {};
+    const { message = `user was not found in the database`, meta } = options || {};
     super({
       code: 'NOT_FOUND_EXCEPTION',
       message: message,

@@ -7,10 +7,7 @@ import { UserRepositoryAdapter } from '@users/infrastructure/repository/adapters
 import { UserAggregatePersistanceACL } from '@users/infrastructure/anti-corruption/aggregate-persistance-acl';
 import { UserPrismaClient } from '@users/infrastructure/repository/client';
 
-import {
-  PrismaClientMock,
-  DatabaseHandlerMock,
-} from '@test/users/mocks/infrastructure/repository';
+import { PrismaClientMock, DatabaseHandlerMock } from '@test/users/mocks/infrastructure/repository';
 import { UserACLMock } from '@test/users/mocks/infrastructure/acl';
 import { LoggerMock } from '@test/users/mocks/infrastructure/logger';
 import { persistedUserStub } from '@test/users/stubs/persistance';

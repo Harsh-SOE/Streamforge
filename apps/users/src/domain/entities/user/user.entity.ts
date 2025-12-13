@@ -10,40 +10,12 @@ import {
   UserId,
 } from '@users/domain/value-objects';
 
-export interface UserEntityOptions {
-  id: UserId;
-  userAuthId: string;
-  handle: UserHandle;
-  email: UserEmail;
-  avatarUrl: UserAvatarUrl;
-  dob: UserDOB;
-  phoneNumber: UserPhoneNumber;
-  isPhoneNumberVerified: boolean;
-  notification: boolean;
-  themePreference: UserThemePreference;
-  languagePreference: UserLanguagePreference;
-  region: UserRegion;
-}
-
-export interface UserEntityCreationOptions {
-  id?: string;
-  userAuthId: string;
-  handle: string;
-  email: string;
-  avatarUrl: string;
-  dob?: Date;
-  phoneNumber?: string;
-  isPhoneNumberVerified?: boolean;
-  notification?: boolean;
-  themePreference?: string;
-  languagePreference?: string;
-  region?: string;
-}
+import { CreateUserEntityOptions, UserEntityOptions, UserSnapshot } from './options';
 
 export class UserEntity {
-  constructor(private valueObjects: UserEntityOptions) {}
+  private constructor(private readonly valueObjects: UserEntityOptions) {}
 
-  public static create(data: UserEntityCreationOptions): UserEntity {
+  public static create(data: CreateUserEntityOptions): UserEntity {
     const {
       id,
       userAuthId,
@@ -123,7 +95,7 @@ export class UserEntity {
     return this.valueObjects.region.getValue();
   }
 
-  public getSnapshot() {
+  public getSnapshot(): UserSnapshot {
     return {
       id: this.valueObjects.id.getValue(),
       userAuthId: this.valueObjects.userAuthId,
@@ -162,9 +134,6 @@ export class UserEntity {
   }
 
   public verifyPhoneNumber(): void {
-    if (this.valueObjects.isPhoneNumberVerified) {
-      throw new Error(`Phone number is already verified`);
-    }
     this.valueObjects.isPhoneNumberVerified = true;
     return;
   }
@@ -175,15 +144,12 @@ export class UserEntity {
   }
 
   public updateThemePreference(newThemePreference: string): void {
-    this.valueObjects.themePreference =
-      UserThemePreference.create(newThemePreference);
+    this.valueObjects.themePreference = UserThemePreference.create(newThemePreference);
     return;
   }
 
   public updateLanguagePreference(newLanguagePreference: string): void {
-    this.valueObjects.languagePreference = UserLanguagePreference.create(
-      newLanguagePreference,
-    );
+    this.valueObjects.languagePreference = UserLanguagePreference.create(newLanguagePreference);
     return;
   }
 

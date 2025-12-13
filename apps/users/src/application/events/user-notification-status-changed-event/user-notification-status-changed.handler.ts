@@ -7,7 +7,7 @@ import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
 
 import { KafkaMessageBrokerAdapter } from '@users/infrastructure/message-broker/adapters';
 
-import { UserNotificationStatusChangedEvent } from './user-notification-status-chnaged.event';
+import { UserNotificationStatusChangedEvent } from './user-notification-status-changed.event';
 
 @EventsHandler(UserNotificationStatusChangedEvent)
 export class UserNotificationStatusChangedHandler implements IEventHandler<UserNotificationStatusChangedEvent> {
@@ -17,17 +17,13 @@ export class UserNotificationStatusChangedHandler implements IEventHandler<UserN
     private readonly messageBroker: KafkaMessageBrokerAdapter,
   ) {}
 
-  public async handle({
-    notificationStatusChangedEventDto,
-  }: UserNotificationStatusChangedEvent) {
-    const { id, status } = notificationStatusChangedEventDto;
-    this.logger.info(
-      `User with id:${id} turned ${status ? 'on' : 'off'} its notification status`,
-    );
+  public async handle({ userNotificationChangedEventDto }: UserNotificationStatusChangedEvent) {
+    const { id, status } = userNotificationChangedEventDto;
+    this.logger.info(`User with id:${id} turned ${status ? 'on' : 'off'} its notification status`);
 
     await this.messageBroker.publishMessage(
       USERS_EVENTS.USER_NOTIFICATION_CHANGED_EVENT,
-      JSON.stringify(notificationStatusChangedEventDto),
+      JSON.stringify(userNotificationChangedEventDto),
     );
   }
 }

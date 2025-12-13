@@ -2,10 +2,7 @@ import { Inject } from '@nestjs/common';
 import { CommandHandler, EventPublisher, ICommandHandler } from '@nestjs/cqrs';
 import { v4 as uuidv4 } from 'uuid';
 
-import {
-  USER_REROSITORY_PORT,
-  UserRepositoryPort,
-} from '@users/application/ports';
+import { USER_REROSITORY_PORT, UserRepositoryPort } from '@users/application/ports';
 import { UserAggregate } from '@users/domain/aggregates';
 
 import { UserProfileCreatedResponse } from '@app/contracts/users';

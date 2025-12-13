@@ -7,8 +7,7 @@ export interface InvalidLanguaugePreferenceExceptionOptions {
 
 export class InvalidLanguaugePreferenceException extends DomainException {
   public constructor(options: InvalidLanguaugePreferenceExceptionOptions) {
-    const { message = `Invalid Languauge preference was received`, meta } =
-      options || {};
+    const { message = `Invalid Languauge preference was received`, meta } = options || {};
     super({
       code: 'INVALID_INPUT_EXCEPTION',
       message: message,

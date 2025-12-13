@@ -2,10 +2,7 @@ import { throwError } from 'rxjs';
 import { Catch, ExceptionFilter, HttpStatus, Inject } from '@nestjs/common';
 import { status as GrpcStatus } from '@grpc/grpc-js';
 
-import {
-  GrpcApplicationException,
-  GrpcExceptionPayload,
-} from '@app/exceptions/grpc-exceptions';
+import { GrpcApplicationException, GrpcExceptionPayload } from '@app/exceptions/grpc-exceptions';
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
 import { InfrastructureException } from '@app/exceptions/infrastructure-exceptions';
 
@@ -59,8 +56,7 @@ export class GrpcFilter implements ExceptionFilter {
         statusCode: exception.code,
         timestamp: exception.timestamp.toISOString(),
         serviceExceptionCode: GrpcStatus.INTERNAL,
-        httpExceptionCode:
-          exception.httpStatus ?? HttpStatus.INTERNAL_SERVER_ERROR,
+        httpExceptionCode: exception.httpStatus ?? HttpStatus.INTERNAL_SERVER_ERROR,
         message: exception.message ?? `something went wrong on server side`,
       };
       message = `Application error has occured`;

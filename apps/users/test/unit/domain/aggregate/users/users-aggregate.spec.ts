@@ -21,11 +21,11 @@ describe('UserAggregate', () => {
     const date = new Date();
     date.setFullYear(date.getFullYear() - 20);
 
-    userAggregate.updateUserProfile(
-      date,
-      '+919876543210',
-      'https://test-avatar.com?avatar=updated-avatar',
-    );
+    userAggregate.updateUserProfile({
+      dob: date,
+      phoneNumber: '+919876543210',
+      avatar: 'https://test-avatar.com?avatar=updated-avatar',
+    });
 
     const events = userAggregate.getUncommittedEvents();
     expect(events).toHaveLength(2);
@@ -41,11 +41,11 @@ describe('UserAggregate', () => {
     const date = new Date();
 
     expect(() => {
-      userAggregate.updateUserProfile(
-        date,
-        '+919876543210',
-        'https://test-avatar.com?avatar=updated-avatar',
-      );
+      userAggregate.updateUserProfile({
+        dob: date,
+        phoneNumber: '+919876543210',
+        avatar: 'https://test-avatar.com?avatar=updated-avatar',
+      });
     }).toThrow(InvalidDobException);
   });
 
@@ -54,11 +54,11 @@ describe('UserAggregate', () => {
     date.setFullYear(date.getFullYear() - 20);
 
     expect(() => {
-      userAggregate.updateUserProfile(
-        date,
-        '+919876543210',
-        'invalid-avatar-url',
-      );
+      userAggregate.updateUserProfile({
+        dob: date,
+        phoneNumber: '+919876543210',
+        avatar: 'invalid-avatar-url',
+      });
     }).toThrow(InvalidAvatarUrlException);
   });
 
@@ -67,11 +67,11 @@ describe('UserAggregate', () => {
     date.setFullYear(date.getFullYear() - 20);
 
     expect(() => {
-      userAggregate.updateUserProfile(
-        date,
-        'invalid-phone-number',
-        'invalid-avatar-url',
-      );
+      userAggregate.updateUserProfile({
+        dob: date,
+        phoneNumber: 'invalid-phone-number',
+        avatar: 'invalid-avatar-url',
+      });
     }).toThrow(InvalidPhoneNumberException);
   });
 });
