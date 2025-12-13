@@ -20,13 +20,13 @@ import {
 } from '@app/contracts/users';
 
 import {
-  ChangeLanguageCommand,
-  ChangeNotificationCommand,
   ChangeThemeCommand,
   CreateProfileCommand,
   UpdateProfileCommand,
+  ChangeLanguageCommand,
   VerifyPhoneNumberCommand,
   GeneratePreSignedUrlCommand,
+  ChangeNotificationCommand,
 } from '@users/application/use-cases/commands';
 
 @Injectable()

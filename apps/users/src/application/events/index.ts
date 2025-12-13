@@ -1,28 +1,22 @@
-import { ChangeLanguageEventHandler } from './change-language-event/change-language.handler';
-import { ChangeNotificationStatusEventHandler } from './change-notification-status-event/change-notification-status.handler';
-import { ChangeThemeEventHandler } from './change-theme-event/change-theme.handler';
-import { UpdateProfileEventHandler } from './update-profile-event/update-profile.handler';
-import { PhoneNumberVerfiedEventHandler } from './phone-number-verified-event/phone-number-verified.handler';
-import { CompleteProfileEventHandler } from './create-profile-event/create-profile.handler';
+import { UserLanguageChangedHandler } from './user-language-changed-event/user-language-changed.handler';
+import { UserNotificationStatusChangedHandler } from './user-notification-status-changed-event/user-notification-status-changed.handler';
+import { UserThemeChangedHandler } from './user-theme-changed-event/user-change-theme.handler';
+import { UserProfileUpdatedHandler } from './user-profile-updated-event/user-profile-updated.handler';
+import { UserPhoneNumberVerfiedHandler } from './user-phone-number-verified-event/user-phone-number-verified.handler';
+import { UserProfileHandler } from './user-onboarded-event/user-onboarded.handler';
 
 export const UserEventHandlers = [
-  CompleteProfileEventHandler,
-  ChangeLanguageEventHandler,
-  ChangeNotificationStatusEventHandler,
-  ChangeThemeEventHandler,
-  UpdateProfileEventHandler,
-  PhoneNumberVerfiedEventHandler,
+  UserProfileHandler,
+  UserLanguageChangedHandler,
+  UserNotificationStatusChangedHandler,
+  UserThemeChangedHandler,
+  UserProfileUpdatedHandler,
+  UserPhoneNumberVerfiedHandler,
 ];
 
-export * from './create-profile-event/create-profile.event';
-export * from './create-profile-event/create-profile.handler';
-export * from './change-language-event/change-language.event';
-export * from './change-language-event/change-language.handler';
-export * from './change-notification-status-event/change-notification-status.event';
-export * from './change-notification-status-event/change-notification-status.handler';
-export * from './change-theme-event/change-theme.event';
-export * from './change-theme-event/change-theme.handler';
-export * from './phone-number-verified-event/phone-number-verified.event';
-export * from './phone-number-verified-event/phone-number-verified.handler';
-export * from './update-profile-event/update-profile.event';
-export * from './update-profile-event/update-profile.handler';
+// export * from './user-language-changed-event/user-language-changed.handler';
+// export * from './user-notification-status-changed-event/user-notification-status-changed.handler';
+// export * from './user-onboarded-event/user-onboarded.handler';
+// export * from './user-phone-number-verified-event/user-phone-number-verified.handler';
+// export * from './user-profile-updated-event/user-profile-updated.handler';
+// export * from './user-theme-changed-event/user-change-theme.handler';

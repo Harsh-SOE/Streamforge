@@ -32,13 +32,13 @@ export class RedisCacheAdapter implements UserCachePort {
     return true;
   }
 
-  public async getMultipleValuesInCache(
+  public async getMultipleValuesFromCache(
     keys: Array<string>,
   ): Promise<string[]> {
     return (await this.cacheManager.mget(keys)) as string[];
   }
 
-  public async deleteMultipleValuesInCache(
+  public async deleteMultipleValuesFromCache(
     keys: Array<string>,
   ): Promise<boolean> {
     await this.cacheManager.mdel(keys);

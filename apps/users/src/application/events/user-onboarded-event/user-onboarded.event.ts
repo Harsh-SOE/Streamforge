@@ -1,5 +1,5 @@
 import { UserAggregate } from '@users/domain/aggregates';
 
-export class CreateProfileEvent {
+export class UserOnboardingEvent {
   public constructor(public readonly user: UserAggregate) {}
 }

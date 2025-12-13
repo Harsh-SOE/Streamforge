@@ -4,18 +4,18 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UserPreferredThemeChangedResponse } from '@app/contracts/users';
 
 import {
-  USER_COMMAND_REROSITORY_PORT,
+  USER_REROSITORY_PORT,
   UserRepositoryPort,
 } from '@users/application/ports';
 import { UserNotFoundException } from '@users/application/exceptions';
-import { GrpcToDomainThemeEnumMapper } from '@users/infrastructure/anti-corruption';
+import { GrpcToDomainThemeEnumACL } from '@users/infrastructure/anti-corruption/theme-preference-acl';
 
 import { ChangeThemeCommand } from './change-theme.command';
 
 @CommandHandler(ChangeThemeCommand)
 export class ChangeThemeCommandHandler implements ICommandHandler<ChangeThemeCommand> {
   constructor(
-    @Inject(USER_COMMAND_REROSITORY_PORT)
+    @Inject(USER_REROSITORY_PORT)
     private readonly userRepository: UserRepositoryPort,
   ) {}
 
@@ -32,12 +32,7 @@ export class ChangeThemeCommandHandler implements ICommandHandler<ChangeThemeCom
       });
     }
 
-    const domainThemePreference =
-      GrpcToDomainThemeEnumMapper.get(themePerference);
-
-    if (!domainThemePreference) {
-      throw new Error(`Invalid option for theme`);
-    }
+    const domainThemePreference = GrpcToDomainThemeEnumACL[themePerference];
 
     foundUserAggregate.changeUserPreferredTheme(domainThemePreference);
 

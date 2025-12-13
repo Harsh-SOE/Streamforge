@@ -1,4 +1,4 @@
-import { UpdateProfileEvent } from '@users/application/events';
+import { UserProfileUpdatedEvent } from '@users/application/events/user-profile-updated-event';
 import { UserAggregate } from '@users/domain/aggregates';
 import {
   InvalidAvatarUrlException,
@@ -29,7 +29,7 @@ describe('UserAggregate', () => {
 
     const events = userAggregate.getUncommittedEvents();
     expect(events).toHaveLength(2);
-    expect(events[1]).toBeInstanceOf(UpdateProfileEvent);
+    expect(events[1]).toBeInstanceOf(UserProfileUpdatedEvent);
     expect(userAggregate.getUserSnapshot().avatarUrl).toBe(
       'https://test-avatar.com?avatar=updated-avatar',
     );

@@ -4,7 +4,7 @@ import { Inject } from '@nestjs/common';
 import { UserPreferredLanguageChangedResponse } from '@app/contracts/users';
 
 import {
-  USER_COMMAND_REROSITORY_PORT,
+  USER_REROSITORY_PORT,
   UserRepositoryPort,
 } from '@users/application/ports';
 import { UserNotFoundException } from '@users/application/exceptions';
@@ -14,7 +14,7 @@ import { ChangeLanguageCommand } from './change-language.command';
 @CommandHandler(ChangeLanguageCommand)
 export class ChangeLanguageCommandHandler implements ICommandHandler<ChangeLanguageCommand> {
   constructor(
-    @Inject(USER_COMMAND_REROSITORY_PORT)
+    @Inject(USER_REROSITORY_PORT)
     private readonly userRepository: UserRepositoryPort,
     private eventPublisher: EventPublisher,
   ) {}

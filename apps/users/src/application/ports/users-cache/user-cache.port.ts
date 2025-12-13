@@ -9,9 +9,9 @@ export interface UserCachePort {
     data: Array<{ key: string; value: string; ttl?: number }>,
   ): Promise<boolean>;
 
-  getMultipleValuesInCache(keys: Array<string>): Promise<string[]>;
+  getMultipleValuesFromCache(keys: Array<string>): Promise<string[]>;
 
-  deleteMultipleValuesInCache(keys: Array<string>): Promise<boolean>;
+  deleteMultipleValuesFromCache(keys: Array<string>): Promise<boolean>;
 }
 
 export const USER_CACHE_PORT = Symbol('USER_CACHE_PORT');

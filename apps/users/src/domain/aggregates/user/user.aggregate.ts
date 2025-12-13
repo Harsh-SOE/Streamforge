@@ -1,14 +1,12 @@
 import { AggregateRoot } from '@nestjs/cqrs';
 
 import { UserEntity } from '@users/domain/entities';
-import {
-  ChangeLanguageEvent,
-  ChangeNotificationStatusEvent,
-  ChangeThemeEvent,
-  CreateProfileEvent,
-  PhoneNumberVerfiedEvent,
-  UpdateProfileEvent,
-} from '@users/application/events';
+import { UserLanguageChangedEvent } from '@users/application/events/user-language-changed-event';
+import { UserNotificationStatusChangedEvent } from '@users/application/events/user-notification-status-changed-event';
+import { UserOnboardingEvent } from '@users/application/events/user-onboarded-event';
+import { UserPhoneNumberVerfiedEvent } from '@users/application/events/user-phone-number-verified-event';
+import { UserProfileUpdatedEvent } from '@users/application/events/user-profile-updated-event';
+import { UserThemeChangedEvent } from '@users/application/events/user-theme-changed-event';
 
 export interface userAggregateOption {
   id?: string;
@@ -70,7 +68,7 @@ export class UserAggregate extends AggregateRoot {
     });
     const userAggregate = new UserAggregate(userEntity);
 
-    userAggregate.apply(new CreateProfileEvent(userAggregate));
+    userAggregate.apply(new UserOnboardingEvent(userAggregate));
 
     return userAggregate;
   }
@@ -81,7 +79,7 @@ export class UserAggregate extends AggregateRoot {
     if (avatar) this.getUserEntity().updateAvatar(avatar);
 
     this.apply(
-      new UpdateProfileEvent({
+      new UserProfileUpdatedEvent({
         updatedProfile: {
           id: this.getUserSnapshot().id,
           dob: dob?.toISOString(),
@@ -98,7 +96,7 @@ export class UserAggregate extends AggregateRoot {
     this.getUserEntity().verifyPhoneNumber();
 
     this.apply(
-      new PhoneNumberVerfiedEvent({
+      new UserPhoneNumberVerfiedEvent({
         id: this.getUserSnapshot().id,
         phoneNumber: this.getUserSnapshot().phoneNumber as string,
       }),
@@ -110,7 +108,7 @@ export class UserAggregate extends AggregateRoot {
 
     // event for theme changed here...
     this.apply(
-      new ChangeThemeEvent({
+      new UserThemeChangedEvent({
         id: this.getUserSnapshot().id,
         theme: this.getUserSnapshot().themePreference,
       }),
@@ -121,7 +119,7 @@ export class UserAggregate extends AggregateRoot {
     this.getUserEntity().updateLanguagePreference(newLanguage);
 
     this.apply(
-      new ChangeLanguageEvent({
+      new UserLanguageChangedEvent({
         id: this.getUserSnapshot().id,
         langauge: this.getUserEntity().getLanguagePreference(),
       }),
@@ -132,7 +130,7 @@ export class UserAggregate extends AggregateRoot {
     this.getUserEntity().updateNotificationStatus(newNotificationStatus);
 
     this.apply(
-      new ChangeNotificationStatusEvent({
+      new UserNotificationStatusChangedEvent({
         id: this.getUserSnapshot().id,
         status: this.getUserSnapshot().notification,
       }),

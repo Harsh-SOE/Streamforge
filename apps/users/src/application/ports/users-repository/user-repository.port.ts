@@ -26,6 +26,4 @@ export interface UserRepositoryPort {
   findOneUserById(id: string): Promise<UserAggregate | null>;
 }
 
-export const USER_COMMAND_REROSITORY_PORT = Symbol(
-  'USER_COMMAND_REROSITORY_PORT',
-);
+export const USER_REROSITORY_PORT = Symbol('USER_REROSITORY_PORT');

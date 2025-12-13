@@ -1,5 +1,10 @@
 export enum USERS_EVENTS {
-  USER_ONBOARDED_EVENT = 'user.onboarded',
+  USER_ONBOARDED_EVENT = 'users.onboarded',
+  USER_PROFILE_UPDATED_EVENT = 'users.profile-updated',
+  USER_PHONE_NUMBER_UPDATED_EVENT = 'users.phone-number-updated',
+  USER_THEME_CHANGED_EVENT = 'users.theme-changed',
+  USER_NOTIFICATION_CHANGED_EVENT = 'users.notification-changed',
+  USER_LANGUAGE_CHANGED_EVENT = 'users.language-changed',
 }
 
 export enum VIDEO_EVENTS {

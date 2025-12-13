@@ -4,7 +4,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UserProfileUpdatedResponse } from '@app/contracts/users';
 
 import {
-  USER_COMMAND_REROSITORY_PORT,
+  USER_REROSITORY_PORT,
   UserRepositoryPort,
 } from '@users/application/ports';
 import { UserNotFoundException } from '@users/application/exceptions';
@@ -14,7 +14,7 @@ import { UpdateProfileCommand } from './update-profile.command';
 @CommandHandler(UpdateProfileCommand)
 export class UpdateProfileCommandHandler implements ICommandHandler<UpdateProfileCommand> {
   constructor(
-    @Inject(USER_COMMAND_REROSITORY_PORT)
+    @Inject(USER_REROSITORY_PORT)
     private readonly userRepository: UserRepositoryPort,
   ) {}
 

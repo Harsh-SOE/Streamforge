@@ -93,7 +93,7 @@ export class KafkaMessageBrokerHandler implements OnModuleInit {
     );
   }
 
-  public async filter<TMessageBrokerResponse, TFallback = never>(
+  public async execute<TMessageBrokerResponse, TFallback = never>(
     kafkaOperation: () => TMessageBrokerResponse,
     options: MessageBrokerFilterOptions<TFallback>,
   ) {

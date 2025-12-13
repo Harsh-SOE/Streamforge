@@ -1,0 +1,13 @@
+import { UserGrpcThemePreferences } from '@app/contracts/users';
+
+import { DomainThemePreference } from '@users/domain/enums';
+
+export const GrpcToDomainThemeEnumACL: Record<
+  UserGrpcThemePreferences,
+  DomainThemePreference
+> = {
+  [UserGrpcThemePreferences.SYSTEM]: DomainThemePreference.SYSTEM,
+  [UserGrpcThemePreferences.DARK]: DomainThemePreference.DARK,
+  [UserGrpcThemePreferences.LIGHT]: DomainThemePreference.LIGHT,
+  [UserGrpcThemePreferences.UNRECOGNIZED]: DomainThemePreference.LIGHT,
+};

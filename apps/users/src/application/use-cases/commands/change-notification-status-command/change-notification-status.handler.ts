@@ -4,7 +4,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UserNotificationStatusChangedResponse } from '@app/contracts/users';
 
 import {
-  USER_COMMAND_REROSITORY_PORT,
+  USER_REROSITORY_PORT,
   UserRepositoryPort,
 } from '@users/application/ports';
 import { UserNotFoundException } from '@users/application/exceptions';
@@ -14,7 +14,7 @@ import { ChangeNotificationCommand } from './change-notification-status.command'
 @CommandHandler(ChangeNotificationCommand)
 export class ChangeNotificationCommandHandler implements ICommandHandler<ChangeNotificationCommand> {
   constructor(
-    @Inject(USER_COMMAND_REROSITORY_PORT)
+    @Inject(USER_REROSITORY_PORT)
     private readonly userRepository: UserRepositoryPort,
   ) {}
 

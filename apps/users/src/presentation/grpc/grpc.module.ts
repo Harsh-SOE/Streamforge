@@ -10,7 +10,7 @@ import { KafkaMessageBrokerHandler } from '@app/handlers/message-broker-handler'
 
 import {
   USER_CACHE_PORT,
-  USER_COMMAND_REROSITORY_PORT,
+  USER_REROSITORY_PORT,
   USERS_STORAGE_PORT,
 } from '@users/application/ports';
 import {
@@ -21,7 +21,7 @@ import { UserCommandHandlers } from '@users/application/use-cases/commands';
 import { UserEventHandlers } from '@users/application/events';
 import { MeasureModule } from '@users/infrastructure/measure';
 import { UserRepositoryAdapter } from '@users/infrastructure/repository/adapters';
-import { UserAggregatePersistanceACL } from '@users/infrastructure/anti-corruption';
+import { UserAggregatePersistanceACL } from '@users/infrastructure/anti-corruption/aggregate-persistance-acl';
 import { KafkaMessageBrokerAdapter } from '@users/infrastructure/message-broker/adapters';
 import { WinstonLoggerAdapter } from '@users/infrastructure/logger';
 import { AwsS3StorageAdapter } from '@users/infrastructure/storage/adapters';
@@ -33,7 +33,6 @@ import { GrpcController } from './grpc.controller';
 
 @Module({
   imports: [
-    AppConfigModule,
     MeasureModule,
     CqrsModule,
     CacheModule.registerAsync({
@@ -51,13 +50,12 @@ import { GrpcController } from './grpc.controller';
   controllers: [GrpcController],
   providers: [
     GrpcService,
-    AppConfigService,
     UserAggregatePersistanceACL,
     KafkaMessageBrokerHandler,
     PrismaDatabaseHandler,
     UserPrismaClient,
     {
-      provide: USER_COMMAND_REROSITORY_PORT,
+      provide: USER_REROSITORY_PORT,
       useClass: UserRepositoryAdapter,
     },
     {

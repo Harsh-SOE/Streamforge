@@ -6,18 +6,22 @@ import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
 import { MESSAGE_BROKER, MessageBrokerPort } from '@app/ports/message-broker';
 import { UserProfileCreatedEventDto } from '@app/contracts/users';
 
-import { CreateProfileEvent } from './create-profile.event';
+import { UserOnboardingEvent } from './user-onboarded.event';
 
-@EventsHandler(CreateProfileEvent)
-export class CompleteProfileEventHandler implements IEventHandler<CreateProfileEvent> {
+@EventsHandler(UserOnboardingEvent)
+export class UserProfileHandler implements IEventHandler<UserOnboardingEvent> {
   constructor(
-    @Inject(MESSAGE_BROKER) private readonly messageBroker: MessageBrokerPort,
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
+    @Inject(MESSAGE_BROKER) private readonly messageBroker: MessageBrokerPort,
   ) {}
 
-  async handle({ user }: CreateProfileEvent) {
+  async handle({ user }: UserOnboardingEvent) {
     const userPayload = user.getUserSnapshot();
     const { id, handle, email, avatarUrl: avatar, userAuthId } = userPayload;
+
+    this.logger.info(
+      `User with email:${email}, created a profile: ${JSON.stringify(user)}`,
+    );
 
     const userProfileCreatedEventDto: UserProfileCreatedEventDto = {
       id,
@@ -30,10 +34,6 @@ export class CompleteProfileEventHandler implements IEventHandler<CreateProfileE
     await this.messageBroker.publishMessage(
       USERS_EVENTS.USER_ONBOARDED_EVENT,
       JSON.stringify(userProfileCreatedEventDto),
-    );
-
-    this.logger.info(
-      `User with email:${email}, created a profile: ${JSON.stringify(user)}`,
     );
   }
 }

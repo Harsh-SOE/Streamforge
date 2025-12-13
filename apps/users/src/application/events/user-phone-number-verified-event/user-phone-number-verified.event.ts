@@ -1,4 +1,4 @@
-export class PhoneNumberVerfiedEvent {
+export class UserPhoneNumberVerfiedEvent {
   public constructor(
     public readonly phoneNumberVerfiedEventDto: {
       id: string;

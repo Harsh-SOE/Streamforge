@@ -45,7 +45,7 @@ export class KafkaMessageBrokerAdapter
     const kafkaPublishMessageOperation = () =>
       this.producer.send({ topic, messages: [{ key: 'xyz', value: payload }] });
 
-    await this.kafkaFilter.filter(kafkaPublishMessageOperation, {
+    await this.kafkaFilter.execute(kafkaPublishMessageOperation, {
       operationType: 'PUBLISH_OR_SEND',
       topic,
       message: String(payload),
@@ -57,7 +57,7 @@ export class KafkaMessageBrokerAdapter
   public async subscribeTo(topic: string): Promise<void> {
     const kafkaSubscribeOperation = () =>
       this.consumer.subscribe({ topic, fromBeginning: true });
-    await this.kafkaFilter.filter(kafkaSubscribeOperation, {
+    await this.kafkaFilter.execute(kafkaSubscribeOperation, {
       operationType: 'SUBSCRIBE',
       topic,
       logErrors: true,
