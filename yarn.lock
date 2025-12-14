@@ -7650,7 +7650,7 @@ parseurl@^1.3.3, parseurl@~1.3.3:
   resolved "https://registry.yarnpkg.com/parseurl/-/parseurl-1.3.3.tgz#9da19e7bee8d12dff0513ed5b76957793bc2e8d4"
   integrity sha512-CiyeOxFT/JZyN5m0z9PfXw4SCBJ6Sygz1Dpl0wqjlhDEGGBP1GnsUVEL0p63hoG1fcj3fHynXi9NYO4nWOL+qQ==
 
-passport-auth0@^1.4.4:
+passport-auth0@^1.4.5:
   version "1.4.5"
   resolved "https://registry.yarnpkg.com/passport-auth0/-/passport-auth0-1.4.5.tgz#83e3b7f9cdd8a5d3231985573d89ea6e6c894bea"
   integrity sha512-pfAvcAoR1HjKFygq0gGEHCy+9eqXr1CnfN3yD4kuUj1p4ek7P3s4bMn13+Q1FajqDNA8lD0Vvy6j8Od1oqF9Dg==
