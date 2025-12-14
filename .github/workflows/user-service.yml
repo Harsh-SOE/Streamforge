@@ -50,7 +50,7 @@ jobs:
         run: yarn lint:libs
 
       - name: Run linter (Users Service)
-        run: yarn lint:user
+        run: yarn lint:users
 
   test-and-validate:
     runs-on: ubuntu-latest
