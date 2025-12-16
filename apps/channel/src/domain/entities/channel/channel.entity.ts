@@ -1,90 +1,86 @@
 import { Injectable } from '@nestjs/common';
 
-import { ChannelBio, ChannelCoverImage, ChannelUserId } from '@channel/domain/value-objects';
+import {
+  ChannelBio,
+  ChannelCoverImage,
+  ChannelId,
+  ChannelUserId,
+} from '@channel/domain/value-objects';
+
+import { ChannelEntityCreateOptions, ChannelEntityOptions } from './options';
 
 @Injectable()
 export class ChannelEntity {
-  public constructor(
-    private readonly id: string,
-    private readonly userId: ChannelUserId,
-    private bio: ChannelBio,
-    private coverImage?: ChannelCoverImage,
-    private isChannelVerified?: boolean,
-    private isChannelMonitized?: boolean,
-  ) {}
+  private constructor(private readonly valueObjects: ChannelEntityOptions) {}
+
+  public static create(channelEntityCreateOptions: ChannelEntityCreateOptions): ChannelEntity {
+    const { id, userId, bio, coverImage, isChannelMonitized, isChannelVerified } =
+      channelEntityCreateOptions;
+
+    return new ChannelEntity({
+      id: ChannelId.create(id),
+      bio: ChannelBio.create(bio),
+      userId: ChannelUserId.create(userId),
+      coverImage: ChannelCoverImage.create(coverImage),
+      isChannelMonitized: isChannelMonitized,
+      isChannelVerified: isChannelVerified,
+    });
+  }
 
   public getId() {
-    return this.id;
+    return this.valueObjects.id;
   }
 
   public getUserId() {
-    return this.userId;
+    return this.valueObjects.userId;
   }
 
   public getBio() {
-    return this.bio;
+    return this.valueObjects.bio;
   }
 
   public getCoverImage() {
-    return this.coverImage;
+    return this.valueObjects.coverImage;
   }
 
   public getIsChannelVerified() {
-    return this.isChannelVerified;
+    return this.valueObjects.isChannelVerified;
   }
 
   public getIsChannelMonitized() {
-    return this.isChannelMonitized;
+    return this.valueObjects.isChannelMonitized;
   }
 
   public getChannelSnapshot() {
     return {
-      id: this.id,
-      userId: this.userId.getValue(),
-      bio: this.bio.getValue(),
-      coverImage: this.coverImage?.getValue(),
-      isChannelMonitized: this.isChannelMonitized,
-      isChannelVerified: this.isChannelVerified,
+      id: this.valueObjects.id.getValue(),
+      userId: this.valueObjects.userId.getValue(),
+      bio: this.valueObjects.bio.getValue(),
+      coverImage: this.valueObjects.coverImage?.getValue(),
+      isChannelMonitized: this.valueObjects.isChannelMonitized,
+      isChannelVerified: this.valueObjects.isChannelVerified,
     };
   }
 
-  public static create(
-    id: string,
-    userId: string,
-    bio?: string,
-    coverImage?: string,
-    isChannelVerified?: boolean,
-    isChannelMonitized?: boolean,
-  ): ChannelEntity {
-    return new ChannelEntity(
-      id,
-      ChannelUserId.create(userId),
-      ChannelBio.create(bio),
-      ChannelCoverImage.create(coverImage),
-      isChannelVerified,
-      isChannelMonitized,
-    );
-  }
-
   public updateChannelBio(bio?: string) {
-    this.bio = ChannelBio.create(bio);
+    this.valueObjects.bio = ChannelBio.create(bio);
     return;
   }
 
   public updateChannelCoverImage(coverImage?: string) {
-    this.coverImage = ChannelCoverImage.create(coverImage);
+    this.valueObjects.coverImage = ChannelCoverImage.create(coverImage);
     return;
   }
 
   public monitizeChannel() {
-    this.isChannelMonitized = true;
+    this.valueObjects.isChannelMonitized = true;
   }
 
   public demonitizeChannel() {
-    this.isChannelMonitized = false;
+    this.valueObjects.isChannelMonitized = false;
   }
 
   public verifyChannel() {
-    this.isChannelVerified = true;
+    this.valueObjects.isChannelVerified = true;
   }
 }

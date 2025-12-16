@@ -3,17 +3,14 @@ import { CommandHandler, EventPublisher, ICommandHandler } from '@nestjs/cqrs';
 
 import { ChannelMonitizationActivatedResponse } from '@app/contracts/channel';
 
-import {
-  CHANNEL_COMMAND_REPOSITORY,
-  ChannelCommandRepositoryPort,
-} from '@channel/application/ports';
+import { CHANNEL_REPOSITORY, ChannelCommandRepositoryPort } from '@channel/application/ports';
 
 import { ActivateMonitizationCommand } from './activate-monitization.command';
 
 @CommandHandler(ActivateMonitizationCommand)
 export class ActivateMonitizationCommandHandler implements ICommandHandler<ActivateMonitizationCommand> {
   public constructor(
-    @Inject(CHANNEL_COMMAND_REPOSITORY)
+    @Inject(CHANNEL_REPOSITORY)
     private readonly channelRespository: ChannelCommandRepositoryPort,
     private readonly eventPublisher: EventPublisher,
   ) {}
@@ -23,7 +20,7 @@ export class ActivateMonitizationCommandHandler implements ICommandHandler<Activ
   }: ActivateMonitizationCommand): Promise<ChannelMonitizationActivatedResponse> {
     const { id } = channelActivateMonitizationDto;
 
-    const channelAggregate = await this.channelRespository.findOneById(id);
+    const channelAggregate = await this.channelRespository.findOneChannelById(id);
 
     if (!channelAggregate) {
       throw new Error();
@@ -33,7 +30,7 @@ export class ActivateMonitizationCommandHandler implements ICommandHandler<Activ
 
     channelAggregateWithEvents.updateChannelMonitizedStatus(true);
 
-    await this.channelRespository.updateOneById(id, channelAggregateWithEvents);
+    await this.channelRespository.updateOneChannelByUserId(id, channelAggregateWithEvents);
 
     channelAggregateWithEvents.commit();
 

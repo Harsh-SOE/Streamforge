@@ -3,17 +3,14 @@ import { Inject } from '@nestjs/common';
 
 import { ChannelVerifyByIdResponse } from '@app/contracts/channel';
 
-import {
-  CHANNEL_COMMAND_REPOSITORY,
-  ChannelCommandRepositoryPort,
-} from '@channel/application/ports';
+import { CHANNEL_REPOSITORY, ChannelCommandRepositoryPort } from '@channel/application/ports';
 
 import { VerifyChannelCommand } from './verify-channel.command';
 
 @CommandHandler(VerifyChannelCommand)
 export class VerifyChannelHandler implements ICommandHandler<VerifyChannelCommand> {
   public constructor(
-    @Inject(CHANNEL_COMMAND_REPOSITORY)
+    @Inject(CHANNEL_REPOSITORY)
     private readonly channelRepository: ChannelCommandRepositoryPort,
     private readonly eventPublisher: EventPublisher,
   ) {}
@@ -21,7 +18,7 @@ export class VerifyChannelHandler implements ICommandHandler<VerifyChannelComman
   async execute({ verifyChannelDto }: VerifyChannelCommand): Promise<ChannelVerifyByIdResponse> {
     const { id } = verifyChannelDto;
 
-    const channelAggregate = await this.channelRepository.findOneById(id);
+    const channelAggregate = await this.channelRepository.findOneChannelById(id);
 
     if (!channelAggregate) {
       throw new Error();
@@ -30,7 +27,7 @@ export class VerifyChannelHandler implements ICommandHandler<VerifyChannelComman
 
     channelAggregateWithEvents.updateChannelVerificationStatus();
 
-    await this.channelRepository.updateOneById(id, channelAggregateWithEvents);
+    await this.channelRepository.updateOneChannelByUserId(id, channelAggregateWithEvents);
 
     channelAggregateWithEvents.commit();
 
