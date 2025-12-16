@@ -1,31 +1,27 @@
-import { DatabaseFilter } from '@app/common/types';
-
 import { ChannelAggregate } from '@channel/domain/aggregates';
 
-import { Channel } from '@peristance/channel';
-
 export interface ChannelCommandRepositoryPort {
-  save(domain: ChannelAggregate): Promise<ChannelAggregate>;
+  saveChannel(domain: ChannelAggregate): Promise<ChannelAggregate>;
 
-  saveMany(domains: ChannelAggregate[]): Promise<number>;
+  saveManyChannels(domains: ChannelAggregate[]): Promise<number>;
 
-  findOneById(id: string): Promise<ChannelAggregate | null>;
+  findOneChannelById(channelId: string): Promise<ChannelAggregate | null>;
 
-  findOne(filter: DatabaseFilter<Channel>): Promise<ChannelAggregate | null>;
+  findOneChannelByUserId(userId: string): Promise<ChannelAggregate | null>;
 
-  findMany(filter: DatabaseFilter<Channel>): Promise<ChannelAggregate[]>;
+  updateOneChannelById(
+    channelId: string,
+    updatedChannel: ChannelAggregate,
+  ): Promise<ChannelAggregate>;
 
-  updateOneById(id: string, updates: ChannelAggregate): Promise<ChannelAggregate>;
+  updateOneChannelByUserId(
+    userId: string,
+    updatedChannel: ChannelAggregate,
+  ): Promise<ChannelAggregate>;
 
-  updateOne(filter: DatabaseFilter<Channel>, updates: ChannelAggregate): Promise<ChannelAggregate>;
+  deleteOneChannelById(channelId: string): Promise<boolean>;
 
-  updateMany(filter: DatabaseFilter<Channel>, updates: ChannelAggregate): Promise<number>;
-
-  deleteOneById(id: string): Promise<boolean>;
-
-  deleteOne(filter: DatabaseFilter<Channel>): Promise<boolean>;
-
-  deleteMany(filter: DatabaseFilter<Channel>): Promise<number>;
+  deleteOneChannelByUserId(userId: string): Promise<boolean>;
 }
 
-export const CHANNEL_COMMAND_REPOSITORY = Symbol('CHANNEL_COMMAND_REPOSITORY');
+export const CHANNEL_REPOSITORY = Symbol('CHANNEL_REPOSITORY');

@@ -3,17 +3,14 @@ import { Inject } from '@nestjs/common';
 
 import { ChannelUpdateByIdResponse } from '@app/contracts/channel';
 
-import {
-  CHANNEL_COMMAND_REPOSITORY,
-  ChannelCommandRepositoryPort,
-} from '@channel/application/ports';
+import { CHANNEL_REPOSITORY, ChannelCommandRepositoryPort } from '@channel/application/ports';
 
 import { UpdateChannelCommand } from './update-channel.command';
 
 @CommandHandler(UpdateChannelCommand)
 export class UpdateChannelCommandHandler implements ICommandHandler<UpdateChannelCommand> {
   constructor(
-    @Inject(CHANNEL_COMMAND_REPOSITORY)
+    @Inject(CHANNEL_REPOSITORY)
     private readonly channelCommandRepository: ChannelCommandRepositoryPort,
     private readonly eventPublisher: EventPublisher,
   ) {}
@@ -22,7 +19,7 @@ export class UpdateChannelCommandHandler implements ICommandHandler<UpdateChanne
     channelUpdateByIdDto,
   }: UpdateChannelCommand): Promise<ChannelUpdateByIdResponse> {
     const { id, channelBio, channelCoverImage } = channelUpdateByIdDto;
-    const foundChannelAggregate = await this.channelCommandRepository.findOneById(id);
+    const foundChannelAggregate = await this.channelCommandRepository.findOneChannelById(id);
 
     if (!foundChannelAggregate) {
       throw new Error();
@@ -30,9 +27,9 @@ export class UpdateChannelCommandHandler implements ICommandHandler<UpdateChanne
 
     const channelAggregate = this.eventPublisher.mergeObjectContext(foundChannelAggregate);
 
-    channelAggregate.updateChannelDetails(channelBio, channelCoverImage);
+    channelAggregate.updateChannelDetails({ bio: channelBio, coverImage: channelCoverImage });
 
-    await this.channelCommandRepository.updateOneById(id, channelAggregate);
+    await this.channelCommandRepository.updateOneChannelByUserId(id, channelAggregate);
 
     channelAggregate.commit();
 

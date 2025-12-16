@@ -17,15 +17,6 @@ message ChannelCreateDto {
 message ChannelActivateMonitizationDto {
   string id = 1;
 }
-
-message ChannelFindByIdDto {
-  string id = 1;
-}
-
-message ChannelFindByUserIdDto {
-  string userId = 1;
-}
-
 message ChannelUpdateByIdDto {
   string id = 1;
   optional string channelBio = 2;
@@ -52,19 +43,6 @@ message ChannelMonitizationActivatedResponse {
   bool isMonitized = 2;
 }
 
-message ChannelPayload {
-  string id = 1;
-  string userId = 2;
-  optional string bio = 3;
-  optional bool isChannelMonitized = 4;
-  optional bool isChannelVerified = 5;
-  optional string channelCoverImage = 6;
-}
-
-message ChannelFoundResponse {
-  optional ChannelPayload channel = 1;
-}
-
 message ChannelUpdateByIdResponse {
   string response = 1;
 }
@@ -77,8 +55,6 @@ service ChannelService {
   rpc getPresignedUrlForFileUpload(GetPresignedUrlDto) returns (GetPreSignedUrlResponse) {}
   rpc createChannel(ChannelCreateDto) returns (ChannelCreatedResponse) {}
   rpc activateMonitization(ChannelActivateMonitizationDto) returns (ChannelMonitizationActivatedResponse) {}
-  rpc findChannelById(ChannelFindByIdDto) returns (ChannelFoundResponse) {}
-  rpc findChannelByUserId(ChannelFindByUserIdDto) returns (ChannelFoundResponse) {}
   rpc channelUpdateById(ChannelUpdateByIdDto) returns (ChannelUpdateByIdResponse) {}
   rpc channelVerify(ChannelVerifyByIdDto) returns (ChannelVerifyByIdResponse) {}
 }

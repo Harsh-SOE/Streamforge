@@ -8,9 +8,11 @@ import {
   ChannelUpdatedEvent,
 } from '@channel/application/events';
 
+import { ChannelAggregateCreateOptions, ChannelUpdateOptions } from './options';
+
 @Injectable()
 export class ChannelAggregate extends AggregateRoot {
-  public constructor(private channelEntity: ChannelEntity) {
+  private constructor(private readonly channelEntity: ChannelEntity) {
     super();
   }
 
@@ -23,30 +25,32 @@ export class ChannelAggregate extends AggregateRoot {
   }
 
   public static create(
-    id: string,
-    userId: string,
-    bio?: string,
-    coverImage?: string,
-    isChannelVerified?: boolean,
-    isChannelMonitized?: boolean,
+    channelAggregateCreateOptions: ChannelAggregateCreateOptions,
   ): ChannelAggregate {
-    const channelEntity = ChannelEntity.create(
+    const { id, userId, bio, coverImage, isChannelMonitized, isChannelVerified } =
+      channelAggregateCreateOptions;
+
+    const channelEntity = ChannelEntity.create({
       id,
       userId,
       bio,
       coverImage,
       isChannelVerified,
       isChannelMonitized,
-    );
+    });
     const channelAggregate = new ChannelAggregate(channelEntity);
 
     channelAggregate.apply(new ChannelCreatedEvent(channelAggregate));
     return channelAggregate;
   }
 
-  public updateChannelDetails(bio?: string, coverImage?: string) {
-    this.channelEntity.updateChannelBio(bio);
-    this.channelEntity.updateChannelCoverImage(coverImage);
+  public updateChannelDetails(data: ChannelUpdateOptions) {
+    const { bio, coverImage } = data;
+    const channelEntity = this.getChannelEntity();
+
+    channelEntity.updateChannelBio(bio);
+    channelEntity.updateChannelCoverImage(coverImage);
+
     this.apply(new ChannelUpdatedEvent(this));
   }
 
@@ -55,11 +59,13 @@ export class ChannelAggregate extends AggregateRoot {
   }
 
   public updateChannelMonitizedStatus(newStatus: boolean) {
+    const channelEntity = this.getChannelEntity();
+
     if (newStatus) {
-      this.channelEntity.monitizeChannel();
+      channelEntity.monitizeChannel();
       return;
     }
-    this.channelEntity.demonitizeChannel();
+    channelEntity.demonitizeChannel();
     this.apply(new ChannelMonitizedEvent(this));
   }
 }
