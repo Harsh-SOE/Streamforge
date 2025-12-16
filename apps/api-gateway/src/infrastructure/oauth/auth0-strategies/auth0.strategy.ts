@@ -1,12 +1,12 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { ExtraVerificationParams, Profile, Strategy } from 'passport-auth0';
+import { ExtraVerificationParams, Strategy } from 'passport-auth0';
 
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
 
 import { AppConfigService } from '@gateway/infrastructure/config';
 
-import { GATEWAY_AUTH0_GAURD_STRATEGY, UserProfile } from '../types';
+import { Auth0Profile, GATEWAY_AUTH0_GAURD_STRATEGY, UserProfile } from '../types';
 
 @Injectable()
 export class GatewayAuth0Strategy extends PassportStrategy(Strategy, GATEWAY_AUTH0_GAURD_STRATEGY) {
@@ -27,9 +27,9 @@ export class GatewayAuth0Strategy extends PassportStrategy(Strategy, GATEWAY_AUT
     accessToken: string,
     refreshToken: string,
     extraParams: ExtraVerificationParams,
-    profile: Profile,
+    profile: Auth0Profile,
   ): UserProfile {
-    const { id, provider, name, emails, displayName, photos } = profile;
+    const { id, provider, name, emails, displayName, picture: avatar } = profile;
 
     // email
     const validEmails = emails
@@ -52,13 +52,6 @@ export class GatewayAuth0Strategy extends PassportStrategy(Strategy, GATEWAY_AUT
       throw new UnauthorizedException(`Auth0 Error: No Name was provided`);
     }
 
-    // avatar
-    const validAvatars = photos
-      ? photos
-          .filter((photo) => photo && photo.value.trim().length > 0)
-          .map((photo) => photo.value.trim())
-      : [];
-    const avatar = validAvatars.length > 0 ? validAvatars[0] : '';
     if (!avatar) {
       throw new UnauthorizedException(`Auth0 Error: No Avatar was provided`);
     }

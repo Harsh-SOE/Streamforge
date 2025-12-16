@@ -8,22 +8,10 @@ import { UserAuthPayload } from '@app/contracts/auth';
 import { CHANNEL_SERVICE_NAME, ChannelServiceClient } from '@app/contracts/channel';
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
 
+import { ClientTransportVideoVisibilityEnumMapper } from './mappers/video-visibility-status';
+import { ClientTransportVideoPublishEnumMapper } from './mappers/video-publish-status';
+import { CreateVideoRequestDto, PreSignedUrlRequestDto, UpdateVideoRequestDto } from './request';
 import {
-  ClientTransportVideoVisibilityEnumMapper,
-  TransportClientVideoVisibilityEnumMapper,
-} from './mappers/video-visibility-status';
-import {
-  ClientTransportVideoPublishEnumMapper,
-  TransportClientVideoPublishEnumMapper,
-} from './mappers/video-publish-status';
-import {
-  CreateVideoRequestDto,
-  ListVideosQueryDto,
-  PreSignedUrlRequestDto,
-  UpdateVideoRequestDto,
-} from './request';
-import {
-  FoundVideoRequestResponse,
   PreSignedUrlRequestResponse,
   PublishedVideoRequestResponse,
   UpdatedVideoRequestResponse,
@@ -99,26 +87,6 @@ export class VideoService implements OnModuleInit {
     return await firstValueFrom(response$);
   }
 
-  async findOneVideo(id: string): Promise<FoundVideoRequestResponse> {
-    const response$ = this.videoService.findOne({ id });
-    const response = await firstValueFrom(response$);
-    const videoPublishStatusResponse =
-      TransportClientVideoPublishEnumMapper[response.videoTransportPublishStatus];
-    const videoVisibilityStatusResponse =
-      TransportClientVideoVisibilityEnumMapper[response.videoTransportVisibilityStatus];
-
-    return {
-      id: response.id,
-      title: response.title,
-      thumbnail: response.videoThumbnailIdentifier,
-      categories: response.categories,
-      videoFileIdentifier: response.videoFileIdentifier,
-      videoPublishStatus: videoPublishStatusResponse,
-      videoVisibilityStatus: videoVisibilityStatusResponse,
-      description: response.description,
-    };
-  }
-
   async updateOneVideo(
     updateVideoDto: UpdateVideoRequestDto,
     videoId: string,
@@ -129,14 +97,5 @@ export class VideoService implements OnModuleInit {
       ...updateVideoDto,
     });
     return await firstValueFrom(response$);
-  }
-
-  findVideos(listVideosQueryDto: ListVideosQueryDto) {
-    return this.videoService.findVideos({
-      limit: listVideosQueryDto.limit,
-      skip: listVideosQueryDto.cursor,
-      channelId: listVideosQueryDto.channelId,
-      categories: listVideosQueryDto.categories || [],
-    });
   }
 }

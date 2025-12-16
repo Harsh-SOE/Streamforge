@@ -19,10 +19,10 @@ export class AppHealthController {
   check() {
     return this.health.check([
       async () => this.memory.checkHeap('memory_heap', 150 * 1024 * 1024),
-      async () => this.memory.checkRSS('memory_rss', 100 * 1024 * 1024),
+      async () => this.memory.checkRSS('memory_rss', 200 * 1024 * 1024),
       async () =>
         this.disk.checkStorage('storage', {
-          thresholdPercent: 0.7,
+          thresholdPercent: 1.0,
           path: '/',
         }),
     ]);

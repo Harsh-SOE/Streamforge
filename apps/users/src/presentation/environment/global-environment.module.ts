@@ -14,17 +14,17 @@ import {
   USERS_STORAGE_PORT,
 } from '@users/application/ports';
 import { MeasureModule } from '@users/infrastructure/measure';
-import { UserKafkaClient } from '@users/infrastructure/message-broker/client';
 import { AppConfigModule, AppConfigService } from '@users/infrastructure/config';
 import { UserAggregatePersistanceACL } from '@users/infrastructure/anti-corruption/aggregate-persistance-acl';
 import { UserRepositoryAdapter } from '@users/infrastructure/repository/adapters';
-import { UserPrismaClient } from '@users/infrastructure/repository/client';
 import { KafkaMessageBrokerAdapter } from '@users/infrastructure/message-broker/adapters';
 import { RedisCacheAdapter } from '@users/infrastructure/cache/adapters';
 import { WinstonLoggerAdapter } from '@users/infrastructure/logger';
 import { AwsS3StorageAdapter } from '@users/infrastructure/storage/adapters';
 import { UserCommandHandlers } from '@users/application/use-cases/commands';
 import { UserEventHandlers } from '@users/application/events';
+import { UserPrismaClient } from '@users/infrastructure/clients/prisma';
+import { UserKafkaClient } from '@users/infrastructure/clients/message-bus';
 
 @Global()
 @Module({
