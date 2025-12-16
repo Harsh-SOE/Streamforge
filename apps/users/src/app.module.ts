@@ -3,10 +3,10 @@ import { Module } from '@nestjs/common';
 import { MeasureModule } from '@users/infrastructure/measure';
 import { AppConfigModule } from '@users/infrastructure/config';
 
-import { AppHealthModule } from './infrastructure/health';
 import { GrpcModule } from './presentation/grpc';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
-  imports: [GrpcModule, MeasureModule, AppConfigModule, AppHealthModule],
+  imports: [GrpcModule, MeasureModule, AppConfigModule, ScheduleModule.forRoot()],
 })
 export class AppModule {}

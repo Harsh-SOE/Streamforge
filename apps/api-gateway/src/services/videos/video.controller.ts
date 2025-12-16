@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Body,
   Controller,
@@ -8,6 +9,7 @@ import {
   Query,
   UseGuards,
   Version,
+  NotImplementedException,
 } from '@nestjs/common';
 import { InjectMetric } from '@willsoto/nestjs-prometheus';
 import { Counter } from 'prom-client';
@@ -63,10 +65,8 @@ export class VideoController {
 
   @Get(VIDEO_API_ENDPOINT.FIND_A_VIDEO)
   @Version(VIDEO_API_VERSION.VERSION_1)
-  async findOneVideo(@Param('videoid') id: string): Promise<FoundVideoRequestResponse> {
-    this.counter.inc();
-    console.log(id);
-    return this.videoService.findOneVideo(id);
+  findOneVideo(@Param('videoid') id: string): Promise<FoundVideoRequestResponse> {
+    throw new NotImplementedException(`Implement 'findOneVideo' method first`);
   }
 
   @Post(VIDEO_API_ENDPOINT.PUBLISH_VIDEO)
@@ -91,7 +91,6 @@ export class VideoController {
 
   @Get()
   findVideos(@Query() listVideosQueryDto: ListVideosQueryDto) {
-    this.counter.inc();
-    return this.videoService.findVideos(listVideosQueryDto);
+    throw new NotImplementedException(`Implement 'findVideos' method first`);
   }
 }

@@ -3,9 +3,9 @@ import { Test } from '@nestjs/testing';
 import { LOGGER_PORT } from '@app/ports/logger';
 import { PrismaDatabaseHandler } from '@app/handlers/database-handler';
 
+import { UserPrismaClient } from '@users/infrastructure/clients/prisma';
 import { UserRepositoryAdapter } from '@users/infrastructure/repository/adapters';
 import { UserAggregatePersistanceACL } from '@users/infrastructure/anti-corruption/aggregate-persistance-acl';
-import { UserPrismaClient } from '@users/infrastructure/repository/client';
 
 import { PrismaClientMock, DatabaseHandlerMock } from '@test/users/mocks/infrastructure/repository';
 import { UserACLMock } from '@test/users/mocks/infrastructure/acl';

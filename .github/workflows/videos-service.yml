@@ -1,4 +1,4 @@
-name: User Service CI/CD
+name: Videos Service CI/CD
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
     paths:
       - "apps/videos/**"
       - "libs/**"
-      - ".github/workflows/user-service.yml"
+      - ".github/workflows/videos-service.yml"
       - "package.json"
       - "yarn.lock"
       - "jest.config.json"
@@ -19,7 +19,7 @@ on:
     paths:
       - "apps/videos/**"
       - "libs/**"
-      - ".github/workflows/user-service.yml"
+      - ".github/workflows/videos-service.yml"
       - "package.json"
       - "yarn.lock"
       - "jest.config.json"
@@ -31,7 +31,7 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
-    name: Lint all the changes made in the libraries and user service
+    name: Lint all the changes made in the libraries and videos service
 
     steps:
       - name: Checkout Code
@@ -46,7 +46,7 @@ jobs:
       - name: Install Dependencies (Root)
         run: yarn install --frozen-lockfile
 
-      - name: Generate Prisma Client (User Service)
+      - name: Generate Prisma Client (Videos Service)
         run: npx prisma generate --schema=apps/videos/prisma/schema.prisma
 
       - name: Run linter (Libraries)
@@ -73,13 +73,13 @@ jobs:
       - name: Install Dependencies (Root)
         run: yarn install --frozen-lockfile
 
-      - name: Generate Prisma Client (User Service)
+      - name: Generate Prisma Client (Videos Service)
         run: npx prisma generate --schema=apps/videos/prisma/schema.prisma
 
-      - name: Run Unit Tests (User Service)
+      - name: Run Unit Tests (Videos Service)
         run: npx jest apps/videos/test/unit
 
-      - name: Run Integration Tests (User Service)
+      - name: Run Integration Tests (Videos Service)
         run: npx jest apps/videos/test/integration
 
   build-and-push:
@@ -108,5 +108,5 @@ jobs:
           file: ./apps/videos/Dockerfile
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/user-service:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/user-service:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/videos-service:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/videos-service:${{ github.sha }}

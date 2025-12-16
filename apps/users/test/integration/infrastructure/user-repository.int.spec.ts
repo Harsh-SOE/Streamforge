@@ -3,27 +3,24 @@ import { v4 as uuidv4 } from 'uuid';
 import { execSync } from 'child_process';
 import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 
-import { UserRepositoryAdapter } from '@users/infrastructure/repository/adapters';
-import { PrismaDatabaseHandler } from '@app/handlers/database-handler';
 import { LOGGER_PORT } from '@app/ports/logger';
+import { PrismaDatabaseHandler } from '@app/handlers/database-handler';
+import { UserRepositoryAdapter } from '@users/infrastructure/repository/adapters';
 
-import { UserAggregatePersistanceACL } from '@users/infrastructure/anti-corruption/aggregate-persistance-acl';
 import { UserAggregate } from '@users/domain/aggregates';
-import { UserPrismaClient } from '@users/infrastructure/repository/client';
-
-import { PrismaClient } from '@persistance/users';
+import { UserPrismaClient } from '@users/infrastructure/clients/prisma';
+import { UserAggregatePersistanceACL } from '@users/infrastructure/anti-corruption/aggregate-persistance-acl';
 
 describe('UserRepositoryAdapter (Integration)', () => {
   let container: StartedPostgreSqlContainer;
   let adapter: UserRepositoryAdapter;
-  let prismaClient: PrismaClient;
 
   jest.setTimeout(60000);
 
   beforeAll(async () => {
     container = await new PostgreSqlContainer('postgres:latest').start();
     const databaseUrl = container.getConnectionUri();
-
+    process.env.DATABASE_URL = databaseUrl;
     console.log(`Connecting to ${databaseUrl}...`);
 
     execSync(`npx prisma migrate deploy --schema apps/users/prisma/schema.prisma`, {
@@ -35,34 +32,21 @@ describe('UserRepositoryAdapter (Integration)', () => {
 
     console.log(`Migrations applied successfully`);
 
-    prismaClient = new PrismaClient({
-      datasources: {
-        db: { url: databaseUrl },
-      },
-    });
-    await prismaClient.$connect();
-
     console.log(`Test database started successfully`);
   });
 
   afterAll(async () => {
-    await prismaClient.$disconnect();
     await container.stop();
     console.log(`Test database shutdown successfully`);
   });
 
   beforeEach(async () => {
-    await prismaClient.$executeRawUnsafe(`TRUNCATE TABLE "User" CASCADE;`);
-
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UserRepositoryAdapter,
         UserAggregatePersistanceACL,
         PrismaDatabaseHandler,
-        {
-          provide: UserPrismaClient,
-          useValue: prismaClient,
-        },
+        UserPrismaClient,
         {
           provide: LOGGER_PORT,
           useValue: {
@@ -74,6 +58,11 @@ describe('UserRepositoryAdapter (Integration)', () => {
         },
       ],
     }).compile();
+
+    await module.init();
+
+    const userPrismaClient = module.get<UserPrismaClient>(UserPrismaClient);
+    await userPrismaClient.prismaClient.$executeRawUnsafe(`TRUNCATE TABLE "User" CASCADE;`);
 
     adapter = module.get<UserRepositoryAdapter>(UserRepositoryAdapter);
   });
