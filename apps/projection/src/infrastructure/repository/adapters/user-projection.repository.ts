@@ -5,16 +5,16 @@ import { InjectModel } from '@nestjs/mongoose';
 import { UserProfileCreatedEventDto } from '@app/contracts/users';
 
 import { UserProjectionRepositoryPort } from '@projection/application/ports';
-import { UserCardACL } from '@projection/infrastructure/anti-corruption';
+import { UserProjectionACL } from '@projection/infrastructure/anti-corruption';
 
-import { ProjectedUserQueryModel } from '../models';
+import { UserProjectionModel } from '../models';
 
 @Injectable()
-export class UserCardRepository implements UserProjectionRepositoryPort {
+export class UserProjectionRepository implements UserProjectionRepositoryPort {
   constructor(
-    @InjectModel(ProjectedUserQueryModel.name)
-    private readonly projectedVideoCard: Model<ProjectedUserQueryModel>,
-    private readonly userCardACL: UserCardACL,
+    @InjectModel(UserProjectionModel.name)
+    private readonly projectedVideoCard: Model<UserProjectionModel>,
+    private readonly userCardACL: UserProjectionACL,
   ) {}
 
   public async saveUser(data: UserProfileCreatedEventDto): Promise<boolean> {

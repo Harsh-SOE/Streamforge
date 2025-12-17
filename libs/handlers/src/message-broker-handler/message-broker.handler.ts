@@ -88,6 +88,7 @@ export class KafkaMessageBrokerHandler implements OnModuleInit {
   ) {
     const { logErrors, host, port, suppressErrors, fallbackValue, topic, message } = options;
     try {
+      console.log(`Operation policy`, this.operationPolicy);
       return await this.operationPolicy.execute(() => kafkaOperation());
     } catch (error) {
       if (suppressErrors && fallbackValue) {

@@ -4,18 +4,18 @@ import { InjectModel } from '@nestjs/mongoose';
 
 import { UserProfileCreatedEventDto, UserProfileUpdatedEventDto } from '@app/contracts/users';
 
-import { ProjectedUserQueryModel } from '@projection/infrastructure/repository/models';
+import { UserProjectionModel } from '@projection/infrastructure/repository/models';
 
 @Injectable()
-export class UserCardACL {
+export class UserProjectionACL {
   public constructor(
-    @InjectModel(ProjectedUserQueryModel.name)
-    private readonly userCard: Model<ProjectedUserQueryModel>,
+    @InjectModel(UserProjectionModel.name)
+    private readonly userCard: Model<UserProjectionModel>,
   ) {}
 
   public userProfileCreatedEventToPersistance(
     event: UserProfileCreatedEventDto,
-  ): ProjectedUserQueryModel {
+  ): UserProjectionModel {
     const userCard = {
       userId: event.id,
       userAuthId: event.userAuthId,
@@ -32,7 +32,7 @@ export class UserCardACL {
 
   public userProfileUpdatedEventToPersistance(
     event: UserProfileUpdatedEventDto,
-  ): ProjectedUserQueryModel {
+  ): UserProjectionModel {
     const userCard = {
       userId: event.id,
       avatar: event.avatar,

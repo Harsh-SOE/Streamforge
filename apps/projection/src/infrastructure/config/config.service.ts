@@ -22,6 +22,14 @@ export class AppConfigService {
     return this.configService.getOrThrow<string>('DATABASE_URL');
   }
 
+  get CACHE_HOST() {
+    return this.configService.getOrThrow<string>('CACHE_HOST');
+  }
+
+  get CACHE_PORT() {
+    return this.configService.getOrThrow<number>('CACHE_PORT');
+  }
+
   get PROJECTION_CLIENT_ID() {
     return this.configService.getOrThrow<string>('PROJECTION_CLIENT_ID');
   }

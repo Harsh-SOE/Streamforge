@@ -6,11 +6,11 @@ import { UserProfileCreatedEventDto } from '@app/contracts/users';
 import { ChannelCreatedEventDto } from '@app/contracts/channel';
 import { CHANNEL_EVENTS, USERS_EVENTS, VIDEO_EVENTS } from '@app/clients';
 
-import { KafkaService } from './kafka.service';
+import { MessagesService } from './messages.service';
 
 @Controller('projection')
-export class KafkaController {
-  public constructor(private readonly kafkaService: KafkaService) {}
+export class MessagesController {
+  public constructor(private readonly kafkaService: MessagesService) {}
 
   @EventPattern(VIDEO_EVENTS.VIDEO_PUBLISHED_EVENT)
   public onVideoUploadedProjectionEvent(@Payload() message: VideoUploadedEventDto) {

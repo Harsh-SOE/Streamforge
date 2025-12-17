@@ -13,7 +13,7 @@ import {
 } from '@projection/application/events';
 
 @Injectable()
-export class KafkaService {
+export class MessagesService {
   constructor(
     private readonly eventBus: EventBus,
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,

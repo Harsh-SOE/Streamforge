@@ -1,3 +1,3 @@
-export * from './video-card/video-card.acl';
-export * from './user-card/user-card.acl';
-export * from './channel-card/channel-card.acl';
+export * from './video-projection/video-projection.acl';
+export * from './user-projection/user-projection.acl';
+export * from './channel-projection/channel-projection.acl';
