@@ -5,16 +5,16 @@ import { InjectModel } from '@nestjs/mongoose';
 import { ChannelCreatedEventDto } from '@app/contracts/channel';
 
 import { ChannelProjectionRepositoryPort } from '@projection/application/ports';
-import { ChannelCardACL } from '@projection/infrastructure/anti-corruption';
+import { ChannelProjectionACL } from '@projection/infrastructure/anti-corruption';
 
-import { ProjectedChannelModel } from '../models';
+import { ChannelProjectionModel } from '../models';
 
 @Injectable()
-export class ChannelCardRepository implements ChannelProjectionRepositoryPort {
+export class ChannelProjectionRepository implements ChannelProjectionRepositoryPort {
   constructor(
-    @InjectModel(ProjectedChannelModel.name)
-    private readonly projectedVideoCard: Model<ProjectedChannelModel>,
-    private readonly channelCardACL: ChannelCardACL,
+    @InjectModel(ChannelProjectionModel.name)
+    private readonly projectedVideoCard: Model<ChannelProjectionModel>,
+    private readonly channelCardACL: ChannelProjectionACL,
   ) {}
 
   public async saveChannel(data: ChannelCreatedEventDto): Promise<boolean> {

@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
 @Schema({ timestamps: true })
-export class ProjectedCommentsForVideoModel extends Document {
+export class CommentProjectionModel extends Document {
   @Prop({ type: String, index: true, unique: true })
   commentId: string;
 
@@ -22,6 +22,4 @@ export class ProjectedCommentsForVideoModel extends Document {
   content: string;
 }
 
-export const ProjectedCommentsForVideoSchema = SchemaFactory.createForClass(
-  ProjectedCommentsForVideoModel,
-);
+export const CommentProjectionSchema = SchemaFactory.createForClass(CommentProjectionModel);

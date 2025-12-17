@@ -25,6 +25,8 @@ import { AppConfigService } from './config.service';
         BUFFER_KAFKA_CONSUMER_ID: joi.string().required(),
         BUFFER_FLUSH_MAX_WAIT_TIME_MS: joi.number().required(),
         GRAFANA_LOKI_URL: joi.string().required(),
+        CACHE_HOST: joi.string().required(),
+        CACHE_PORT: joi.number().required(),
       }),
     }),
   ],

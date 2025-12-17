@@ -5,16 +5,16 @@ import { InjectModel } from '@nestjs/mongoose';
 import { VideoUploadedEventDto } from '@app/contracts/videos';
 
 import { VideoProjectionRepositoryPort } from '@projection/application/ports';
-import { VideoCardACL } from '@projection/infrastructure/anti-corruption';
+import { VideoProjectionACL } from '@projection/infrastructure/anti-corruption';
 
-import { ProjectedVideoCardModel } from '../models';
+import { VideoProjectionModel } from '../models';
 
 @Injectable()
-export class VideoCardRepository implements VideoProjectionRepositoryPort {
+export class VideoProjectionRepository implements VideoProjectionRepositoryPort {
   constructor(
-    @InjectModel(ProjectedVideoCardModel.name)
-    private readonly projectedVideoCard: Model<ProjectedVideoCardModel>,
-    private readonly videoCardACL: VideoCardACL,
+    @InjectModel(VideoProjectionModel.name)
+    private readonly projectedVideoCard: Model<VideoProjectionModel>,
+    private readonly videoCardACL: VideoProjectionACL,
   ) {}
 
   public async saveVideo(data: VideoUploadedEventDto): Promise<boolean> {
