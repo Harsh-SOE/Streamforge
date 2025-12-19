@@ -8,7 +8,7 @@ import { PrismaDatabaseHandler } from '@app/handlers/database-handler';
 import { UserRepositoryAdapter } from '@users/infrastructure/repository/adapters';
 
 import { UserAggregate } from '@users/domain/aggregates';
-import { PrismaDBClient } from '@app/clients/prisma';
+import { PRISMA_CLIENT, PRISMA_CLIENT_NAME, PrismaDBClient } from '@app/clients/prisma';
 import { UserAggregatePersistanceACL } from '@users/infrastructure/anti-corruption/aggregate-persistance-acl';
 
 import { PrismaClient as UserPrismaClient } from '@persistance/users';
@@ -49,6 +49,14 @@ describe('UserRepositoryAdapter (Integration)', () => {
         UserAggregatePersistanceACL,
         PrismaDatabaseHandler,
         PrismaDBClient,
+        {
+          provide: PRISMA_CLIENT,
+          useValue: UserPrismaClient,
+        },
+        {
+          provide: PRISMA_CLIENT_NAME,
+          useValue: 'users',
+        },
         {
           provide: LOGGER_PORT,
           useValue: {
