@@ -89,7 +89,7 @@ export class PrismaDatabaseHandler {
   }
 
   async execute<TResult, TFallback = never>(
-    databaseOperation: () => Promise<TResult>,
+    databaseOperation: () => Promise<TResult> | TResult,
     options: DatabaseFilterOptions<TFallback>,
   ): Promise<TResult | NonNullable<TFallback>> {
     const {
@@ -104,6 +104,7 @@ export class PrismaDatabaseHandler {
     try {
       return await this.operationPolicy.execute(async () => await databaseOperation());
     } catch (error) {
+      console.error(error);
       this.logger.error(`error`, error as Error);
       if (suppressErrors && fallbackValue) {
         return fallbackValue;

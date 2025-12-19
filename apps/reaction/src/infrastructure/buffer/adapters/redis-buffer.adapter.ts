@@ -1,6 +1,5 @@
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import Redis from 'ioredis';
 
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
 
@@ -11,62 +10,24 @@ import {
 } from '@reaction/application/ports';
 import { ReactionAggregate } from '@reaction/domain/aggregates';
 import { AppConfigService } from '@reaction/infrastructure/config';
-import { GrpcDomainReactionStatusEnumMapper } from '@reaction/infrastructure/anti-corruption';
+import { TransportDomainReactionStatusEnumMapper } from '@reaction/infrastructure/anti-corruption';
 
 import { ReactionMessage, StreamData } from '../types';
+import { RedisClient } from '@app/clients/redis';
 
 @Injectable()
-export class RedisStreamBufferAdapter implements OnModuleInit, ReactionBufferPort {
-  private redisClient: Redis;
-
+export class RedisStreamBufferAdapter implements ReactionBufferPort {
   public constructor(
     private readonly configService: AppConfigService,
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
     @Inject(REACTION_DATABASE_PORT)
     private readonly reactionRepo: ReactionRepositoryPort,
-  ) {
-    this.redisClient = new Redis({
-      host: configService.CACHE_HOST,
-      port: configService.CACHE_PORT,
-    });
-
-    this.redisClient.on('connecting', () => {
-      this.logger.info(`⏳ Redis connecting...`);
-    });
-
-    this.redisClient.on('connect', () => {
-      this.logger.info('✅ Redis connected');
-    });
-
-    this.redisClient.on('error', (error) => {
-      this.logger.info('❌ Error occured while connecting to redis', error);
-    });
-  }
-
-  public async onModuleInit() {
-    try {
-      await this.redisClient.xgroup(
-        'CREATE',
-        this.configService.BUFFER_KEY,
-        this.configService.BUFFER_GROUPNAME,
-        '0',
-        'MKSTREAM',
-      );
-    } catch (error) {
-      const err = error as Error;
-      if (err.message.includes('BUSYGROUP')) {
-        console.warn(
-          `Stream with key: ${this.configService.BUFFER_KEY} already exists, skipping creation`,
-        );
-      } else {
-        throw err;
-      }
-    }
-  }
+    private readonly redis: RedisClient,
+  ) {}
 
   public async bufferReaction(reaction: ReactionAggregate): Promise<void> {
-    await this.redisClient.xadd(
-      this.configService.BUFFER_KEY,
+    await this.redis.client.xadd(
+      this.configService.REDIS_STREAM_KEY,
       '*',
       'reaction-message',
       JSON.stringify(reaction.getEntity().getSnapshot()),
@@ -75,16 +36,16 @@ export class RedisStreamBufferAdapter implements OnModuleInit, ReactionBufferPor
 
   @Cron(CronExpression.EVERY_10_SECONDS)
   public async processReactionsBatch() {
-    const streamData = (await this.redisClient.xreadgroup(
+    const streamData = (await this.redis.client.xreadgroup(
       'GROUP',
-      this.configService.BUFFER_GROUPNAME,
-      this.configService.BUFFER_REDIS_CONSUMER_ID,
+      this.configService.REDIS_STREAM_GROUPNAME,
+      this.configService.REDIS_STREAM_CONSUMER_ID,
       'COUNT',
       10,
       'BLOCK',
       5000,
       'STREAMS',
-      this.configService.BUFFER_KEY,
+      this.configService.REDIS_STREAM_KEY,
       '>',
     )) as StreamData[];
 
@@ -113,16 +74,19 @@ export class RedisStreamBufferAdapter implements OnModuleInit, ReactionBufferPor
 
   public async processMessages(ids: string[], messages: ReactionMessage[]) {
     const models = messages.map((message) => {
-      const reactionStatus = GrpcDomainReactionStatusEnumMapper.get(message.reactionStatus);
-      if (!reactionStatus) throw new Error();
-      return ReactionAggregate.create(message.userId, message.videoId, reactionStatus);
+      const reactionStatus = TransportDomainReactionStatusEnumMapper[message.reactionStatus];
+      return ReactionAggregate.create({
+        userId: message.userId,
+        videoId: message.videoId,
+        reactionStatus,
+      });
     });
 
-    const processedMessagesNumber = await this.reactionRepo.saveMany(models);
+    const processedMessagesNumber = await this.reactionRepo.saveManyReaction(models);
 
-    await this.redisClient.xack(
-      this.configService.BUFFER_KEY,
-      this.configService.BUFFER_GROUPNAME,
+    await this.redis.client.xack(
+      this.configService.REDIS_STREAM_KEY,
+      this.configService.REDIS_STREAM_GROUPNAME,
       ...ids,
     );
 

@@ -1,11 +1,11 @@
-import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import Redis from 'ioredis';
 import * as fs from 'fs';
 import { join } from 'path';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 
 import { getShardFor } from '@app/counters';
-import { RedisCacheHandler } from '@app/handlers/cache-handler';
+import { RedisClient } from '@app/clients/redis';
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
+import { RedisCacheHandler } from '@app/handlers/cache-handler';
 
 import { ReactionCachePort } from '@reaction/application/ports';
 import { AppConfigService } from '@reaction/infrastructure/config';
@@ -13,30 +13,16 @@ import { AppConfigService } from '@reaction/infrastructure/config';
 import { RedisWithCommands } from '../types';
 
 @Injectable()
-export class RedisCacheAdapter implements OnModuleInit, OnModuleDestroy, ReactionCachePort {
+export class RedisCacheAdapter implements OnModuleInit, ReactionCachePort {
   private readonly SHARDS: number = 64;
-  private redisClient: RedisWithCommands;
+  private client: RedisWithCommands;
 
   public constructor(
     private readonly configService: AppConfigService,
     private readonly redisCacheHandler: RedisCacheHandler,
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
-  ) {
-    this.redisClient = new Redis({
-      host: configService.CACHE_HOST,
-      port: configService.CACHE_PORT,
-    }) as RedisWithCommands;
-
-    this.redisClient.on('connecting', () => {
-      this.logger.info('⏳ Redis connecting...');
-    });
-    this.redisClient.on('connect', () => {
-      this.logger.info('✅ Redis connected');
-    });
-    this.redisClient.on('error', (error) => {
-      this.logger.error('❌ An Error occured in redis cache', error);
-    });
-  }
+    private readonly redis: RedisClient,
+  ) {}
 
   public onModuleInit() {
     const likeScript = fs.readFileSync(join(__dirname, 'scripts/like.lua'), 'utf8');
@@ -47,31 +33,29 @@ export class RedisCacheAdapter implements OnModuleInit, OnModuleDestroy, Reactio
 
     const undislikeScript = fs.readFileSync(join(__dirname, 'scripts/undislike.lua'), 'utf8');
 
-    this.redisClient.defineCommand('videoLikesCountIncr', {
+    this.redis.client.defineCommand('videoLikesCountIncr', {
       numberOfKeys: 4,
       lua: likeScript,
     });
 
-    this.redisClient.defineCommand('videoLikesCountDecr', {
+    this.redis.client.defineCommand('videoLikesCountDecr', {
       numberOfKeys: 2,
       lua: unlikeScript,
     });
 
-    this.redisClient.defineCommand('videoDislikesCountIncr', {
+    this.redis.client.defineCommand('videoDislikesCountIncr', {
       numberOfKeys: 4,
       lua: dislikeScript,
     });
 
-    this.redisClient.defineCommand('videoDislikesCountDecr', {
+    this.redis.client.defineCommand('videoDislikesCountDecr', {
       numberOfKeys: 2,
       lua: undislikeScript,
     });
 
-    this.logger.info('✅ Scripts intialized');
-  }
+    this.client = this.redis.client as RedisWithCommands;
 
-  public onModuleDestroy() {
-    this.redisClient.disconnect();
+    this.logger.info('✅ Scripts intialized');
   }
 
   getShardKey(videoId: string, userId: string, shard: number = 64) {
@@ -99,7 +83,7 @@ export class RedisCacheAdapter implements OnModuleInit, OnModuleDestroy, Reactio
       this.getVideoLikesCounterKey(videoId, i),
     );
 
-    const getValuesOperations = async () => await this.redisClient.mget(...allShardedKeys);
+    const getValuesOperations = async () => await this.client.mget(...allShardedKeys);
 
     const values = await this.redisCacheHandler.execute(getValuesOperations, {
       operationType: 'READ_MANY',
@@ -121,7 +105,7 @@ export class RedisCacheAdapter implements OnModuleInit, OnModuleDestroy, Reactio
       this.getVideoDislikeCounterKey(videoId, i),
     );
 
-    const getValuesOperations = async () => await this.redisClient.mget(...allShardedKeys);
+    const getValuesOperations = async () => await this.client.mget(...allShardedKeys);
 
     const values = await this.redisCacheHandler.execute(getValuesOperations, {
       operationType: 'READ_MANY',
@@ -145,7 +129,7 @@ export class RedisCacheAdapter implements OnModuleInit, OnModuleDestroy, Reactio
     const videoDislikeCounterKey = this.getVideoDislikeCounterKey(videoId, shardNum);
     const videoLikeCounterKey = this.getVideoLikesCounterKey(videoId, shardNum);
 
-    return await this.redisClient.videoLikesCountIncrScriptFunction(
+    return await this.client.videoLikesCountIncrScriptFunction(
       usersLikedSetKey,
       usersDislikedSetKey,
       videoLikeCounterKey,
@@ -159,7 +143,7 @@ export class RedisCacheAdapter implements OnModuleInit, OnModuleDestroy, Reactio
     const usersLikedSetKey = this.getUserLikesSetKey(videoId);
     const videoLikeCounterKey = this.getVideoLikesCounterKey(videoId, shardNum);
 
-    return await this.redisClient.videoLikesCountDecrScriptFunction(
+    return await this.client.videoLikesCountDecrScriptFunction(
       usersLikedSetKey,
       videoLikeCounterKey,
       userId,
@@ -173,7 +157,7 @@ export class RedisCacheAdapter implements OnModuleInit, OnModuleDestroy, Reactio
     const videoDislikeCounterKey = this.getVideoDislikeCounterKey(videoId, shardNum);
     const videoLikeCounterKey = this.getVideoLikesCounterKey(videoId, shardNum);
 
-    return await this.redisClient.videoDislikesCountIncrScriptFunction(
+    return await this.client.videoDislikesCountIncrScriptFunction(
       usersDislikedSetKey,
       usersLikedSetKey,
       videoDislikeCounterKey,
@@ -187,7 +171,7 @@ export class RedisCacheAdapter implements OnModuleInit, OnModuleDestroy, Reactio
     const usersDislikedSetKey = this.getUserDislikesSetKey(videoId);
     const videoDislikeCounterKey = this.getVideoDislikeCounterKey(videoId, shardNum);
 
-    return await this.redisClient.videoDislikesCountDecrScriptFunction(
+    return await this.client.videoDislikesCountDecrScriptFunction(
       usersDislikedSetKey,
       videoDislikeCounterKey,
       userId,

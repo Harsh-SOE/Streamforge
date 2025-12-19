@@ -1,16 +1,21 @@
 import { AggregateRoot } from '@nestjs/cqrs';
-import { v4 as uuidv4 } from 'uuid';
 
 import { ViewEntity } from '@views/domain/entities';
-import { UserId, VideoId } from '@views/domain/value-objects';
+
+import { ViewAggregateCreateOptions } from '../options';
 
 export class ViewAggregate extends AggregateRoot {
-  public constructor(private viewEntity: ViewEntity) {
+  private constructor(private viewEntity: ViewEntity) {
     super();
   }
 
-  public static create(userId: string, videoId: string) {
-    const view = new ViewEntity(uuidv4(), UserId.create(userId), VideoId.create(videoId));
+  public static create(data: ViewAggregateCreateOptions) {
+    const { id, userId, videoId } = data;
+    const view = ViewEntity.create({
+      id,
+      userId,
+      videoId,
+    });
     const viewAggregate = new ViewAggregate(view);
     return viewAggregate;
   }

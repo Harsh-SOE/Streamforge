@@ -1,18 +1,20 @@
 import { AggregateRoot } from '@nestjs/cqrs';
 
 import { CommentEntity } from '../../entities';
+import { CommentsAggregateOptions } from './options';
 
 export class CommentAggregate extends AggregateRoot {
-  public constructor(private comment: CommentEntity) {
+  private constructor(private comment: CommentEntity) {
     super();
   }
 
-  public static create(userId: string, videoId: string, commentText: string): CommentAggregate {
-    const commentEntity = CommentEntity.create(userId, videoId, commentText);
+  public static create(data: CommentsAggregateOptions): CommentAggregate {
+    const { id, userId, videoId, commentText } = data;
+    const commentEntity = CommentEntity.create({ id, userId, videoId, commentText });
     return new CommentAggregate(commentEntity);
   }
 
-  public getComment() {
+  public getEntity() {
     return this.comment;
   }
 

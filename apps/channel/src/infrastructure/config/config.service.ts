@@ -24,36 +24,44 @@ export class AppConfigService {
     return this.configService.getOrThrow<string>('DATABASE_URL');
   }
 
-  get BUFFER_CLIENT_ID() {
-    return this.configService.getOrThrow<string>('BUFFER_CLIENT_ID');
+  get KAFKA_HOST() {
+    return this.configService.getOrThrow<string>('KAFKA_HOST');
   }
 
-  get BUFFER_KAFKA_CONSUMER_ID() {
-    return this.configService.getOrThrow<string>('BUFFER_KAFKA_CONSUMER_ID');
+  get KAFKA_PORT() {
+    return this.configService.getOrThrow<number>('KAFKA_PORT');
   }
 
-  get BUFFER_FLUSH_MAX_WAIT_TIME_MS() {
-    return this.configService.getOrThrow<number>('BUFFER_FLUSH_MAX_WAIT_TIME_MS');
+  get KAFKA_CLIENT_ID() {
+    return this.configService.getOrThrow<string>('KAFKA_CLIENT_ID');
   }
 
-  get BUFFER_KEY() {
-    return this.configService.getOrThrow<string>('BUFFER_KEY');
+  get KAFKA_CONSUMER_ID() {
+    return this.configService.getOrThrow<string>('KAFKA_CONSUMER_ID');
   }
 
-  get BUFFER_GROUPNAME() {
-    return this.configService.getOrThrow<string>('BUFFER_GROUPNAME');
+  get KAFKA_FLUSH_MAX_WAIT_TIME_MS() {
+    return this.configService.getOrThrow<number>('KAFKA_FLUSH_MAX_WAIT_TIME_MS');
   }
 
-  get BUFFER_REDIS_CONSUMER_ID() {
-    return this.configService.getOrThrow<string>('BUFFER_REDIS_CONSUMER_ID');
+  get REDIS_HOST() {
+    return this.configService.getOrThrow<string>('REDIS_HOST');
   }
 
-  get CACHE_HOST() {
-    return this.configService.getOrThrow<string>('CACHE_HOST');
+  get REDIS_PORT() {
+    return this.configService.getOrThrow<number>('REDIS_PORT');
   }
 
-  get CACHE_PORT() {
-    return this.configService.getOrThrow<number>('CACHE_PORT');
+  get REDIS_STREAM_KEY() {
+    return this.configService.getOrThrow<string>('REDIS_STREAM_KEY');
+  }
+
+  get REDIS_STREAM_GROUPNAME() {
+    return this.configService.getOrThrow<string>('REDIS_STREAM_GROUPNAME');
+  }
+
+  get REDIS_STREAM_CONSUMER_ID() {
+    return this.configService.getOrThrow<string>('REDIS_STREAM_CONSUMER_ID');
   }
 
   get SERVICE_OPTIONS(): GrpcOptions {
@@ -76,30 +84,6 @@ export class AppConfigService {
         },
       },
     };
-  }
-
-  get MESSAGE_BROKER_HOST() {
-    return this.configService.getOrThrow<string>('MESSAGE_BROKER_HOST');
-  }
-
-  get MESSAGE_BROKER_PORT() {
-    return this.configService.getOrThrow<number>('MESSAGE_BROKER_PORT');
-  }
-
-  get EMAIL_CLIENT_ID() {
-    return this.configService.getOrThrow<string>('EMAIL_CLIENT_ID');
-  }
-
-  get EMAIL_CONSUMER_GROUP_ID() {
-    return this.configService.getOrThrow<string>('EMAIL_CONSUMER_GROUP_ID');
-  }
-
-  get CHANNEL_CLIENT_ID() {
-    return this.configService.getOrThrow<string>('CHANNEL_CLIENT_ID');
-  }
-
-  get CHANNEL_CONSUMER_ID() {
-    return this.configService.getOrThrow<string>('CHANNEL_CONSUMER_ID');
   }
 
   get AWS_REGION() {
@@ -127,11 +111,11 @@ export class AppConfigService {
       transport: Transport.KAFKA,
       options: {
         client: {
-          clientId: this.EMAIL_CLIENT_ID,
-          brokers: [`${this.MESSAGE_BROKER_HOST}:${this.MESSAGE_BROKER_PORT}`],
+          clientId: this.KAFKA_CLIENT_ID,
+          brokers: [`${this.KAFKA_HOST}:${this.KAFKA_PORT}`],
         },
         consumer: {
-          groupId: this.EMAIL_CONSUMER_GROUP_ID,
+          groupId: this.KAFKA_CONSUMER_ID,
         },
       },
     };

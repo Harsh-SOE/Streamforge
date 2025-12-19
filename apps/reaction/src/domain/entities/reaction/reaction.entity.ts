@@ -1,36 +1,42 @@
-import { ReactionStatus, UserId, VideoId } from '../../value-objects';
 import { ReactionDomainStatus } from '../../enums';
+import { ReactionId, ReactionStatus, UserId, VideoId } from '../../value-objects';
+import { ReactionCreateOption, ReactionEntityOption, ReactionSnapshot } from './options';
 
 export class ReactionEntity {
-  public constructor(
-    private readonly id: string,
-    private readonly userId: UserId,
-    private readonly videoId: VideoId,
-    private readonly reactionStatus: ReactionStatus,
-  ) {}
+  private constructor(private readonly valueObjects: ReactionEntityOption) {}
+
+  public static create(data: ReactionCreateOption) {
+    const { id, userId, videoId, reactionStatus } = data;
+    return new ReactionEntity({
+      id: ReactionId.create(id),
+      reactionStatus: ReactionStatus.create(reactionStatus),
+      userId: UserId.create(userId),
+      videoId: VideoId.create(videoId),
+    });
+  }
 
   public getId(): string {
-    return this.id;
+    return this.valueObjects.id.getValue();
   }
 
   public getUserId(): string {
-    return this.userId.getValue();
+    return this.valueObjects.userId.getValue();
   }
 
   public getVideoId(): string {
-    return this.videoId.getValue();
+    return this.valueObjects.videoId.getValue();
   }
 
   public getReactionStatus(): ReactionDomainStatus {
-    return this.reactionStatus.getValue();
+    return this.valueObjects.reactionStatus.getValue();
   }
 
-  public getSnapshot() {
+  public getSnapshot(): ReactionSnapshot {
     return {
-      id: this.id,
-      userId: this.userId,
-      videoId: this.videoId,
-      reactionStatus: this.reactionStatus,
+      id: this.valueObjects.id.getValue(),
+      userId: this.valueObjects.userId.getValue(),
+      videoId: this.valueObjects.videoId.getValue(),
+      reactionStatus: this.valueObjects.reactionStatus.getValue(),
     };
   }
 

@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
 
-import { AppConfigModule } from './infrastructure/config';
-import { GrpcModule } from './presentation/gprc/gprc.module';
-import { AppHealthModule } from './infrastructure/health';
 import { MeasureModule } from './infrastructure/measure';
+import { AppConfigModule } from './infrastructure/config';
+import { RpcModule } from './presentation/rpc/rpc.module';
 
 @Module({
-  imports: [AppConfigModule, GrpcModule, AppHealthModule, MeasureModule],
+  imports: [AppConfigModule, RpcModule, MeasureModule],
   controllers: [],
   providers: [],
 })

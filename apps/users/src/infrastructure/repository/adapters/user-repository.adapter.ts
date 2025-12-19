@@ -1,26 +1,30 @@
 import { Inject, Injectable } from '@nestjs/common';
 
+import { PrismaDBClient } from '@app/clients/prisma';
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
 import { PrismaDatabaseHandler } from '@app/handlers/database-handler';
 
 import { UserAggregate } from '@users/domain/aggregates';
 import { UserRepositoryPort } from '@users/application/ports';
-import { UserPrismaClient } from '@users/infrastructure/clients/prisma';
 import { UserAggregatePersistanceACL } from '@users/infrastructure/anti-corruption/aggregate-persistance-acl';
+
+import { PrismaClient } from '@persistance/users';
 
 @Injectable()
 export class UserRepositoryAdapter implements UserRepositoryPort {
   public constructor(
     private userPersistanceACL: UserAggregatePersistanceACL,
     private readonly prismaDatabaseHandler: PrismaDatabaseHandler,
-    private readonly userPrismaClient: UserPrismaClient,
+    private readonly prisma: PrismaDBClient<PrismaClient>,
     @Inject(LOGGER_PORT) private logger: LoggerPort,
-  ) {}
+  ) {
+    this.logger.alert(`Using prisma for database connection for users service`);
+  }
 
   public async saveOneUser(userAggregate: UserAggregate): Promise<UserAggregate> {
     const data = this.userPersistanceACL.toPersistance(userAggregate);
     const saveUserOperation = async () =>
-      await this.userPrismaClient.user.create({
+      await this.prisma.client.user.create({
         data,
       });
     const createdUser = await this.prismaDatabaseHandler.execute(saveUserOperation, {
@@ -40,7 +44,7 @@ export class UserRepositoryAdapter implements UserRepositoryPort {
     );
 
     const saveManyUsersOperations = async () =>
-      await this.userPrismaClient.user.createMany({
+      await this.prisma.client.user.createMany({
         data: userAggregates.map((model) => this.userPersistanceACL.toPersistance(model)),
       });
 
@@ -53,7 +57,7 @@ export class UserRepositoryAdapter implements UserRepositoryPort {
 
   async updateOneUserById(id: string, updatedUserModel: UserAggregate): Promise<UserAggregate> {
     const updateUserByIdOperation = async () =>
-      await this.userPrismaClient.user.update({
+      await this.prisma.client.user.update({
         where: { id },
         data: this.userPersistanceACL.toPersistance(updatedUserModel),
       });
@@ -72,7 +76,7 @@ export class UserRepositoryAdapter implements UserRepositoryPort {
     updatedUserAggregate: UserAggregate,
   ): Promise<UserAggregate> {
     const updateUserOperation = async () =>
-      await this.userPrismaClient.user.update({
+      await this.prisma.client.user.update({
         where: { authUserId: userAuthId },
         data: this.userPersistanceACL.toPersistance(updatedUserAggregate),
       });
@@ -91,7 +95,7 @@ export class UserRepositoryAdapter implements UserRepositoryPort {
     updatedUserAggregate: UserAggregate,
   ): Promise<UserAggregate> {
     const updateUserOperation = async () =>
-      await this.userPrismaClient.user.update({
+      await this.prisma.client.user.update({
         where: { handle },
         data: this.userPersistanceACL.toPersistance(updatedUserAggregate),
       });
@@ -107,7 +111,7 @@ export class UserRepositoryAdapter implements UserRepositoryPort {
 
   async deleteOneUserById(id: string): Promise<boolean> {
     const deleteUserByIdOperation = async () => {
-      return await this.userPrismaClient.user.delete({
+      return await this.prisma.client.user.delete({
         where: { id },
       });
     };
@@ -122,7 +126,7 @@ export class UserRepositoryAdapter implements UserRepositoryPort {
 
   public async deleteOneUserByAuthId(userAuthId: string): Promise<boolean> {
     const deleteUserByIdOperation = async () => {
-      return await this.userPrismaClient.user.delete({
+      return await this.prisma.client.user.delete({
         where: { authUserId: userAuthId },
       });
     };
@@ -137,7 +141,7 @@ export class UserRepositoryAdapter implements UserRepositoryPort {
 
   public async deleteOneUserByHandle(userHandle: string): Promise<boolean> {
     const deleteUserByIdOperation = async () => {
-      return await this.userPrismaClient.user.delete({
+      return await this.prisma.client.user.delete({
         where: { handle: userHandle },
       });
     };
@@ -152,7 +156,7 @@ export class UserRepositoryAdapter implements UserRepositoryPort {
 
   async findOneUserById(id: string): Promise<UserAggregate | null> {
     const findUserByIdOperation = async () => {
-      return await this.userPrismaClient.user.findUnique({
+      return await this.prisma.client.user.findUnique({
         where: { id },
       });
     };

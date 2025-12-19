@@ -1,9 +1,10 @@
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { EachBatchPayload } from 'kafkajs';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
+import { VideoUploadedEventDto } from '@app/contracts/videos';
 import { UserProfileCreatedEventDto } from '@app/contracts/users';
-import { KafkaMessageBrokerHandler } from '@app/handlers/message-broker-handler';
+import { KafkaMessageBusHandler } from '@app/handlers/message-bus-handler';
 
 import {
   USER_PROJECTION_REPOSITORY_PORT,
@@ -13,11 +14,10 @@ import {
   VideoProjectionRepositoryPort,
 } from '@projection/application/ports';
 import { AppConfigService } from '@projection/infrastructure/config';
-import { ProjectionKafkaClient } from '@projection/infrastructure/clients/kafka';
-import { VideoUploadedEventDto } from '@app/contracts/videos';
+import { KafkaClient } from '@app/clients/kafka';
 
-export const USER_PROFILE_PROJECTION_BUFFER_TOPIC = 'user_profile_created_projection_topic';
-export const VIDEO_PROJECTION_BUFFER_TOPIC = 'video_projection_event';
+export const USER_PROFILE_PROJECTION_BUFFER_TOPIC = 'user.profile-created-projection-topic';
+export const VIDEO_PROJECTION_BUFFER_TOPIC = 'video.projection-event';
 
 @Injectable()
 export class KafkaBufferAdapter implements OnModuleInit, ProjectionBufferPort {
@@ -28,8 +28,8 @@ export class KafkaBufferAdapter implements OnModuleInit, ProjectionBufferPort {
     @Inject(VIDEO_PROJECTION_REPOSITORY_PORT)
     private readonly videoProjectionRepo: VideoProjectionRepositoryPort,
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
-    private readonly kafkaClient: ProjectionKafkaClient,
-    private readonly kafkaHandler: KafkaMessageBrokerHandler,
+    private readonly kafkaClient: KafkaClient,
+    private readonly kafkaHandler: KafkaMessageBusHandler,
   ) {}
 
   public async onModuleInit() {
@@ -50,11 +50,11 @@ export class KafkaBufferAdapter implements OnModuleInit, ProjectionBufferPort {
         fromBeginning: false,
       });
 
-    await this.kafkaHandler.execute(userSubscribeOperation, {
+    await this.kafkaHandler.handle(userSubscribeOperation, {
       operationType: 'CONNECT_OR_DISCONNECT',
     });
 
-    await this.kafkaHandler.execute(videosubscribeOperation, {
+    await this.kafkaHandler.handle(videosubscribeOperation, {
       operationType: 'CONNECT_OR_DISCONNECT',
     });
   }

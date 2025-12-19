@@ -1,4 +1,4 @@
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ReplyError } from 'ioredis';
 import {
   retry,
@@ -27,12 +27,16 @@ import {
 import { RedisOptions } from './types';
 
 @Injectable()
-export class RedisCacheHandler implements OnModuleInit {
+export class RedisCacheHandler {
   private retryPolicy: RetryPolicy;
   private circuitBreakerPolicy: CircuitBreakerPolicy;
   private operationPolicy: IPolicy;
 
-  constructor(@Inject(LOGGER_PORT) private readonly logger: LoggerPort) {}
+  constructor(@Inject(LOGGER_PORT) private readonly logger: LoggerPort) {
+    this.enableRetries(3);
+    this.enableCircuitBreaker(10, 15);
+    this.operationPolicy = wrap(this.retryPolicy, this.circuitBreakerPolicy);
+  }
 
   public enableRetries(maxRetryAttempts: number) {
     this.retryPolicy = retry(handleAll, {
@@ -77,12 +81,6 @@ export class RedisCacheHandler implements OnModuleInit {
         component: Components.CACHE,
       }),
     );
-  }
-
-  onModuleInit() {
-    this.enableRetries(3);
-    this.enableCircuitBreaker(10, 15);
-    this.operationPolicy = wrap(this.retryPolicy, this.circuitBreakerPolicy);
   }
 
   async execute<TResult, TFallback = never>(

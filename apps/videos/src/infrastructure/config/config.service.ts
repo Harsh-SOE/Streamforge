@@ -20,56 +20,8 @@ export class AppConfigService {
     return this.configService.getOrThrow<number>('GRPC_PORT');
   }
 
-  get CACHE_HOST() {
-    return this.configService.getOrThrow<string>('CACHE_HOST');
-  }
-
-  get CACHE_PORT() {
-    return this.configService.getOrThrow<number>('CACHE_PORT');
-  }
-
   get DATABASE_URL() {
     return this.configService.getOrThrow<string>('DATABASE_URL');
-  }
-
-  get VIDEO_CLIENT_ID() {
-    return this.configService.getOrThrow<string>('VIDEO_CLIENT_ID');
-  }
-
-  get VIDEO_CONSUMER_ID() {
-    return this.configService.getOrThrow<string>('VIDEO_CONSUMER_ID');
-  }
-
-  get MESSAGE_BROKER_HOST() {
-    return this.configService.getOrThrow<string>('MESSAGE_BROKER_HOST');
-  }
-
-  get MESSAGE_BROKER_PORT() {
-    return this.configService.getOrThrow<number>('MESSAGE_BROKER_PORT');
-  }
-
-  get BUFFER_CLIENT_ID() {
-    return this.configService.getOrThrow<string>('BUFFER_CLIENT_ID');
-  }
-
-  get BUFFER_KAFKA_CONSUMER_ID() {
-    return this.configService.getOrThrow<string>('BUFFER_KAFKA_CONSUMER_ID');
-  }
-
-  get BUFFER_FLUSH_MAX_WAIT_TIME_MS() {
-    return this.configService.getOrThrow<number>('BUFFER_FLUSH_MAX_WAIT_TIME_MS');
-  }
-
-  get BUFFER_KEY() {
-    return this.configService.getOrThrow<string>('BUFFER_KEY');
-  }
-
-  get BUFFER_GROUPNAME() {
-    return this.configService.getOrThrow<string>('BUFFER_GROUPNAME');
-  }
-
-  get BUFFER_REDIS_CONSUMER_ID() {
-    return this.configService.getOrThrow<string>('BUFFER_REDIS_CONSUMER_ID');
   }
 
   get AWS_REGION() {
@@ -92,16 +44,56 @@ export class AppConfigService {
     return this.configService.getOrThrow<string>('GRAFANA_LOKI_URL');
   }
 
+  get KAFKA_HOST() {
+    return this.configService.getOrThrow<string>('KAFKA_HOST');
+  }
+
+  get KAFKA_PORT() {
+    return this.configService.getOrThrow<number>('KAFKA_PORT');
+  }
+
+  get KAFKA_CLIENT_ID() {
+    return this.configService.getOrThrow<string>('KAFKA_CLIENT_ID');
+  }
+
+  get KAFKA_CONSUMER_ID() {
+    return this.configService.getOrThrow<string>('KAFKA_CONSUMER_ID');
+  }
+
+  get KAFKA_FLUSH_MAX_WAIT_TIME_MS() {
+    return this.configService.getOrThrow<number>('KAFKA_FLUSH_MAX_WAIT_TIME_MS');
+  }
+
+  get REDIS_HOST() {
+    return this.configService.getOrThrow<string>('REDIS_HOST');
+  }
+
+  get REDIS_PORT() {
+    return this.configService.getOrThrow<number>('REDIS_PORT');
+  }
+
+  get REDIS_STREAM_KEY() {
+    return this.configService.getOrThrow<string>('REDIS_STREAM_KEY');
+  }
+
+  get REDIS_STREAM_GROUPNAME() {
+    return this.configService.getOrThrow<string>('REDIS_STREAM_GROUPNAME');
+  }
+
+  get REDIS_STREAM_CONSUMER_ID() {
+    return this.configService.getOrThrow<string>('REDIS_STREAM_CONSUMER_ID');
+  }
+
   get VIDEO_TRANSCODER_SERVICE_OPTIONS() {
     const options: KafkaOptions = {
       transport: Transport.KAFKA,
       options: {
         client: {
-          clientId: this.VIDEO_CLIENT_ID,
-          brokers: [`${this.MESSAGE_BROKER_HOST}:${this.MESSAGE_BROKER_PORT}`],
+          clientId: this.KAFKA_CLIENT_ID,
+          brokers: [`${this.KAFKA_HOST}:${this.KAFKA_PORT}`],
         },
         consumer: {
-          groupId: this.VIDEO_CONSUMER_ID,
+          groupId: this.KAFKA_CONSUMER_ID,
         },
       },
     };

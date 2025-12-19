@@ -1,7 +1,7 @@
-import { ConfigModule } from '@nestjs/config';
-import { Module } from '@nestjs/common';
 import path from 'path';
 import * as joi from 'joi';
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 
 import { AppConfigService } from './config.service';
 
@@ -12,21 +12,19 @@ import { AppConfigService } from './config.service';
       envFilePath: path.join(__dirname, '../../.env'),
       validationSchema: joi.object({
         HTTP_PORT: joi.number().required(),
+
         KAFKA_HOST: joi.string().required(),
         KAFKA_PORT: joi.number().required(),
-        PROJECTION_CLIENT_ID: joi.string().required(),
-        PROJECTION_CONSUMER_ID: joi.string().required(),
-        MESSAGE_BROKER_HOST: joi.string().required(),
-        MESSAGE_BROKER_PORT: joi.number().required(),
-        BUFFER_KEY: joi.string().required(),
-        BUFFER_GROUPNAME: joi.string().required(),
-        BUFFER_REDIS_CONSUMER_ID: joi.string().required(),
-        BUFFER_CLIENT_ID: joi.string().required(),
-        BUFFER_KAFKA_CONSUMER_ID: joi.string().required(),
-        BUFFER_FLUSH_MAX_WAIT_TIME_MS: joi.number().required(),
+        KAFKA_CLIENT_ID: joi.string().required(),
+        KAFKA_CONSUMER_ID: joi.string().required(),
+        KAFKA_FLUSH_MAX_WAIT_TIME_MS: joi.number().required(),
+
+        REDIS_HOST: joi.string().required(),
+        REDIS_PORT: joi.number().required(),
+        REDIS_STREAM_KEY: joi.string().required(),
+        REDIS_STREAM_GROUPNAME: joi.string().required(),
+
         GRAFANA_LOKI_URL: joi.string().required(),
-        CACHE_HOST: joi.string().required(),
-        CACHE_PORT: joi.number().required(),
       }),
     }),
   ],

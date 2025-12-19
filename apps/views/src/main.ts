@@ -13,8 +13,8 @@ async function bootstrap() {
   await app.listen(configService.HTTP_PORT, '0.0.0.0');
 }
 bootstrap()
-  .then(() => console.log(`Watch service started successfully`))
+  .then(() => console.log(`Views service started successfully`))
   .catch((error) => {
-    console.log(`An error occured while starting watch service`);
+    console.log(`An error occured while starting views service`);
     console.error(error);
   });

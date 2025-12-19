@@ -1,4 +1,4 @@
-name: Query Service CI/CD
+name: Query CI/CD
 
 on:
   push:
@@ -31,7 +31,7 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
-    name: Lint all the changes made in the libraries and Query service
+    name: Lint all the changes made in the libraries and query
 
     steps:
       - name: Checkout Code
@@ -46,10 +46,10 @@ jobs:
       - name: Install Dependencies (Root)
         run: yarn install --frozen-lockfile
 
-      - name: Run linter (Libraries)
+      - name: Run linter (libraries)
         run: yarn lint:libs
 
-      - name: Run linter (Query Service)
+      - name: Run linter (query)
         run: yarn lint:query
 
   test-and-validate:
@@ -70,10 +70,10 @@ jobs:
       - name: Install Dependencies (Root)
         run: yarn install --frozen-lockfile
 
-      - name: Run Unit Tests (Query Service)
+      - name: Run Unit Tests (query)
         run: npx jest apps/query/test/unit
 
-      - name: Run Integration Tests (Query Service)
+      - name: Run Integration Tests (query)
         run: npx jest apps/query/test/integration
 
   build-and-push:
@@ -102,5 +102,5 @@ jobs:
           file: ./apps/query/Dockerfile
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/query-service:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/query-service:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/streamforge-query:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/streamforge-query:${{ github.sha }}

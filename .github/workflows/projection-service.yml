@@ -1,4 +1,4 @@
-name: Projection Service CI/CD
+name: Projection CI/CD
 
 on:
   push:
@@ -31,7 +31,7 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
-    name: Lint all the changes made in the libraries and projection service
+    name: Lint all the changes made in the libraries and projection
 
     steps:
       - name: Checkout Code
@@ -46,10 +46,10 @@ jobs:
       - name: Install Dependencies (Root)
         run: yarn install --frozen-lockfile
 
-      - name: Run linter (Libraries)
+      - name: Run linter (libraries)
         run: yarn lint:libs
 
-      - name: Run linter (projection Service)
+      - name: Run linter (projection)
         run: yarn lint:projection
 
   test-and-validate:
@@ -70,10 +70,10 @@ jobs:
       - name: Install Dependencies (Root)
         run: yarn install --frozen-lockfile
 
-      - name: Run Unit Tests (projection Service)
+      - name: Run Unit Tests (projection)
         run: npx jest apps/projection/test/unit
 
-      - name: Run Integration Tests (projection Service)
+      - name: Run Integration Tests (projection)
         run: npx jest apps/projection/test/integration
 
   build-and-push:
@@ -102,5 +102,5 @@ jobs:
           file: ./apps/projection/Dockerfile
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/projection-service:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/projection-service:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/streamforge-projection:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/streamforge-projection:${{ github.sha }}

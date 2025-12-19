@@ -1,3 +1,4 @@
+import { InvalidUserIdException } from '@views/domain/exceptions';
 import { uuid } from 'zod';
 
 export class UserId {
@@ -9,7 +10,9 @@ export class UserId {
     const parsedUserId = UserId.UserIdValidationSchema.safeParse(value);
     if (!parsedUserId.success) {
       const errorMessage = parsedUserId.error.message;
-      throw new Error(`An error occured while validating the userId. Reason: ${errorMessage}`);
+      throw new InvalidUserIdException({
+        message: `UserId validation has failed: ${errorMessage}`,
+      });
     }
     return new UserId(parsedUserId.data);
   }

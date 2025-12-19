@@ -29,4 +29,6 @@ model VideoReactions {
   reactionStatus ReactionPersistanceStatus
   createdAt      DateTime                  @default(now())
   updatedAt      DateTime                  @updatedAt()
+
+  @@unique([userId, videoId])
 }

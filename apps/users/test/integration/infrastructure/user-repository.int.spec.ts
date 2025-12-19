@@ -8,8 +8,10 @@ import { PrismaDatabaseHandler } from '@app/handlers/database-handler';
 import { UserRepositoryAdapter } from '@users/infrastructure/repository/adapters';
 
 import { UserAggregate } from '@users/domain/aggregates';
-import { UserPrismaClient } from '@users/infrastructure/clients/prisma';
+import { PrismaDBClient } from '@app/clients/prisma';
 import { UserAggregatePersistanceACL } from '@users/infrastructure/anti-corruption/aggregate-persistance-acl';
+
+import { PrismaClient as UserPrismaClient } from '@persistance/users';
 
 describe('UserRepositoryAdapter (Integration)', () => {
   let container: StartedPostgreSqlContainer;
@@ -46,7 +48,7 @@ describe('UserRepositoryAdapter (Integration)', () => {
         UserRepositoryAdapter,
         UserAggregatePersistanceACL,
         PrismaDatabaseHandler,
-        UserPrismaClient,
+        PrismaDBClient,
         {
           provide: LOGGER_PORT,
           useValue: {
@@ -61,8 +63,8 @@ describe('UserRepositoryAdapter (Integration)', () => {
 
     await module.init();
 
-    const userPrismaClient = module.get<UserPrismaClient>(UserPrismaClient);
-    await userPrismaClient.prismaClient.$executeRawUnsafe(`TRUNCATE TABLE "User" CASCADE;`);
+    const userPrismaClient = module.get(PrismaDBClient<UserPrismaClient>);
+    await userPrismaClient.client.$executeRawUnsafe(`TRUNCATE TABLE "User" CASCADE;`);
 
     adapter = module.get<UserRepositoryAdapter>(UserRepositoryAdapter);
   });
