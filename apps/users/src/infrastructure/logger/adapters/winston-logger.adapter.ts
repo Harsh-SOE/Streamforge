@@ -49,15 +49,16 @@ export class WinstonLoggerAdapter implements LoggerPort {
 
   private consoleTransport() {
     const consoleFormatPipeline = format.combine(
-      format.timestamp(),
+      format.timestamp({ format: 'MM/DD/YYYY, h:mm:ss A' }),
       format.errors({ stack: true }),
-      format.colorize(),
+      format.colorize({ all: true }),
       format.printf((info: MyConsoleLogCompleteInfo) => {
         const { level, message, timestamp, stack, ...meta } = info;
-        // TODO Colored output message
-        return `[${timestamp}] [${level}] ${message} ${meta ? JSON.stringify(meta) : ''} ${stack || ''}`;
+        const metaString = Object.keys(meta).length ? JSON.stringify(meta) : '';
+        return `[${timestamp}] [${level}] ${message} ${metaString} ${stack || ''}`;
       }),
     );
+
     return new transports.Console({
       level: 'debug',
       format: consoleFormatPipeline,

@@ -1,25 +1,23 @@
 import { Global, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
+import {
+  KAFKA_CLIENT,
+  KAFKA_CONSUMER,
+  KAFKA_HOST,
+  KAFKA_PORT,
+  KafkaClient,
+} from '@app/clients/kafka';
 import { LOGGER_PORT } from '@app/ports/logger';
-// import { KafkaMessageBrokerHandler } from '@app/handlers/message-broker-handler';
+import { KafkaMessageBusHandler } from '@app/handlers/message-bus-handler';
 
 import {
   CHANNEL_PROJECTION_REPOSITORY_PORT,
   USER_PROJECTION_REPOSITORY_PORT,
-  // PROJECTION_BUFFER_PORT,
+  PROJECTION_BUFFER_PORT,
   VIDEO_PROJECTION_REPOSITORY_PORT,
 } from '@projection/application/ports';
 
-import {
-  ChannelProjectionRepository,
-  UserProjectionRepository,
-  VideoProjectionRepository,
-} from '../repository/adapters';
-import { AppConfigModule, AppConfigService } from '../config';
-import { WinstonLoggerAdapter } from '../logger';
-// import { KafkaBufferAdapter } from '../buffer/adapters';
-import { ChannelProjectionACL, UserProjectionACL, VideoProjectionACL } from '../anti-corruption';
 import {
   ChannelProjectionModel,
   ChannelProjectionSchema,
@@ -28,7 +26,15 @@ import {
   VideoProjectionSchema,
   UserProjectionSchema,
 } from '../repository/models';
-// import { ProjectionKafkaClient } from '../clients/kafka';
+import {
+  ChannelProjectionRepository,
+  UserProjectionRepository,
+  VideoProjectionRepository,
+} from '../repository/adapters';
+import { WinstonLoggerAdapter } from '../logger';
+import { KafkaBufferAdapter } from '../buffer/adapters';
+import { AppConfigModule, AppConfigService } from '../config';
+import { ChannelProjectionACL, UserProjectionACL, VideoProjectionACL } from '../anti-corruption';
 
 @Global()
 @Module({
@@ -61,12 +67,12 @@ import {
     VideoProjectionACL,
     ChannelProjectionACL,
     UserProjectionACL,
-    // ProjectionKafkaClient,
-    // KafkaMessageBrokerHandler,
-    // {
-    //   provide: PROJECTION_BUFFER_PORT,
-    //   useClass: KafkaBufferAdapter,
-    // },
+    KafkaClient,
+    KafkaMessageBusHandler,
+    {
+      provide: PROJECTION_BUFFER_PORT,
+      useClass: KafkaBufferAdapter,
+    },
     {
       provide: LOGGER_PORT,
       useClass: WinstonLoggerAdapter,
@@ -83,18 +89,38 @@ import {
       provide: CHANNEL_PROJECTION_REPOSITORY_PORT,
       useClass: ChannelProjectionRepository,
     },
+    {
+      provide: KAFKA_HOST,
+      inject: [AppConfigService],
+      useFactory: (configService: AppConfigService) => configService.KAFKA_HOST,
+    },
+    {
+      provide: KAFKA_PORT,
+      inject: [AppConfigService],
+      useFactory: (configService: AppConfigService) => configService.KAFKA_PORT,
+    },
+    {
+      provide: KAFKA_CLIENT,
+      inject: [AppConfigService],
+      useFactory: (configService: AppConfigService) => configService.KAFKA_CLIENT_ID,
+    },
+    {
+      provide: KAFKA_CONSUMER,
+      inject: [AppConfigService],
+      useFactory: (configService: AppConfigService) => configService.KAFKA_CONSUMER_ID,
+    },
   ],
   exports: [
     AppConfigService,
     VideoProjectionACL,
     ChannelProjectionACL,
     UserProjectionACL,
-    // ProjectionKafkaClient,
-    // KafkaMessageBrokerHandler,
+    KafkaClient,
+    KafkaMessageBusHandler,
     LOGGER_PORT,
     VIDEO_PROJECTION_REPOSITORY_PORT,
     USER_PROJECTION_REPOSITORY_PORT,
-    // PROJECTION_BUFFER_PORT,
+    PROJECTION_BUFFER_PORT,
     CHANNEL_PROJECTION_REPOSITORY_PORT,
   ],
 })

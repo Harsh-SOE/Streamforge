@@ -2,7 +2,7 @@ import { Consumer, Kafka, Producer } from 'kafkajs';
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 
 import { MessageBrokerPort } from '@app/ports/message-broker';
-import { KafkaMessageBrokerHandler } from '@app/handlers/message-broker-handler';
+import { KafkaMessageBusHandler } from '@app/handlers/message-bus-handler';
 
 import { AppConfigService } from '@transcoder/infrastructure/config';
 
@@ -14,7 +14,7 @@ export class KafkaMessageBrokerAdapter implements MessageBrokerPort, OnModuleIni
 
   public constructor(
     private readonly configService: AppConfigService,
-    private kafkaFilter: KafkaMessageBrokerHandler,
+    private kafkaFilter: KafkaMessageBusHandler,
   ) {
     this.kafka = new Kafka({
       brokers: [
@@ -43,7 +43,7 @@ export class KafkaMessageBrokerAdapter implements MessageBrokerPort, OnModuleIni
     const kafkaPublishMessageOperation = () =>
       this.producer.send({ topic, messages: [{ key: 'xyz', value: payload }] });
 
-    await this.kafkaFilter.execute(kafkaPublishMessageOperation, {
+    await this.kafkaFilter.handle(kafkaPublishMessageOperation, {
       operationType: 'PUBLISH_OR_SEND',
       topic,
       message: String(payload),
@@ -54,7 +54,7 @@ export class KafkaMessageBrokerAdapter implements MessageBrokerPort, OnModuleIni
 
   public async subscribeTo(topic: string): Promise<void> {
     const kafkaSubscribeOperation = () => this.consumer.subscribe({ topic, fromBeginning: true });
-    await this.kafkaFilter.execute(kafkaSubscribeOperation, {
+    await this.kafkaFilter.handle(kafkaSubscribeOperation, {
       operationType: 'SUBSCRIBE',
       topic,
       logErrors: true,

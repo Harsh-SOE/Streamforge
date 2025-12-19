@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
+import { RedisClient } from '@app/clients/redis';
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
 
 import {
@@ -10,7 +11,6 @@ import {
 } from '@videos/application/ports';
 import { VideoAggregate } from '@videos/domain/aggregates';
 import { AppConfigService } from '@videos/infrastructure/config';
-import { VideoRedisClient } from '@videos/infrastructure/clients/redis';
 
 import { VideoMessage, StreamData } from '../types';
 
@@ -21,12 +21,12 @@ export class RedisStreamBufferAdapter implements VideosBufferPort {
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
     @Inject(VIDEOS_RESPOSITORY_PORT)
     private readonly videosRepository: VideoRepositoryPort,
-    private readonly redisBufferClient: VideoRedisClient,
+    private readonly redisBufferClient: RedisClient,
   ) {}
 
   public async bufferVideo(video: VideoAggregate): Promise<void> {
-    await this.redisBufferClient.redisClient.xadd(
-      this.configService.BUFFER_KEY,
+    await this.redisBufferClient.client.xadd(
+      this.configService.REDIS_STREAM_KEY,
       '*',
       'like-message',
       JSON.stringify(video.getSnapshot()),
@@ -37,16 +37,16 @@ export class RedisStreamBufferAdapter implements VideosBufferPort {
   public async processVideosBatch() {
     this.logger.alert(`Processing videos in batches now`);
 
-    const streamData = (await this.redisBufferClient.redisClient.xreadgroup(
+    const streamData = (await this.redisBufferClient.client.xreadgroup(
       'GROUP',
-      this.configService.BUFFER_GROUPNAME,
-      this.configService.BUFFER_REDIS_CONSUMER_ID,
+      this.configService.REDIS_STREAM_GROUPNAME,
+      this.configService.REDIS_STREAM_CONSUMER_ID,
       'COUNT',
       10,
       'BLOCK',
       5000,
       'STREAMS',
-      this.configService.BUFFER_KEY,
+      this.configService.REDIS_STREAM_KEY,
       '>',
     )) as StreamData[];
 
@@ -91,9 +91,9 @@ export class RedisStreamBufferAdapter implements VideosBufferPort {
 
     const processedMessagesNumber = await this.videosRepository.saveManyVideos(models);
 
-    await this.redisBufferClient.redisClient.xack(
-      this.configService.BUFFER_KEY,
-      this.configService.BUFFER_GROUPNAME,
+    await this.redisBufferClient.client.xack(
+      this.configService.REDIS_STREAM_KEY,
+      this.configService.REDIS_STREAM_GROUPNAME,
       ...ids,
     );
 

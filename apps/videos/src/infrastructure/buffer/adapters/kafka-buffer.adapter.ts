@@ -1,6 +1,7 @@
 import { EachBatchPayload } from 'kafkajs';
 import { Inject, Injectable } from '@nestjs/common';
 
+import { KafkaClient } from '@app/clients/kafka';
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
 
 import {
@@ -9,7 +10,6 @@ import {
   VideoRepositoryPort,
 } from '@videos/application/ports';
 import { VideoAggregate } from '@videos/domain/aggregates';
-import { VideosKafkaClient } from '@videos/infrastructure/clients/kafka';
 
 import { VideoMessage } from '../types';
 
@@ -21,7 +21,7 @@ export class KafkaBufferAdapter implements VideosBufferPort {
     @Inject(VIDEOS_RESPOSITORY_PORT)
     private readonly videosRepository: VideoRepositoryPort,
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
-    private readonly videoKafkaClient: VideosKafkaClient,
+    private readonly videoKafkaClient: KafkaClient,
   ) {}
 
   public async onModuleInit() {

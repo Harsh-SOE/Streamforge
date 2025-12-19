@@ -1,49 +1,21 @@
-import { Consumer, Kafka, Producer } from 'kafkajs';
-import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
-import { KafkaMessageBrokerHandler } from '@app/handlers/message-broker-handler';
+import { KafkaClient } from '@app/clients/kafka';
 import { MessageBrokerPort } from '@app/ports/message-broker';
-
-import { AppConfigService } from '@comments/infrastructure/config';
+import { KafkaMessageBusHandler } from '@app/handlers/message-bus-handler';
 
 @Injectable()
-export class KafkaMessageBrokerAdapter implements MessageBrokerPort, OnModuleInit, OnModuleDestroy {
-  private kafka: Kafka;
-  private producer: Producer;
-  private consumer: Consumer;
-
+export class KafkaMessageBrokerAdapter implements MessageBrokerPort {
   public constructor(
-    private readonly configService: AppConfigService,
-    private kafkaFilter: KafkaMessageBrokerHandler,
-  ) {
-    this.kafka = new Kafka({
-      brokers: [
-        `${this.configService.MESSAGE_BROKER_HOST}:${this.configService.MESSAGE_BROKER_PORT}`,
-      ],
-      clientId: this.configService.COMMENTS_CLIENT_ID,
-    });
-
-    this.producer = this.kafka.producer({ allowAutoTopicCreation: true });
-    this.consumer = this.kafka.consumer({
-      groupId: this.configService.COMMENTS_CONSUMER_ID,
-    });
-  }
-
-  public async onModuleInit() {
-    await this.producer.connect();
-    await this.consumer.connect();
-  }
-
-  public async onModuleDestroy() {
-    await this.producer.disconnect();
-    await this.consumer.disconnect();
-  }
+    private kafkaFilter: KafkaMessageBusHandler,
+    private kafka: KafkaClient,
+  ) {}
 
   public async publishMessage(topic: string, payload: string): Promise<void> {
     const kafkaPublishMessageOperation = () =>
-      this.producer.send({ topic, messages: [{ key: 'xyz', value: payload }] });
+      this.kafka.producer.send({ topic, messages: [{ key: 'comment', value: payload }] });
 
-    await this.kafkaFilter.execute(kafkaPublishMessageOperation, {
+    await this.kafkaFilter.handle(kafkaPublishMessageOperation, {
       operationType: 'PUBLISH_OR_SEND',
       topic,
       message: String(payload),
@@ -53,8 +25,9 @@ export class KafkaMessageBrokerAdapter implements MessageBrokerPort, OnModuleIni
   }
 
   public async subscribeTo(topic: string): Promise<void> {
-    const kafkaSubscribeOperation = () => this.consumer.subscribe({ topic, fromBeginning: true });
-    await this.kafkaFilter.execute(kafkaSubscribeOperation, {
+    const kafkaSubscribeOperation = () =>
+      this.kafka.consumer.subscribe({ topic, fromBeginning: true });
+    await this.kafkaFilter.handle(kafkaSubscribeOperation, {
       operationType: 'SUBSCRIBE',
       topic,
       logErrors: true,

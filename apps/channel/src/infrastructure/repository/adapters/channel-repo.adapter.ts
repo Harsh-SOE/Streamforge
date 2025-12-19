@@ -6,21 +6,22 @@ import { PrismaDatabaseHandler } from '@app/handlers/database-handler';
 
 import { ChannelAggregate } from '@channel/domain/aggregates';
 import { ChannelCommandRepositoryPort } from '@channel/application/ports';
-import { ChannelPrismaClient } from '@channel/infrastructure/clients/prisma';
 import { ChannelAggregatePersistanceACL } from '@channel/infrastructure/anti-corruption';
+import { PrismaDBClient } from '@app/clients/prisma';
+import { PrismaClient as ChannelPrismaClient } from '@peristance/channel';
 
 @Injectable()
 export class ChannelRepositoryAdapter implements ChannelCommandRepositoryPort {
   public constructor(
     private readonly channelPersistanceACL: ChannelAggregatePersistanceACL,
     private readonly prismaDatabaseHandler: PrismaDatabaseHandler,
-    private readonly channelPrismaClient: ChannelPrismaClient,
+    private readonly prisma: PrismaDBClient<ChannelPrismaClient>,
     @Inject(LOGGER_PORT) private logger: LoggerPort,
   ) {}
 
   public async saveChannel(model: ChannelAggregate): Promise<ChannelAggregate> {
     const saveChannelOperation = async () =>
-      await this.channelPrismaClient.channel.create({
+      await this.prisma.client.channel.create({
         data: this.channelPersistanceACL.toPersistance(model),
       });
     const createdChannel = await this.prismaDatabaseHandler.execute(saveChannelOperation, {
@@ -41,7 +42,7 @@ export class ChannelRepositoryAdapter implements ChannelCommandRepositoryPort {
       service: 'CHANNELS',
     });
     const saveManyChannelsOperations = async () =>
-      await this.channelPrismaClient.channel.createMany({
+      await this.prisma.client.channel.createMany({
         data: models.map((model) => this.channelPersistanceACL.toPersistance(model)),
       });
 
@@ -57,7 +58,7 @@ export class ChannelRepositoryAdapter implements ChannelCommandRepositoryPort {
     updatedChannelModel: ChannelAggregate,
   ): Promise<ChannelAggregate> {
     const updateChannelByIdOperation = async () =>
-      await this.channelPrismaClient.channel.update({
+      await this.prisma.client.channel.update({
         where: { id: channelId },
         data: this.channelPersistanceACL.toPersistance(updatedChannelModel),
       });
@@ -76,7 +77,7 @@ export class ChannelRepositoryAdapter implements ChannelCommandRepositoryPort {
     updatedChannelModel: ChannelAggregate,
   ): Promise<ChannelAggregate> {
     const updateChannelByIdOperation = async () =>
-      await this.channelPrismaClient.channel.update({
+      await this.prisma.client.channel.update({
         where: { userId },
         data: this.channelPersistanceACL.toPersistance(updatedChannelModel),
       });
@@ -92,7 +93,7 @@ export class ChannelRepositoryAdapter implements ChannelCommandRepositoryPort {
 
   public async findOneChannelById(channelId: string): Promise<ChannelAggregate | null> {
     const findChannelByIdOperation = async () => {
-      return await this.channelPrismaClient.channel.findUnique({
+      return await this.prisma.client.channel.findUnique({
         where: { id: channelId },
       });
     };
@@ -107,7 +108,7 @@ export class ChannelRepositoryAdapter implements ChannelCommandRepositoryPort {
 
   public async findOneChannelByUserId(userId: string): Promise<ChannelAggregate | null> {
     const findChannelByIdOperation = async () => {
-      return await this.channelPrismaClient.channel.findUnique({
+      return await this.prisma.client.channel.findUnique({
         where: { userId },
       });
     };
@@ -122,7 +123,7 @@ export class ChannelRepositoryAdapter implements ChannelCommandRepositoryPort {
 
   public async deleteOneChannelById(channelId: string): Promise<boolean> {
     const deleteChannelByIdOperation = async () => {
-      return await this.channelPrismaClient.channel.delete({
+      return await this.prisma.client.channel.delete({
         where: { id: channelId },
       });
     };
@@ -137,7 +138,7 @@ export class ChannelRepositoryAdapter implements ChannelCommandRepositoryPort {
 
   public async deleteOneChannelByUserId(userId: string): Promise<boolean> {
     const deleteChannelByIdOperation = async () => {
-      return await this.channelPrismaClient.channel.delete({
+      return await this.prisma.client.channel.delete({
         where: { userId },
       });
     };

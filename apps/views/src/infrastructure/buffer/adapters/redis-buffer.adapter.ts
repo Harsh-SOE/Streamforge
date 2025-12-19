@@ -1,7 +1,7 @@
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import Redis from 'ioredis';
 
+import { RedisClient } from '@app/clients/redis';
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
 
 import {
@@ -15,57 +15,18 @@ import { AppConfigService } from '@views/infrastructure/config';
 import { ViewMessage, StreamData } from '../types';
 
 @Injectable()
-export class RedisStreamBufferAdapter implements OnModuleInit, ViewsBufferPort {
-  private redisClient: Redis;
-
+export class RedisStreamBufferAdapter implements ViewsBufferPort {
   public constructor(
     private readonly configService: AppConfigService,
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
     @Inject(VIEWS_REPOSITORY_PORT)
     private readonly viewsRepo: ViewRepositoryPort,
-  ) {
-    this.redisClient = new Redis({
-      host: configService.CACHE_HOST,
-      port: configService.CACHE_PORT,
-    });
-
-    this.redisClient.on('connecting', () => {
-      this.logger.info(`⏳ Redis connecting...`);
-    });
-
-    this.redisClient.on('connect', () => {
-      this.logger.info('✅ Redis connected');
-    });
-
-    this.redisClient.on('error', (error) => {
-      this.logger.info('❌ Error occured while connecting to redis', error);
-    });
-  }
-
-  public async onModuleInit() {
-    try {
-      await this.redisClient.xgroup(
-        'CREATE',
-        this.configService.BUFFER_KEY,
-        this.configService.BUFFER_GROUPNAME,
-        '0',
-        'MKSTREAM',
-      );
-    } catch (error) {
-      const err = error as Error;
-      if (err.message.includes('BUSYGROUP')) {
-        console.warn(
-          `Stream with key: ${this.configService.BUFFER_KEY} already exists, skipping creation`,
-        );
-      } else {
-        throw err;
-      }
-    }
-  }
+    private readonly redis: RedisClient,
+  ) {}
 
   public async bufferView(like: ViewAggregate): Promise<void> {
-    await this.redisClient.xadd(
-      this.configService.BUFFER_KEY,
+    await this.redis.client.xadd(
+      this.configService.REDIS_STREAM_KEY,
       '*',
       'like-message',
       JSON.stringify(like.getEntity().getSnapshot()),
@@ -74,16 +35,16 @@ export class RedisStreamBufferAdapter implements OnModuleInit, ViewsBufferPort {
 
   @Cron(CronExpression.EVERY_10_SECONDS)
   public async processViewsBatch() {
-    const streamData = (await this.redisClient.xreadgroup(
+    const streamData = (await this.redis.client.xreadgroup(
       'GROUP',
-      this.configService.BUFFER_GROUPNAME,
-      this.configService.BUFFER_REDIS_CONSUMER_ID,
+      this.configService.REDIS_STREAM_GROUPNAME,
+      this.configService.REDIS_STREAM_CONSUMER_ID,
       'COUNT',
       10,
       'BLOCK',
       5000,
       'STREAMS',
-      this.configService.BUFFER_KEY,
+      this.configService.REDIS_STREAM_KEY,
       '>',
     )) as StreamData[];
 
@@ -112,14 +73,14 @@ export class RedisStreamBufferAdapter implements OnModuleInit, ViewsBufferPort {
 
   public async processMessages(ids: string[], messages: ViewMessage[]) {
     const models = messages.map((message) => {
-      return ViewAggregate.create(message.userId, message.videoId);
+      return ViewAggregate.create({ userId: message.userId, videoId: message.videoId });
     });
 
     const processedMessagesNumber = await this.viewsRepo.saveMany(models);
 
-    await this.redisClient.xack(
-      this.configService.BUFFER_KEY,
-      this.configService.BUFFER_GROUPNAME,
+    await this.redis.client.xack(
+      this.configService.REDIS_STREAM_KEY,
+      this.configService.REDIS_STREAM_GROUPNAME,
       ...ids,
     );
 

@@ -1,5 +1,5 @@
-const CopyWebpackPlugin = require('copy-webpack-plugin');
 const path = require('path');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = (options, webpack) => {
   return {
@@ -9,11 +9,7 @@ module.exports = (options, webpack) => {
       new CopyWebpackPlugin({
         patterns: [
           {
-            from: path.join(__dirname, 'proto/subscribe.proto'),
-            to: path.join(__dirname, '../../dist/apps/subscribe/proto'),
-          },
-          {
-            from: path.join(__dirname, 'proto/health.proto'),
+            from: path.join('libs/proto/subscribe.proto'),
             to: path.join(__dirname, '../../dist/apps/subscribe/proto'),
           },
           {

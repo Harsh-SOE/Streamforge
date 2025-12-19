@@ -1,26 +1,28 @@
 import { Inject, Injectable } from '@nestjs/common';
 
+import { PrismaDBClient } from '@app/clients/prisma';
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
 import { PrismaDatabaseHandler } from '@app/handlers/database-handler';
 
 import { VideoAggregate } from '@videos/domain/aggregates';
 import { VideoRepositoryPort } from '@videos/application/ports';
-import { VideoPrismaClient } from '@videos/infrastructure/clients/prisma';
 import { VideoAggregatePersistanceACL } from '@videos/infrastructure/anti-corruption';
 import { VideoDomainPublishStatus, VideoDomainVisibiltyStatus } from '@videos/domain/enums';
+
+import { PrismaClient as VideoPrismaClient } from '@peristance/videos';
 
 @Injectable()
 export class VideoRepositoryAdapter implements VideoRepositoryPort {
   public constructor(
     private readonly videoPersistanceACL: VideoAggregatePersistanceACL,
     private readonly prismaDatabaseHandler: PrismaDatabaseHandler,
-    private videoPrismaClient: VideoPrismaClient,
+    private prisma: PrismaDBClient<VideoPrismaClient>,
     @Inject(LOGGER_PORT) private logger: LoggerPort,
   ) {}
 
   public async saveVideo(model: VideoAggregate): Promise<VideoAggregate> {
     const createdEntityFunc = async () =>
-      await this.videoPrismaClient.video.create({
+      await this.prisma.client.video.create({
         data: this.videoPersistanceACL.toPersistance(model),
       });
     const createdEntity = await this.prismaDatabaseHandler.execute(createdEntityFunc, {
@@ -38,7 +40,7 @@ export class VideoRepositoryAdapter implements VideoRepositoryPort {
     const videosToCreate = models.map((model) => this.videoPersistanceACL.toPersistance(model));
 
     const createVideosOperation = async () =>
-      await this.videoPrismaClient.video.createMany({
+      await this.prisma.client.video.createMany({
         data: models.map((model) => this.videoPersistanceACL.toPersistance(model)),
       });
 
@@ -55,7 +57,7 @@ export class VideoRepositoryAdapter implements VideoRepositoryPort {
     updatedPublishStatus: VideoDomainPublishStatus,
   ): Promise<VideoAggregate> {
     const updatePublishStatusOperation = async () =>
-      await this.videoPrismaClient.video.update({
+      await this.prisma.client.video.update({
         where: { id },
         data: { videoPublishStatus: updatedPublishStatus },
       });
@@ -74,7 +76,7 @@ export class VideoRepositoryAdapter implements VideoRepositoryPort {
     updatedVisibilityStatus: VideoDomainVisibiltyStatus,
   ): Promise<VideoAggregate> {
     const updateVisibilityOperation = async () =>
-      await this.videoPrismaClient.video.update({
+      await this.prisma.client.video.update({
         where: { id },
         data: { videoVisibiltyStatus: updatedVisibilityStatus },
       });
@@ -90,7 +92,7 @@ export class VideoRepositoryAdapter implements VideoRepositoryPort {
 
   async findOneVideoById(id: string): Promise<VideoAggregate | undefined> {
     const findVideoOperation = async () => {
-      return await this.videoPrismaClient.video.findUnique({
+      return await this.prisma.client.video.findUnique({
         where: { id },
       });
     };
@@ -109,7 +111,7 @@ export class VideoRepositoryAdapter implements VideoRepositoryPort {
   ): Promise<VideoAggregate> {
     const videoEntity = newVideoModel.getVideoEntity();
     const updatedLikesOperation = async () =>
-      await this.videoPrismaClient.video.update({
+      await this.prisma.client.video.update({
         where: { id },
         data: {
           videoFileIdentifier: videoEntity.getVideoFileIdentifier(),

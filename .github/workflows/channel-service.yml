@@ -1,4 +1,4 @@
-name: Channel Service CI/CD
+name: Channel CI/CD
 
 on:
   push:
@@ -31,7 +31,7 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
-    name: Lint all the changes made in the libraries and channel service
+    name: Lint all the changes made in the libraries and channel
 
     steps:
       - name: Checkout Code
@@ -46,13 +46,13 @@ jobs:
       - name: Install Dependencies (Root)
         run: yarn install --frozen-lockfile
 
-      - name: Generate Prisma Client (Channel Service)
+      - name: Generate Prisma Client (channel)
         run: npx prisma generate --schema=apps/channel/prisma/schema.prisma
 
-      - name: Run linter (Libraries)
+      - name: Run linter (libraries)
         run: yarn lint:libs
 
-      - name: Run linter (Channel Service)
+      - name: Run linter (channel)
         run: yarn lint:channel
 
   test-and-validate:
@@ -73,13 +73,13 @@ jobs:
       - name: Install Dependencies (Root)
         run: yarn install --frozen-lockfile
 
-      - name: Generate Prisma Client (Channel Service)
+      - name: Generate Prisma Client (channel)
         run: npx prisma generate --schema=apps/channel/prisma/schema.prisma
 
-      - name: Run Unit Tests (Channel Service)
+      - name: Run Unit Tests (channel)
         run: npx jest apps/channel/test/unit
 
-      - name: Run Integration Tests (Channel Service)
+      - name: Run Integration Tests (channel)
         run: npx jest apps/channel/test/integration
 
   build-and-push:
@@ -108,5 +108,5 @@ jobs:
           file: ./apps/channel/Dockerfile
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/channel-service:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/channel-service:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/streamforge-channel:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/streamforge-channel:${{ github.sha }}

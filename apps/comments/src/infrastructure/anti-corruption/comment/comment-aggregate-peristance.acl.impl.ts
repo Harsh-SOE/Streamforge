@@ -3,8 +3,6 @@ import { Injectable } from '@nestjs/common';
 import { IAggregatePersistanceACL } from '@app/ports/anti-corruption';
 
 import { CommentAggregate } from '@comments/domain/aggregates';
-import { CommentEntity } from '@comments/domain/entities';
-import { CommentText, UserId, VideoId } from '@comments/domain/value-objects';
 
 import { Comment } from '@peristance/comments';
 
@@ -14,21 +12,21 @@ export class CommentAggregatePersistance implements IAggregatePersistanceACL<
   Omit<Comment, 'createdAt' | 'updatedAt'>
 > {
   public toAggregate(persistance: Omit<Comment, 'createdAt' | 'updatedAt'>): CommentAggregate {
-    const commentEntity = new CommentEntity(
-      persistance.id,
-      UserId.create(persistance.commentedByUserId),
-      VideoId.create(persistance.commentedForVideoId),
-      CommentText.create(persistance.commentText),
-    );
-    return new CommentAggregate(commentEntity);
+    return CommentAggregate.create({
+      id: persistance.id,
+      userId: persistance.commentedByUserId,
+      videoId: persistance.commentedForVideoId,
+      commentText: persistance.commentText,
+    });
   }
 
   public toPersistance(aggregate: CommentAggregate): Omit<Comment, 'createdAt' | 'updatedAt'> {
+    const entity = aggregate.getEntity();
     return {
-      id: aggregate.getComment().getId(),
-      commentedByUserId: aggregate.getComment().getUserId(),
-      commentedForVideoId: aggregate.getComment().getVideoId(),
-      commentText: aggregate.getComment().getCommentText(),
+      id: entity.getId(),
+      commentedByUserId: entity.getUserId(),
+      commentedForVideoId: entity.getVideoId(),
+      commentText: entity.getCommentText(),
     };
   }
 }

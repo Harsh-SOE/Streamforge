@@ -1,9 +1,8 @@
-import { Inject, Injectable } from '@nestjs/common';
 import { OpenFgaClient } from '@openfga/sdk';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
 
-import { AppConfigService } from '@authz/infrastructure/config';
 import {
   AuthorizePort,
   CheckRelationOptions,
@@ -11,6 +10,7 @@ import {
   CreateRelationOptions,
   CreateRelationResponse,
 } from '@authz/application/ports/auth';
+import { AppConfigService } from '@authz/infrastructure/config';
 
 @Injectable()
 export class OpenFGAAuthAdapter implements AuthorizePort {

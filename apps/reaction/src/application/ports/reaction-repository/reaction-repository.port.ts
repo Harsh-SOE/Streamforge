@@ -1,24 +1,20 @@
-import { DatabaseFilter } from '@app/common/types';
-
 import { ReactionAggregate } from '@reaction/domain/aggregates';
 import { ReactionDomainStatus } from '@reaction/domain/enums';
 
-import { VideoReactions } from '@peristance/reaction';
-
 export interface ReactionRepositoryPort {
-  save(model: ReactionAggregate): Promise<ReactionAggregate>;
+  saveReaction(model: ReactionAggregate): Promise<ReactionAggregate>;
 
-  saveMany(models: ReactionAggregate[]): Promise<number>;
+  saveManyReaction(models: ReactionAggregate[]): Promise<number>;
 
-  update(
-    filter: DatabaseFilter<VideoReactions>,
+  updateOneReactionById(
+    id: string,
     newLikeStatus: ReactionDomainStatus,
   ): Promise<ReactionAggregate>;
 
-  updateMany(
-    filter: DatabaseFilter<VideoReactions>,
+  updateOneReactionByUserAndVideoId(
+    data: { userId: string; videoId: string },
     newLikeStatus: ReactionDomainStatus,
-  ): Promise<number>;
+  ): Promise<ReactionAggregate>;
 }
 
 export const REACTION_DATABASE_PORT = Symbol('REACTION_DATABASE_PORT');

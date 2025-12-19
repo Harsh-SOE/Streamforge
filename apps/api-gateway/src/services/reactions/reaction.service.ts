@@ -1,4 +1,4 @@
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, NotImplementedException, OnModuleInit } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 
@@ -41,21 +41,11 @@ export class ReactionService implements OnModuleInit {
     return await firstValueFrom(response$);
   }
 
-  async getLikesCountForVideo(videoId: string): Promise<GetLikesCountForVideo> {
-    this.logger.info(`Request recieved:${videoId}`);
-
-    const response$ = this.reactionService.getLikesCountForVideo({
-      videoId,
-    });
-    return await firstValueFrom(response$);
+  getLikesCountForVideo(videoId: string): Promise<GetLikesCountForVideo> {
+    throw new NotImplementedException(`Please implement 'getLikesCountForVideo' for ${videoId}`);
   }
 
-  async getDislikesCountForVideo(videoId: string): Promise<GetDislikesCountForVideo> {
-    this.logger.info(`Request recieved:${videoId}`);
-
-    const response$ = this.reactionService.getDislikesCountForVideo({
-      videoId,
-    });
-    return await firstValueFrom(response$);
+  getDislikesCountForVideo(videoId: string): Promise<GetDislikesCountForVideo> {
+    throw new NotImplementedException(`Please implement 'getDislikesCountForVideo' for ${videoId}`);
   }
 }

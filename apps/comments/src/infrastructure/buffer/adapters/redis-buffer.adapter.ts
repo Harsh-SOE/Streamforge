@@ -1,7 +1,7 @@
+import { Inject, Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
-import Redis from 'ioredis';
 
+import { RedisClient } from '@app/clients/redis';
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
 import { CommentMessage, StreamData } from '@app/common/types';
 
@@ -14,60 +14,21 @@ import { CommentAggregate } from '@comments/domain/aggregates';
 import { AppConfigService } from '@comments/infrastructure/config';
 
 @Injectable()
-export class RedisStreamBufferAdapter implements CommentBufferPort, OnModuleInit {
-  private redisClient: Redis;
-
+export class RedisStreamBufferAdapter implements CommentBufferPort {
   public constructor(
     private readonly configService: AppConfigService,
     @Inject(COMMENTS_REPOSITORY_PORT)
     private readonly commentsRepo: CommentRepositoryPort,
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
-  ) {
-    this.redisClient = new Redis({
-      host: configService.CACHE_HOST,
-      port: configService.CACHE_PORT,
-    });
-
-    this.redisClient.on('connecting', () => {
-      this.logger.info(`⏳ Redis connecting...`);
-    });
-
-    this.redisClient.on('connect', () => {
-      this.logger.info('✅ Redis connected');
-    });
-
-    this.redisClient.on('error', (error) => {
-      this.logger.info('❌ Error occured while connecting to redis', error);
-    });
-  }
-
-  public async onModuleInit() {
-    try {
-      await this.redisClient.xgroup(
-        'CREATE',
-        this.configService.BUFFER_KEY,
-        this.configService.BUFFER_GROUPNAME,
-        '0',
-        'MKSTREAM',
-      );
-    } catch (error) {
-      const err = error as Error;
-      if (err.message.includes('BUSYGROUP')) {
-        console.warn(
-          `Stream with key: ${this.configService.BUFFER_KEY} already exists, skipping creation`,
-        );
-      } else {
-        throw err;
-      }
-    }
-  }
+    private readonly redis: RedisClient,
+  ) {}
 
   public async bufferComment(comment: CommentAggregate): Promise<void> {
-    await this.redisClient.xadd(
-      this.configService.BUFFER_KEY,
+    await this.redis.client.xadd(
+      this.configService.REDIS_STREAM_KEY,
       '*',
       'comment-message',
-      JSON.stringify(comment.getComment().getSnapshot()),
+      JSON.stringify(comment.getEntity().getSnapshot()),
     );
   }
 
@@ -75,16 +36,16 @@ export class RedisStreamBufferAdapter implements CommentBufferPort, OnModuleInit
   public async processCommentsBatch() {
     this.logger.info(`Processing batches of comments now...`);
 
-    const streamData = (await this.redisClient.xreadgroup(
+    const streamData = (await this.redis.client.xreadgroup(
       'GROUP',
-      this.configService.BUFFER_GROUPNAME,
+      this.configService.REDIS_STREAM_GROUPNAME,
       'comment-consumer',
       'COUNT',
       10,
       'BLOCK',
       5000,
       'STREAMS',
-      this.configService.BUFFER_KEY,
+      this.configService.REDIS_STREAM_KEY,
       '>',
     )) as StreamData[];
 
@@ -113,13 +74,17 @@ export class RedisStreamBufferAdapter implements CommentBufferPort, OnModuleInit
 
   public async processMessages(ids: string[], messages: CommentMessage[]) {
     const models = messages.map((message) =>
-      CommentAggregate.create(message.userId, message.videoId, message.commentText),
+      CommentAggregate.create({
+        userId: message.userId,
+        videoId: message.videoId,
+        commentText: message.commentText,
+      }),
     );
     const processedMessagesNumber = await this.commentsRepo.saveMany(models);
 
-    await this.redisClient.xack(
-      this.configService.BUFFER_KEY,
-      this.configService.BUFFER_GROUPNAME,
+    await this.redis.client.xack(
+      this.configService.REDIS_STREAM_KEY,
+      this.configService.REDIS_STREAM_GROUPNAME,
       ...ids,
     );
 

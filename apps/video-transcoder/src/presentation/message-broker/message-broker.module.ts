@@ -4,7 +4,7 @@ import { BullModule } from '@nestjs/bullmq';
 
 import { LOGGER_PORT } from '@app/ports/logger';
 import { MESSAGE_BROKER } from '@app/ports/message-broker';
-import { KafkaMessageBrokerHandler } from '@app/handlers/message-broker-handler';
+import { KafkaMessageBusHandler } from '@app/handlers/message-bus-handler';
 
 import { AppConfigModule, AppConfigService } from '@transcoder/infrastructure/config';
 import {
@@ -53,7 +53,7 @@ import { VideoTranscoderController } from './message-broker.controller';
     BullTranscodeJobsWorker,
     BullSegmentUploadWorker,
     AppConfigService,
-    KafkaMessageBrokerHandler,
+    KafkaMessageBusHandler,
     SegmentWatcher,
     { provide: LOGGER_PORT, useClass: WinstonLoggerAdapter },
     { provide: TRANSCODER_STORAGE_PORT, useClass: AwsS3StorageAdapter },

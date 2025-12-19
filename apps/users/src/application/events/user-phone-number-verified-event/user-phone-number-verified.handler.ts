@@ -5,7 +5,7 @@ import { USERS_EVENTS } from '@app/clients';
 import { MESSAGE_BROKER } from '@app/ports/message-broker';
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
 
-import { KafkaMessageBrokerAdapter } from '@users/infrastructure/message-broker/adapters';
+import { KafkaMessageBrokerAdapter } from '@users/infrastructure/message-bus/adapters';
 
 import { UserPhoneNumberVerifiedEvent } from './user-phone-number-verified.event';
 

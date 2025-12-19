@@ -1,24 +1,21 @@
 import { Injectable } from '@nestjs/common';
 
+import { KafkaClient } from '@app/clients/kafka';
 import { MessageBrokerPort } from '@app/ports/message-broker';
-import { KafkaMessageBrokerHandler } from '@app/handlers/message-broker-handler';
-
-import { AppConfigService } from '@channel/infrastructure/config';
-import { ChannelKafkaClient } from '@channel/infrastructure/clients/kafka';
+import { KafkaMessageBusHandler } from '@app/handlers/message-bus-handler';
 
 @Injectable()
 export class KafkaMessageBrokerAdapter implements MessageBrokerPort {
   public constructor(
-    private readonly configService: AppConfigService,
-    private readonly kafkaMessageBrokerHandler: KafkaMessageBrokerHandler,
-    private readonly channelKafkaClient: ChannelKafkaClient,
+    private readonly kafkaMessageBrokerHandler: KafkaMessageBusHandler,
+    private readonly kafka: KafkaClient,
   ) {}
 
   public async publishMessage(topic: string, payload: string): Promise<void> {
     const kafkaPublishMessageOperation = () =>
-      this.channelKafkaClient.producer.send({ topic, messages: [{ key: 'xyz', value: payload }] });
+      this.kafka.producer.send({ topic, messages: [{ key: 'xyz', value: payload }] });
 
-    await this.kafkaMessageBrokerHandler.execute(kafkaPublishMessageOperation, {
+    await this.kafkaMessageBrokerHandler.handle(kafkaPublishMessageOperation, {
       operationType: 'PUBLISH_OR_SEND',
       topic,
       message: String(payload),
@@ -29,8 +26,8 @@ export class KafkaMessageBrokerAdapter implements MessageBrokerPort {
 
   public async subscribeTo(topic: string): Promise<void> {
     const kafkaSubscribeOperation = () =>
-      this.channelKafkaClient.consumer.subscribe({ topic, fromBeginning: true });
-    await this.kafkaMessageBrokerHandler.execute(kafkaSubscribeOperation, {
+      this.kafka.consumer.subscribe({ topic, fromBeginning: true });
+    await this.kafkaMessageBrokerHandler.handle(kafkaSubscribeOperation, {
       operationType: 'SUBSCRIBE',
       topic,
       logErrors: true,

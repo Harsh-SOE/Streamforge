@@ -1,4 +1,4 @@
-name: Videos Service CI/CD
+name: Videos CI/CD
 
 on:
   push:
@@ -31,7 +31,7 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
-    name: Lint all the changes made in the libraries and videos service
+    name: Lint all the changes made in the libraries and videos
 
     steps:
       - name: Checkout Code
@@ -46,13 +46,13 @@ jobs:
       - name: Install Dependencies (Root)
         run: yarn install --frozen-lockfile
 
-      - name: Generate Prisma Client (Videos Service)
+      - name: Generate Prisma Client (videos)
         run: npx prisma generate --schema=apps/videos/prisma/schema.prisma
 
       - name: Run linter (Libraries)
         run: yarn lint:libs
 
-      - name: Run linter (Videos Service)
+      - name: Run linter (videos)
         run: yarn lint:videos
 
   test-and-validate:
@@ -73,13 +73,13 @@ jobs:
       - name: Install Dependencies (Root)
         run: yarn install --frozen-lockfile
 
-      - name: Generate Prisma Client (Videos Service)
+      - name: Generate Prisma Client (videos)
         run: npx prisma generate --schema=apps/videos/prisma/schema.prisma
 
-      - name: Run Unit Tests (Videos Service)
+      - name: Run Unit Tests (videos)
         run: npx jest apps/videos/test/unit
 
-      - name: Run Integration Tests (Videos Service)
+      - name: Run Integration Tests (videos)
         run: npx jest apps/videos/test/integration
 
   build-and-push:
@@ -108,5 +108,5 @@ jobs:
           file: ./apps/videos/Dockerfile
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/videos-service:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/videos-service:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/streamforge-videos:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/streamforge-videos:${{ github.sha }}

@@ -1,45 +1,42 @@
-import { v4 as uuidv4 } from 'uuid';
-
-import { CommentText, UserId, VideoId } from '../../value-objects';
+import { CommentId, CommentText, UserId, VideoId } from '../../value-objects';
+import { CommentEntityCreateOptions, CommentEntityOptions, CommentSnapshot } from './options';
 
 export class CommentEntity {
-  public constructor(
-    private readonly id: string,
-    private readonly userId: UserId,
-    private readonly videoId: VideoId,
-    private commentText: CommentText,
-  ) {}
+  public constructor(private readonly valueObjects: CommentEntityOptions) {}
 
-  public static create(userId: string, videoId: string, commentText: string): CommentEntity {
-    return new CommentEntity(
-      uuidv4(),
-      UserId.create(userId),
-      VideoId.create(videoId),
-      CommentText.create(commentText),
-    );
+  public static create(data: CommentEntityCreateOptions): CommentEntity {
+    const { id, userId, videoId, commentText } = data;
+
+    return new CommentEntity({
+      id: CommentId.create(id),
+      userId: UserId.create(userId),
+      videoId: VideoId.create(videoId),
+      commentText: CommentText.create(commentText),
+    });
   }
 
   public getId(): string {
-    return this.id;
+    return this.valueObjects.id.getValue();
   }
 
   public getUserId(): string {
-    return this.userId.getValue();
+    return this.valueObjects.userId.getValue();
   }
 
   public getVideoId(): string {
-    return this.videoId.getValue();
+    return this.valueObjects.videoId.getValue();
   }
 
   public getCommentText(): string {
-    return this.commentText.getValue();
+    return this.valueObjects.commentText.getValue();
   }
 
-  public getSnapshot() {
+  public getSnapshot(): CommentSnapshot {
     return {
-      userId: this.userId,
-      videoId: this.videoId,
-      commentText: this.commentText,
+      id: this.valueObjects.id.getValue(),
+      userId: this.valueObjects.userId.getValue(),
+      videoId: this.valueObjects.videoId.getValue(),
+      commentText: this.valueObjects.commentText.getValue(),
     };
   }
 

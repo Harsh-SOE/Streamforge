@@ -1,25 +1,35 @@
-import { UserId, VideoId } from '@views/domain/value-objects';
+import { UserId, VideoId, ViewId } from '@views/domain/value-objects';
+
+import { ViewEntityCreateOptions, ViewEntityOptions, ViewSnapshot } from './options';
 
 export class ViewEntity {
-  public constructor(
-    private readonly id: string,
-    private readonly userId: UserId,
-    private readonly videoId: VideoId,
-  ) {}
+  private constructor(private readonly valueObjects: ViewEntityOptions) {}
+
+  public static create(data: ViewEntityCreateOptions) {
+    return new ViewEntity({
+      id: ViewId.create(data.id),
+      userId: UserId.create(data.userId),
+      videoId: VideoId.create(data.videoId),
+    });
+  }
+
+  public getId(): string {
+    return this.valueObjects.id.getValue();
+  }
 
   public getUserId(): string {
-    return this.userId.getValue();
+    return this.valueObjects.userId.getValue();
   }
 
   public getVideoId(): string {
-    return this.videoId.getValue();
+    return this.valueObjects.videoId.getValue();
   }
 
-  public getSnapshot() {
+  public getSnapshot(): ViewSnapshot {
     return {
-      id: this.id,
-      userId: this.userId.getValue(),
-      videoId: this.videoId.getValue(),
+      id: this.valueObjects.id.getValue(),
+      userId: this.valueObjects.userId.getValue(),
+      videoId: this.valueObjects.videoId.getValue(),
     };
   }
 }

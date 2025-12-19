@@ -1,70 +1,27 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { DatabaseFilter } from '@app/common/types';
 import { Components } from '@app/common/components';
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
 import { PrismaDatabaseHandler } from '@app/handlers/database-handler';
 
-import { ViewRepositoryPort } from '@views/application/ports';
 import { ViewAggregate } from '@views/domain/aggregates';
-import { PersistanceService } from '@views/infrastructure/persistance/adapter';
+import { ViewRepositoryPort } from '@views/application/ports';
 import { ViewPeristanceAggregateACL } from '@views/infrastructure/anti-corruption';
 
-import { Prisma, View } from '@persistance/views';
+import { PRISMA_CLIENT, PrismaDBClient } from '@app/clients/prisma';
+import { PrismaClient as ViewPrismaClient } from '@persistance/views';
 
 @Injectable()
 export class ViewRepositoryAdapter implements ViewRepositoryPort {
   public constructor(
-    private readonly viewPersistanceACL: ViewPeristanceAggregateACL,
     private readonly databaseHandler: PrismaDatabaseHandler,
-    private readonly persistanceService: PersistanceService,
+    private readonly viewPersistanceACL: ViewPeristanceAggregateACL,
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
+    @Inject(PRISMA_CLIENT) private readonly prisma: PrismaDBClient<ViewPrismaClient>,
   ) {}
 
-  public toPrismaFilter(
-    filter: DatabaseFilter<View>,
-    mode: 'many' | 'unique',
-  ): Prisma.ViewWhereInput | Prisma.ViewWhereUniqueInput {
-    const prismaFilter: Prisma.ViewWhereInput | Prisma.ViewWhereUniqueInput = {};
-
-    (Object.keys(filter) as Array<keyof View>).forEach((key) => {
-      const value = filter[key];
-      if (value !== undefined) {
-        prismaFilter[key as string] = value;
-      }
-    });
-
-    if (mode === 'unique') return prismaFilter;
-
-    if (filter.and) {
-      prismaFilter.AND = filter.and.map((filterCondition) => ({
-        [filterCondition.field]: {
-          [filterCondition.operator]: [filterCondition.value],
-        },
-      }));
-    }
-
-    if (filter.or) {
-      prismaFilter.OR = filter.or.map((filterCondition) => ({
-        [filterCondition.field]: {
-          [filterCondition.operator]: [filterCondition.value],
-        },
-      }));
-    }
-
-    if (filter.not) {
-      prismaFilter.NOT = filter.not.map((filterCondition) => ({
-        [filterCondition.field]: {
-          [filterCondition.operator]: [filterCondition.value],
-        },
-      }));
-    }
-
-    return prismaFilter;
-  }
-
   public async save(model: ViewAggregate): Promise<ViewAggregate> {
-    const createdEntity = await this.persistanceService.view.create({
+    const createdEntity = await this.prisma.client.view.create({
       data: this.viewPersistanceACL.toPersistance(model),
     });
     return this.viewPersistanceACL.toAggregate(createdEntity);
@@ -81,7 +38,7 @@ export class ViewRepositoryAdapter implements ViewRepositoryPort {
       service: 'VIEW',
     });
     const createdEntitiesFunc = async () =>
-      await this.persistanceService.view.createMany({
+      await this.prisma.client.view.createMany({
         data: models.map((model) => this.viewPersistanceACL.toPersistance(model)),
       });
 

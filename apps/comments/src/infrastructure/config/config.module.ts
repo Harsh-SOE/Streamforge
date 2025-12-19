@@ -12,19 +12,20 @@ import { AppConfigService } from './config.service';
       validationSchema: joi.object({
         HTTP_PORT: joi.number().required(),
         GRPC_PORT: joi.number().required(),
+
         DATABASE_URL: joi.string().required(),
-        CACHE_HOST: joi.string().required(),
-        CACHE_PORT: joi.number().required(),
-        MESSAGE_BROKER_HOST: joi.string().required(),
-        MESSAGE_BROKER_PORT: joi.number().required(),
-        BUFFER_KEY: joi.string().required(),
-        BUFFER_GROUPNAME: joi.string().required(),
-        BUFFER_REDIS_CONSUMER_ID: joi.string().required(),
-        BUFFER_CLIENT_ID: joi.string().required(),
-        BUFFER_KAFKA_CONSUMER_ID: joi.string().required(),
-        BUFFER_FLUSH_MAX_WAIT_TIME_MS: joi.string().required(),
-        COMMENTS_CLIENT_ID: joi.string().required(),
-        COMMENTS_CONSUMER_ID: joi.string().required(),
+
+        KAFKA_HOST: joi.string().required(),
+        KAFKA_PORT: joi.number().required(),
+        KAFKA_CLIENT_ID: joi.string().required(),
+        KAFKA_CONSUMER_ID: joi.string().required(),
+        KAFKA_FLUSH_MAX_WAIT_TIME_MS: joi.string().required(),
+
+        REDIS_HOST: joi.string().required(),
+        REDIS_PORT: joi.number().required(),
+        REDIS_STREAM_KEY: joi.string().required(),
+        REDIS_STREAM_GROUPNAME: joi.string().required(),
+
         GRAFANA_LOKI_URL: joi.string().required(),
       }),
     }),

@@ -1,14 +1,13 @@
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
-import Redis from 'ioredis';
-import { readFileSync } from 'fs';
 import { join } from 'path';
+import { readFileSync } from 'fs';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 
 import { getShardFor } from '@app/counters';
+import { RedisClient } from '@app/clients/redis';
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
 import { RedisCacheHandler } from '@app/handlers/cache-handler';
 
 import { CommentCachePort } from '@comments/application/ports';
-import { AppConfigService } from '@comments/infrastructure/config';
 
 import { RedisWithCommands } from '../types';
 
@@ -18,35 +17,20 @@ export class RedisCacheAdapter implements CommentCachePort, OnModuleInit {
   private redisClient: RedisWithCommands;
 
   public constructor(
-    private readonly configService: AppConfigService,
     private readonly redisHandler: RedisCacheHandler,
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
-  ) {
-    this.redisClient = new Redis({
-      host: configService.CACHE_HOST,
-      port: configService.CACHE_PORT,
-    }) as RedisWithCommands;
-
-    this.redisClient.on('connecting', () => {
-      this.logger.info(`⏳ Redis connecting...`);
-    });
-
-    this.redisClient.on('connect', () => {
-      this.logger.info('✅ Redis connected');
-    });
-
-    this.redisClient.on('error', (error) => {
-      this.logger.error('❌ An Error occured in redis cache', error);
-    });
-  }
+    private readonly redis: RedisClient,
+  ) {}
 
   public onModuleInit() {
     const commentVideoScript = readFileSync(join(__dirname, 'scripts/comments.lua'), 'utf-8');
 
-    this.redisClient.defineCommand('commentVideo', {
+    this.redis.client.defineCommand('commentVideo', {
       numberOfKeys: 2,
       lua: commentVideoScript,
     });
+
+    this.redisClient = this.redis.client as RedisWithCommands;
 
     this.logger.info('✅ Scripts intialized');
   }

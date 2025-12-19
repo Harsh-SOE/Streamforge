@@ -15,7 +15,7 @@ export class AppHealthService implements OnModuleInit, OnModuleDestroy {
   ) {
     this.kafka = new Kafka({
       brokers: [`${configService.KAFKA_HOST}:${configService.KAFKA_PORT}`],
-      clientId: this.configService.PROJECTION_CLIENT_ID,
+      clientId: this.configService.KAFKA_CLIENT_ID,
       logLevel: logLevel.WARN,
     });
     this.admin = this.kafka.admin();

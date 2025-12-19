@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
 import LokiTransport from 'winston-loki';
+import { Injectable } from '@nestjs/common';
 import winston, { createLogger, format, Logger, transport, Logform, transports } from 'winston';
 
 import { LoggerPort } from '@app/ports/logger';
@@ -49,14 +49,16 @@ export class WinstonLoggerAdapter implements LoggerPort {
 
   private consoleTransport() {
     const consoleFormatPipeline = format.combine(
-      format.timestamp(),
+      format.timestamp({ format: 'MM/DD/YYYY, h:mm:ss A' }),
       format.errors({ stack: true }),
-      format.colorize(),
+      format.colorize({ all: true }),
       format.printf((info: MyConsoleLogCompleteInfo) => {
         const { level, message, timestamp, stack, ...meta } = info;
-        return `[${timestamp}] [${level}] ${message} ${JSON.stringify(meta || {})} ${stack || ''}`;
+        const metaString = Object.keys(meta).length ? JSON.stringify(meta) : '';
+        return `[${timestamp}] [${level}] ${message} ${metaString} ${stack || ''}`;
       }),
     );
+
     return new transports.Console({
       level: 'debug',
       format: consoleFormatPipeline,
