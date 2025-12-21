@@ -10,7 +10,7 @@ export function LogExecutionTime(): MethodDecorator {
     propertyKey: string | symbol,
     descriptor: TypedPropertyDescriptor<T>,
   ): TypedPropertyDescriptor<T> => {
-    const originalMethod = descriptor.value as (...args: any[]) => any; // any function with any number of args
+    const originalMethod = descriptor.value as (...args: any[]) => any;
 
     descriptor.value = async function (...args: unknown[]) {
       const start = performance.now();
