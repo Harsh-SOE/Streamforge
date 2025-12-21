@@ -56,7 +56,6 @@ COPY --from=base /@streamforge/package.json /@streamforge/yarn.lock ./
 COPY --from=production-dependencies /@streamforge/node_modules ./node_modules
 COPY --from=builder /@streamforge/dist/apps/projection/main.js ./main.js
 COPY --from=builder /@streamforge/dist/apps/projection/scripts ./scripts
-COPY --from=builder /@streamforge/dist/apps/projection/secrets ./secrets
 
 USER root
 
