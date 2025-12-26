@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { RedisClient } from '@app/clients/redis';
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
-import { RedisCacheHandler } from '@app/handlers/cache-handler';
+import { RedisCacheHandler } from '@app/handlers/redis-cache-handler';
 
 import { VideoCachePort } from '@videos/application/ports';
 

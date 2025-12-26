@@ -1,13 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { GrpcOptions } from '@nestjs/microservices';
 
-import { AppConfigService } from './infrastructure/config';
-import { AppModule } from './app.module';
+import { ViewsConfigService } from './infrastructure/config';
+import { RootModule } from './root.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(RootModule);
 
-  const configService = app.get(AppConfigService);
+  const configService = app.get(ViewsConfigService);
   app.connectMicroservice<GrpcOptions>(configService.GRPC_OPTIONS);
   await app.startAllMicroservices();
   await app.listen(configService.HTTP_PORT, '0.0.0.0');

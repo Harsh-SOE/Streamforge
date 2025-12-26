@@ -9,4 +9,4 @@ import { FrameworkModule } from '@views/infrastructure/framework/framework.modul
   controllers: [GrpcController],
   providers: [GrpcService],
 })
-export class GrpcModule {}
+export class RpcModule {}

@@ -1,1 +1,1 @@
-export * from './database.handler';
+export * from './prisma.handler';

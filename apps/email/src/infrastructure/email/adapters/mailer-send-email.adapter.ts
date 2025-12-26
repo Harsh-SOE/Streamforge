@@ -4,13 +4,13 @@ import { EmailParams, MailerSend, Recipient, Sender } from 'mailersend';
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
 
 import { EmailPort, SendMailOptions } from '@email/application/ports';
-import { AppConfigService } from '@email/infrastructure/config';
+import { EmailConfigService } from '@email/infrastructure/config';
 
 export class MailerSendEmailAdapter implements EmailPort {
   client: MailerSend;
 
   constructor(
-    private readonly configService: AppConfigService,
+    private readonly configService: EmailConfigService,
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
   ) {
     this.client = new MailerSend({

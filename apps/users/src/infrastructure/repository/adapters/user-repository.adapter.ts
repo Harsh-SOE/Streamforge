@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { PrismaDBClient } from '@app/clients/prisma';
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
-import { PrismaDatabaseHandler } from '@app/handlers/database-handler';
+import { PrismaHandler } from '@app/handlers/database-handler';
 
 import { UserAggregate } from '@users/domain/aggregates';
 import { UserRepositoryPort } from '@users/application/ports';
@@ -14,7 +14,7 @@ import { PrismaClient } from '@persistance/users';
 export class UserRepositoryAdapter implements UserRepositoryPort {
   public constructor(
     private userPersistanceACL: UserAggregatePersistanceACL,
-    private readonly prismaDatabaseHandler: PrismaDatabaseHandler,
+    private readonly prismaDatabaseHandler: PrismaHandler,
     private readonly prisma: PrismaDBClient<PrismaClient>,
     @Inject(LOGGER_PORT) private logger: LoggerPort,
   ) {
@@ -29,7 +29,7 @@ export class UserRepositoryAdapter implements UserRepositoryPort {
       });
     const createdUser = await this.prismaDatabaseHandler.execute(saveUserOperation, {
       operationType: 'CREATE',
-      entry: this.userPersistanceACL.toPersistance(userAggregate),
+      entity: this.userPersistanceACL.toPersistance(userAggregate),
     });
     return this.userPersistanceACL.toAggregate(createdUser);
   }
@@ -50,7 +50,7 @@ export class UserRepositoryAdapter implements UserRepositoryPort {
 
     const createdEntities = await this.prismaDatabaseHandler.execute(saveManyUsersOperations, {
       operationType: 'CREATE',
-      entry: usersToCreate,
+      entity: usersToCreate,
     });
     return createdEntities.count;
   }
@@ -64,7 +64,7 @@ export class UserRepositoryAdapter implements UserRepositoryPort {
 
     const updatedUser = await this.prismaDatabaseHandler.execute(updateUserByIdOperation, {
       operationType: 'UPDATE',
-      entry: this.userPersistanceACL.toPersistance(updatedUserModel),
+      entity: this.userPersistanceACL.toPersistance(updatedUserModel),
       filter: { id },
     });
 
@@ -83,7 +83,7 @@ export class UserRepositoryAdapter implements UserRepositoryPort {
 
     const updatedUser = await this.prismaDatabaseHandler.execute(updateUserOperation, {
       operationType: 'UPDATE',
-      entry: this.userPersistanceACL.toPersistance(updatedUserAggregate),
+      entity: this.userPersistanceACL.toPersistance(updatedUserAggregate),
       filter: { authUserId: userAuthId },
     });
 
@@ -102,7 +102,7 @@ export class UserRepositoryAdapter implements UserRepositoryPort {
 
     const updatedUser = await this.prismaDatabaseHandler.execute(updateUserOperation, {
       operationType: 'UPDATE',
-      entry: this.userPersistanceACL.toPersistance(updatedUserAggregate),
+      entity: this.userPersistanceACL.toPersistance(updatedUserAggregate),
       filter: { handle },
     });
 

@@ -1,7 +1,7 @@
 import { Test } from '@nestjs/testing';
 
 import { LOGGER_PORT } from '@app/ports/logger';
-import { PrismaDatabaseHandler } from '@app/handlers/database-handler';
+import { PrismaHandler } from '@app/handlers/database-handler';
 
 import { PrismaDBClient } from '@app/clients/prisma';
 import { UserRepositoryAdapter } from '@users/infrastructure/repository/adapters';
@@ -25,7 +25,7 @@ describe('UserRepositoryAdapter', () => {
     const module = await Test.createTestingModule({
       providers: [
         UserRepositoryAdapter,
-        { provide: PrismaDatabaseHandler, useValue: databaseHandlerMock },
+        { provide: PrismaHandler, useValue: databaseHandlerMock },
         {
           provide: UserAggregatePersistanceACL,
           useValue: userACLMock,

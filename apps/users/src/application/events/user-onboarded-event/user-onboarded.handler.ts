@@ -3,7 +3,7 @@ import { EventsHandler, IEventHandler } from '@nestjs/cqrs';
 
 import { USERS_EVENTS } from '@app/clients';
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
-import { MESSAGE_BROKER, MessageBrokerPort } from '@app/ports/message-broker';
+import { MESSAGE_BROKER, MessageBusPort } from '@app/ports/message-broker';
 
 import { UserOnboardingEvent } from './user-onboarded.event';
 
@@ -11,7 +11,7 @@ import { UserOnboardingEvent } from './user-onboarded.event';
 export class UserProfileHandler implements IEventHandler<UserOnboardingEvent> {
   constructor(
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
-    @Inject(MESSAGE_BROKER) private readonly messageBroker: MessageBrokerPort,
+    @Inject(MESSAGE_BROKER) private readonly messageBroker: MessageBusPort,
   ) {}
 
   async handle({ userProfileCreatedEventDto }: UserOnboardingEvent) {

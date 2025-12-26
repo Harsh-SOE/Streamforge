@@ -2,14 +2,14 @@ import { Controller, UseFilters } from '@nestjs/common';
 
 import { CommentVideoDto, CommentVideoResponse } from '@app/contracts/comments';
 
-import { GrpcService } from './rpc.service';
+import { RpcService } from './rpc.service';
 
 import { GrpcFilter } from '../filters';
 
 @Controller('comments')
 @UseFilters(GrpcFilter)
-export class GrpcController {
-  public constructor(private commentsService: GrpcService) {}
+export class RpcController {
+  public constructor(private commentsService: RpcService) {}
 
   commentVideo(commentVideoDto: CommentVideoDto): Promise<CommentVideoResponse> {
     return this.commentsService.commentOnVideo(commentVideoDto);

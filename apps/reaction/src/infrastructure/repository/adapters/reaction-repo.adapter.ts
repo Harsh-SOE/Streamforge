@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Components } from '@app/common/components';
 import { PrismaDBClient } from '@app/clients/prisma';
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
-import { PrismaDatabaseHandler } from '@app/handlers/database-handler';
+import { PrismaHandler } from '@app/handlers/database-handler';
 
 import { ReactionDomainStatus } from '@reaction/domain/enums';
 import { ReactionAggregate } from '@reaction/domain/aggregates';
@@ -16,7 +16,7 @@ import { PrismaClient } from '@peristance/reaction';
 export class ReactionRepositoryAdapter implements ReactionRepositoryPort {
   public constructor(
     private reactionPersistanceACL: ReactionAggregatePersistanceACL,
-    private readonly reactionRepoFilter: PrismaDatabaseHandler,
+    private readonly reactionRepoFilter: PrismaHandler,
     private prisma: PrismaDBClient<PrismaClient>,
     @Inject(LOGGER_PORT) private logger: LoggerPort,
   ) {}
@@ -45,7 +45,7 @@ export class ReactionRepositoryAdapter implements ReactionRepositoryPort {
 
     const createdEntities = await this.reactionRepoFilter.execute(createdEntitiesFunc, {
       operationType: 'CREATE',
-      entry: dataToCreate,
+      entity: dataToCreate,
     });
     return createdEntities.count;
   }
@@ -62,7 +62,7 @@ export class ReactionRepositoryAdapter implements ReactionRepositoryPort {
 
     const updatedReaction = await this.reactionRepoFilter.execute(updateReactionOperation, {
       operationType: 'UPDATE',
-      entry: {},
+      entity: {},
       filter: { newReactionStatus: newReactionStatus },
     });
 
@@ -87,7 +87,7 @@ export class ReactionRepositoryAdapter implements ReactionRepositoryPort {
 
     const updatedReaction = await this.reactionRepoFilter.execute(updateReactionOperation, {
       operationType: 'UPDATE',
-      entry: {},
+      entity: {},
       filter: { newReactionStatus: newReactionStatus },
     });
 

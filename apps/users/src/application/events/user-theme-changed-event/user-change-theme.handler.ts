@@ -5,7 +5,7 @@ import { USERS_EVENTS } from '@app/clients';
 import { MESSAGE_BROKER } from '@app/ports/message-broker';
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
 
-import { KafkaMessageBrokerAdapter } from '@users/infrastructure/message-bus/adapters';
+import { KafkaMessageBusAdapter } from '@users/infrastructure/message-bus/adapters';
 
 import { UserThemeChangedEvent } from './user-change-theme.event';
 
@@ -14,7 +14,7 @@ export class UserThemeChangedHandler implements IEventHandler<UserThemeChangedEv
   public constructor(
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
     @Inject(MESSAGE_BROKER)
-    private readonly messageBroker: KafkaMessageBrokerAdapter,
+    private readonly messageBroker: KafkaMessageBusAdapter,
   ) {}
 
   public async handle({ userThemeChangedEventDto }: UserThemeChangedEvent) {

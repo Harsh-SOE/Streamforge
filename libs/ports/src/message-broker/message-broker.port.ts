@@ -1,4 +1,4 @@
-export interface MessageBrokerPort {
+export interface MessageBusPort {
   publishMessage(topic: string, payload: string): Promise<void>;
 
   subscribeTo(topic: string): Promise<void>;

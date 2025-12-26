@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { Components } from '@app/common/components';
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
-import { PrismaDatabaseHandler } from '@app/handlers/database-handler';
+import { PrismaHandler } from '@app/handlers/database-handler';
 
 import { ViewAggregate } from '@views/domain/aggregates';
 import { ViewRepositoryPort } from '@views/application/ports';
@@ -14,7 +14,7 @@ import { PrismaClient as ViewPrismaClient } from '@persistance/views';
 @Injectable()
 export class ViewRepositoryAdapter implements ViewRepositoryPort {
   public constructor(
-    private readonly databaseHandler: PrismaDatabaseHandler,
+    private readonly databaseHandler: PrismaHandler,
     private readonly viewPersistanceACL: ViewPeristanceAggregateACL,
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
     @Inject(PRISMA_CLIENT) private readonly prisma: PrismaDBClient<ViewPrismaClient>,
@@ -44,7 +44,7 @@ export class ViewRepositoryAdapter implements ViewRepositoryPort {
 
     const createdEntities = await this.databaseHandler.execute(createdEntitiesFunc, {
       operationType: 'CREATE',
-      entry: dataToCreate,
+      entity: dataToCreate,
     });
     return createdEntities.count;
   }

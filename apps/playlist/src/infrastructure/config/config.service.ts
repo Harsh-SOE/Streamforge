@@ -9,7 +9,7 @@ import { HealthImplementation, protoPath as HealthCheckProto } from 'grpc-health
 import { PLAYLIST_PACKAGE_NAME } from '@app/contracts/playlist';
 
 @Injectable()
-export class AppConfigService {
+export class PlaylistConfigService {
   public constructor(private readonly configService: ConfigService) {}
 
   get HTTP_PORT() {

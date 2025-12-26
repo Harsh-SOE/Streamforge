@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { KafkaOptions, Transport } from '@nestjs/microservices';
 
 @Injectable()
-export class AppConfigService {
+export class EmailConfigService {
   constructor(private readonly configService: ConfigService) {}
 
   get HTTP_PORT() {

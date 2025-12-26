@@ -9,7 +9,7 @@ import { HealthImplementation, protoPath as HealthCheckProto } from 'grpc-health
 import { VIDEO_PACKAGE_NAME } from '@app/contracts/videos';
 
 @Injectable()
-export class AppConfigService {
+export class VideosConfigService {
   constructor(private readonly configService: ConfigService) {}
 
   get HTTP_PORT() {

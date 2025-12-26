@@ -23,7 +23,7 @@ import {
 } from '@channel/application/commands';
 
 @Injectable()
-export class GrpcService {
+export class RpcService {
   public constructor(
     public readonly commandBus: CommandBus,
     public readonly queryBus: QueryBus,

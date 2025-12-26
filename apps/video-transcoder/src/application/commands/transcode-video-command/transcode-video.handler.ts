@@ -2,7 +2,7 @@ import { Inject } from '@nestjs/common';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 
 import { VideoTranscodedEventDto } from '@app/contracts/video-transcoder';
-import { MESSAGE_BROKER, MessageBrokerPort } from '@app/ports/message-broker';
+import { MESSAGE_BROKER, MessageBusPort } from '@app/ports/message-broker';
 
 import {
   TranscoderStoragePort,
@@ -18,7 +18,7 @@ export class TranscodeVideoHandler implements ICommandHandler<TranscodeVideoComm
   public constructor(
     @Inject(TRANSCODER_PORT) private readonly transcoderAdapter: TranscoderPort,
     @Inject(MESSAGE_BROKER)
-    private readonly messageBrokerAdapter: MessageBrokerPort,
+    private readonly messageBrokerAdapter: MessageBusPort,
     @Inject(TRANSCODER_STORAGE_PORT)
     private readonly storagePortAdapter: TranscoderStoragePort,
   ) {}

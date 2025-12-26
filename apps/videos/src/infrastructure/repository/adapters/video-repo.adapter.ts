@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { PrismaDBClient } from '@app/clients/prisma';
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
-import { PrismaDatabaseHandler } from '@app/handlers/database-handler';
+import { PrismaHandler } from '@app/handlers/database-handler';
 
 import { VideoAggregate } from '@videos/domain/aggregates';
 import { VideoRepositoryPort } from '@videos/application/ports';
@@ -15,7 +15,7 @@ import { PrismaClient as VideoPrismaClient } from '@peristance/videos';
 export class VideoRepositoryAdapter implements VideoRepositoryPort {
   public constructor(
     private readonly videoPersistanceACL: VideoAggregatePersistanceACL,
-    private readonly prismaDatabaseHandler: PrismaDatabaseHandler,
+    private readonly prismaDatabaseHandler: PrismaHandler,
     private prisma: PrismaDBClient<VideoPrismaClient>,
     @Inject(LOGGER_PORT) private logger: LoggerPort,
   ) {}
@@ -27,7 +27,7 @@ export class VideoRepositoryAdapter implements VideoRepositoryPort {
       });
     const createdEntity = await this.prismaDatabaseHandler.execute(createdEntityFunc, {
       operationType: 'CREATE',
-      entry: this.videoPersistanceACL.toPersistance(model),
+      entity: this.videoPersistanceACL.toPersistance(model),
     });
     return this.videoPersistanceACL.toAggregate(createdEntity);
   }
@@ -46,7 +46,7 @@ export class VideoRepositoryAdapter implements VideoRepositoryPort {
 
     const createdEntities = await this.prismaDatabaseHandler.execute(createVideosOperation, {
       operationType: 'CREATE',
-      entry: videosToCreate,
+      entity: videosToCreate,
     });
 
     return createdEntities.count;
@@ -64,7 +64,7 @@ export class VideoRepositoryAdapter implements VideoRepositoryPort {
 
     const updatedLike = await this.prismaDatabaseHandler.execute(updatePublishStatusOperation, {
       operationType: 'UPDATE',
-      entry: { updatedPublishStatus },
+      entity: { updatedPublishStatus },
       filter: { id },
     });
 
@@ -83,7 +83,7 @@ export class VideoRepositoryAdapter implements VideoRepositoryPort {
 
     const updatedLike = await this.prismaDatabaseHandler.execute(updateVisibilityOperation, {
       operationType: 'UPDATE',
-      entry: { updatedVisibilityStatus },
+      entity: { updatedVisibilityStatus },
       filter: { id },
     });
 
@@ -99,7 +99,7 @@ export class VideoRepositoryAdapter implements VideoRepositoryPort {
 
     const foundVideo = await this.prismaDatabaseHandler.execute(findVideoOperation, {
       operationType: 'CREATE',
-      entry: {},
+      entity: {},
     });
 
     return foundVideo ? this.videoPersistanceACL.toAggregate(foundVideo) : undefined;
@@ -126,7 +126,7 @@ export class VideoRepositoryAdapter implements VideoRepositoryPort {
 
     const updatedVideo = await this.prismaDatabaseHandler.execute(updatedLikesOperation, {
       operationType: 'UPDATE',
-      entry: {},
+      entity: {},
       filter: { id },
     });
 

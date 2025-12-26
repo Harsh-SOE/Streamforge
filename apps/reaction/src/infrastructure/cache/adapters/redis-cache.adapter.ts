@@ -5,10 +5,9 @@ import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { getShardFor } from '@app/counters';
 import { RedisClient } from '@app/clients/redis';
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
-import { RedisCacheHandler } from '@app/handlers/cache-handler';
+import { RedisCacheHandler } from '@app/handlers/redis-cache-handler';
 
 import { ReactionCachePort } from '@reaction/application/ports';
-import { AppConfigService } from '@reaction/infrastructure/config';
 
 import { RedisWithCommands } from '../types';
 
@@ -18,7 +17,6 @@ export class RedisCacheAdapter implements OnModuleInit, ReactionCachePort {
   private client: RedisWithCommands;
 
   public constructor(
-    private readonly configService: AppConfigService,
     private readonly redisCacheHandler: RedisCacheHandler,
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
     private readonly redis: RedisClient,
@@ -88,8 +86,6 @@ export class RedisCacheAdapter implements OnModuleInit, ReactionCachePort {
     const values = await this.redisCacheHandler.execute(getValuesOperations, {
       operationType: 'READ_MANY',
       keys: allShardedKeys,
-      logErrors: true,
-      suppressErrors: false,
     });
 
     const totalLikes = values.reduce(
@@ -110,8 +106,6 @@ export class RedisCacheAdapter implements OnModuleInit, ReactionCachePort {
     const values = await this.redisCacheHandler.execute(getValuesOperations, {
       operationType: 'READ_MANY',
       keys: allShardedKeys,
-      logErrors: true,
-      suppressErrors: false,
     });
 
     const totalDislikes = values.reduce(

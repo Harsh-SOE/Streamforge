@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import * as joi from 'joi';
 
-import { AppConfigService } from './config.service';
+import { QueryConfigService } from './config.service';
 
 @Module({
   imports: [
@@ -16,7 +16,7 @@ import { AppConfigService } from './config.service';
       }),
     }),
   ],
-  providers: [AppConfigService],
-  exports: [AppConfigService],
+  providers: [QueryConfigService],
+  exports: [QueryConfigService],
 })
-export class AppConfigModule {}
+export class QueryConfigModule {}

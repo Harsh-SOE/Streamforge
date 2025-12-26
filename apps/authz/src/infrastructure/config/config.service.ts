@@ -9,7 +9,7 @@ import { HealthImplementation, protoPath as HealthCheckProto } from 'grpc-health
 import { AUTH_Z_PACKAGE_NAME } from '@app/contracts/authz';
 
 @Injectable()
-export class AppConfigService {
+export class AuthzConfigService {
   public constructor(private configService: ConfigService) {}
 
   public get HTTP_PORT() {

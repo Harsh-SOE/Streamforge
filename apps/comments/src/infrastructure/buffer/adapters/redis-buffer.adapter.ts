@@ -11,12 +11,12 @@ import {
   CommentRepositoryPort,
 } from '@comments/application/ports';
 import { CommentAggregate } from '@comments/domain/aggregates';
-import { AppConfigService } from '@comments/infrastructure/config';
+import { CommentsConfigService } from '@comments/infrastructure/config';
 
 @Injectable()
 export class RedisStreamBufferAdapter implements CommentBufferPort {
   public constructor(
-    private readonly configService: AppConfigService,
+    private readonly configService: CommentsConfigService,
     @Inject(COMMENTS_REPOSITORY_PORT)
     private readonly commentsRepo: CommentRepositoryPort,
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,

@@ -5,7 +5,7 @@ import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { getShardFor } from '@app/counters';
 import { RedisClient } from '@app/clients/redis';
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
-import { RedisCacheHandler } from '@app/handlers/cache-handler';
+import { RedisCacheHandler } from '@app/handlers/redis-cache-handler';
 
 import { CommentCachePort } from '@comments/application/ports';
 
@@ -32,7 +32,7 @@ export class RedisCacheAdapter implements CommentCachePort, OnModuleInit {
 
     this.redisClient = this.redis.client as RedisWithCommands;
 
-    this.logger.info('✅ Scripts intialized');
+    this.logger.info('Scripts intialized');
   }
 
   public getShard(userId: string, videoId: string, shardNum = 64) {
@@ -59,8 +59,6 @@ export class RedisCacheAdapter implements CommentCachePort, OnModuleInit {
       key: userCommentCounterKey,
       value: '+1',
       operationType: 'WRITE',
-      logErrors: true,
-      suppressErrors: false,
     });
   }
 
@@ -74,8 +72,6 @@ export class RedisCacheAdapter implements CommentCachePort, OnModuleInit {
     const values = await this.redisHandler.execute(getValuesOperations, {
       operationType: 'READ_MANY',
       keys: allShardedKeys,
-      logErrors: true,
-      suppressErrors: false,
     });
 
     const totalComments = values.reduce(

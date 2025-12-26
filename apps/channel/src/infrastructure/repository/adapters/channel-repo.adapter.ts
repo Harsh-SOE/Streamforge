@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { Components } from '@app/common/components';
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
-import { PrismaDatabaseHandler } from '@app/handlers/database-handler';
+import { PrismaHandler } from '@app/handlers/database-handler';
 
 import { ChannelAggregate } from '@channel/domain/aggregates';
 import { ChannelCommandRepositoryPort } from '@channel/application/ports';
@@ -14,7 +14,7 @@ import { PrismaClient as ChannelPrismaClient } from '@peristance/channel';
 export class ChannelRepositoryAdapter implements ChannelCommandRepositoryPort {
   public constructor(
     private readonly channelPersistanceACL: ChannelAggregatePersistanceACL,
-    private readonly prismaDatabaseHandler: PrismaDatabaseHandler,
+    private readonly prismaDatabaseHandler: PrismaHandler,
     private readonly prisma: PrismaDBClient<ChannelPrismaClient>,
     @Inject(LOGGER_PORT) private logger: LoggerPort,
   ) {}
@@ -26,7 +26,7 @@ export class ChannelRepositoryAdapter implements ChannelCommandRepositoryPort {
       });
     const createdChannel = await this.prismaDatabaseHandler.execute(saveChannelOperation, {
       operationType: 'CREATE',
-      entry: this.channelPersistanceACL.toPersistance(model),
+      entity: this.channelPersistanceACL.toPersistance(model),
     });
     return this.channelPersistanceACL.toAggregate(createdChannel);
   }
@@ -48,7 +48,7 @@ export class ChannelRepositoryAdapter implements ChannelCommandRepositoryPort {
 
     const createdEntities = await this.prismaDatabaseHandler.execute(saveManyChannelsOperations, {
       operationType: 'CREATE',
-      entry: channelsToCreate,
+      entity: channelsToCreate,
     });
     return createdEntities.count;
   }
@@ -65,7 +65,7 @@ export class ChannelRepositoryAdapter implements ChannelCommandRepositoryPort {
 
     const updatedChannel = await this.prismaDatabaseHandler.execute(updateChannelByIdOperation, {
       operationType: 'UPDATE',
-      entry: this.channelPersistanceACL.toPersistance(updatedChannelModel),
+      entity: this.channelPersistanceACL.toPersistance(updatedChannelModel),
       filter: { id: channelId },
     });
 
@@ -84,7 +84,7 @@ export class ChannelRepositoryAdapter implements ChannelCommandRepositoryPort {
 
     const updatedChannel = await this.prismaDatabaseHandler.execute(updateChannelByIdOperation, {
       operationType: 'UPDATE',
-      entry: this.channelPersistanceACL.toPersistance(updatedChannelModel),
+      entity: this.channelPersistanceACL.toPersistance(updatedChannelModel),
       filter: { userId },
     });
 

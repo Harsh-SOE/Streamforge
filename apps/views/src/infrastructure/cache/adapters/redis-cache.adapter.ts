@@ -5,10 +5,9 @@ import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { getShardFor } from '@app/counters';
 import { RedisClient } from '@app/clients/redis';
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
-import { RedisCacheHandler } from '@app/handlers/cache-handler';
+import { RedisCacheHandler } from '@app/handlers/redis-cache-handler';
 
 import { ViewCachePort } from '@views/application/ports';
-import { AppConfigService } from '@views/infrastructure/config';
 
 import { RedisWithCommands } from '../types';
 
@@ -18,7 +17,6 @@ export class ViewCacheAdapter implements OnModuleInit, ViewCachePort {
   private client: RedisWithCommands;
 
   public constructor(
-    private readonly configService: AppConfigService,
     private readonly redisHandler: RedisCacheHandler,
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
     private readonly redis: RedisClient,
@@ -34,7 +32,7 @@ export class ViewCacheAdapter implements OnModuleInit, ViewCachePort {
 
     this.client = this.redis.client as RedisWithCommands;
 
-    this.logger.info('✅ Scripts intialized');
+    this.logger.info('Scripts intialized');
   }
 
   getShardKey(videoId: string, userId: string, shard: number = 64) {
@@ -59,8 +57,6 @@ export class ViewCacheAdapter implements OnModuleInit, ViewCachePort {
     const values = await this.redisHandler.execute(getValuesOperations, {
       operationType: 'READ_MANY',
       keys: allShardedKeys,
-      logErrors: true,
-      suppressErrors: false,
     });
 
     const totalViews = values.reduce(

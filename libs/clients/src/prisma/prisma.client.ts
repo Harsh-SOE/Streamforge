@@ -1,7 +1,7 @@
 import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
-import { PrismaDatabaseHandler } from '@app/handlers/database-handler';
+import { PrismaHandler } from '@app/handlers/database-handler';
 
 import { PRISMA_CLIENT, PRISMA_CLIENT_NAME } from './constants';
 
@@ -18,7 +18,7 @@ export class PrismaDBClient<T extends IPrismaClient> implements OnModuleInit, On
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
     @Inject(PRISMA_CLIENT) private readonly clientConstructor: new () => T,
     @Inject(PRISMA_CLIENT_NAME) private readonly clientName: string,
-    private readonly prismaHandler: PrismaDatabaseHandler,
+    private readonly prismaHandler: PrismaHandler,
   ) {
     this.logger.alert(`${this.clientName} Prisma client connecting...`);
   }

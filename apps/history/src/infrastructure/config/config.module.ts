@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import * as joi from 'joi';
 import path from 'path';
 
-import { AppConfigService } from './config.service';
+import { HistoryConfigService } from './config.service';
 
 @Module({
   imports: [
@@ -16,6 +16,6 @@ import { AppConfigService } from './config.service';
       }),
     }),
   ],
-  providers: [AppConfigService],
+  providers: [HistoryConfigService],
 })
-export class AppConfigModule {}
+export class HistoryConfigModule {}

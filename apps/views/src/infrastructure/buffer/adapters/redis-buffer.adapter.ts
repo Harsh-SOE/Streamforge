@@ -10,14 +10,14 @@ import {
   ViewRepositoryPort,
 } from '@views/application/ports';
 import { ViewAggregate } from '@views/domain/aggregates';
-import { AppConfigService } from '@views/infrastructure/config';
+import { ViewsConfigService } from '@views/infrastructure/config';
 
 import { ViewMessage, StreamData } from '../types';
 
 @Injectable()
 export class RedisStreamBufferAdapter implements ViewsBufferPort {
   public constructor(
-    private readonly configService: AppConfigService,
+    private readonly configService: ViewsConfigService,
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
     @Inject(VIEWS_REPOSITORY_PORT)
     private readonly viewsRepo: ViewRepositoryPort,

@@ -10,14 +10,14 @@ import {
   VideoRepositoryPort,
 } from '@videos/application/ports';
 import { VideoAggregate } from '@videos/domain/aggregates';
-import { AppConfigService } from '@videos/infrastructure/config';
+import { VideosConfigService } from '@videos/infrastructure/config';
 
 import { VideoMessage, StreamData } from '../types';
 
 @Injectable()
 export class RedisStreamBufferAdapter implements VideosBufferPort {
   public constructor(
-    private readonly configService: AppConfigService,
+    private readonly configService: VideosConfigService,
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
     @Inject(VIDEOS_RESPOSITORY_PORT)
     private readonly videosRepository: VideoRepositoryPort,

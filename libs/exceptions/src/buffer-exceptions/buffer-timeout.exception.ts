@@ -9,8 +9,6 @@ import {
 export type BufferTimeOutExceptionMetadata = {
   host?: string;
   port?: number;
-  retryAttempt?: number;
-  valueToBuffer?: string;
 };
 
 export type BufferTimeOutExceptionOptions = {

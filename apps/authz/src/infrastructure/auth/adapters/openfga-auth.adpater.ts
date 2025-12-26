@@ -10,14 +10,14 @@ import {
   CreateRelationOptions,
   CreateRelationResponse,
 } from '@authz/application/ports/auth';
-import { AppConfigService } from '@authz/infrastructure/config';
+import { AuthzConfigService } from '@authz/infrastructure/config';
 
 @Injectable()
 export class OpenFGAAuthAdapter implements AuthorizePort {
   private readonly client: OpenFgaClient;
 
   constructor(
-    private readonly configService: AppConfigService,
+    private readonly configService: AuthzConfigService,
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
   ) {
     this.client = new OpenFgaClient({

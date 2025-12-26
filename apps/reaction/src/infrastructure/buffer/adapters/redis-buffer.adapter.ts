@@ -9,7 +9,7 @@ import {
   ReactionRepositoryPort,
 } from '@reaction/application/ports';
 import { ReactionAggregate } from '@reaction/domain/aggregates';
-import { AppConfigService } from '@reaction/infrastructure/config';
+import { ReactionConfigService } from '@reaction/infrastructure/config';
 import { TransportDomainReactionStatusEnumMapper } from '@reaction/infrastructure/anti-corruption';
 
 import { ReactionMessage, StreamData } from '../types';
@@ -18,7 +18,7 @@ import { RedisClient } from '@app/clients/redis';
 @Injectable()
 export class RedisStreamBufferAdapter implements ReactionBufferPort {
   public constructor(
-    private readonly configService: AppConfigService,
+    private readonly configService: ReactionConfigService,
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
     @Inject(REACTION_DATABASE_PORT)
     private readonly reactionRepo: ReactionRepositoryPort,
