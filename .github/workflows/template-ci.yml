@@ -6,6 +6,11 @@ on:
       service-name:
         required: true
         type: string
+      generate-prisma:
+        description: "Set to true if this service requires Prisma Client generation"
+        required: false
+        type: boolean
+        default: false
     secrets:
       DOCKERHUB_USERNAME:
         required: true
@@ -23,7 +28,12 @@ jobs:
           cache: "yarn"
       - run: yarn install --frozen-lockfile
 
+      - name: Generate Prisma Client
+        if: ${{ inputs.generate-prisma == true }}
+        run: npx prisma generate --schema=apps/${{ inputs.service-name }}/prisma/schema.prisma
+
       - run: yarn lint:${{ inputs.service-name }}
+      - run: yarn lint:libs
       - run: yarn test apps/${{ inputs.service-name }}
 
       - uses: docker/setup-buildx-action@v3
