@@ -2,7 +2,7 @@ import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { HealthIndicatorResult, HealthIndicatorService } from '@nestjs/terminus';
 import { Admin, Kafka, logLevel } from 'kafkajs';
 
-import { AppConfigService } from '../config';
+import { ProjectionConfigService } from '../config';
 
 @Injectable()
 export class AppHealthService implements OnModuleInit, OnModuleDestroy {
@@ -11,7 +11,7 @@ export class AppHealthService implements OnModuleInit, OnModuleDestroy {
 
   constructor(
     private readonly healthIndicator: HealthIndicatorService,
-    private readonly configService: AppConfigService,
+    private readonly configService: ProjectionConfigService,
   ) {
     this.kafka = new Kafka({
       brokers: [`${configService.KAFKA_HOST}:${configService.KAFKA_PORT}`],

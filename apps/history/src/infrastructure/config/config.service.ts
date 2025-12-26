@@ -9,7 +9,7 @@ import { HealthImplementation, protoPath as HealthCheckProto } from 'grpc-health
 import { HISTORY_PACKAGE_NAME } from '@app/contracts/history/history';
 
 @Injectable()
-export class AppConfigService {
+export class HistoryConfigService {
   constructor(public readonly configService: ConfigService) {}
 
   get HTTP_PORT() {

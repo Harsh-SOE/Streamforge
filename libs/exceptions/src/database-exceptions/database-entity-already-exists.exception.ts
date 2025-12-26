@@ -21,7 +21,7 @@ export type DatabaseEntityAlreadyExistsExceptionOptions = {
 
 export class DatabaseEntityAlreadyExistsException extends InfrastructureException {
   constructor(options: DatabaseEntityAlreadyExistsExceptionOptions) {
-    const { message = `Entry already exists`, contextError, meta } = options;
+    const { message = `Entity already exists`, contextError, meta } = options;
 
     super({
       code: DATABASE_EXCEPTION.DATABASE_ENTRY_ALREADY_EXISTS_EXCEPTION,

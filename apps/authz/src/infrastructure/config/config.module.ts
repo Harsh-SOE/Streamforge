@@ -2,7 +2,7 @@ import { ConfigModule } from '@nestjs/config';
 import { Module } from '@nestjs/common';
 import * as joi from 'joi';
 
-import { AppConfigService } from './config.service';
+import { AuthzConfigService } from './config.service';
 
 @Module({
   imports: [
@@ -19,6 +19,6 @@ import { AppConfigService } from './config.service';
       }),
     }),
   ],
-  providers: [AppConfigService],
+  providers: [AuthzConfigService],
 })
-export class AppConfigModule {}
+export class AuthzConfigModule {}

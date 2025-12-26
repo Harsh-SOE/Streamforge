@@ -4,7 +4,7 @@ import { ClientsModule } from '@nestjs/microservices';
 
 import { SERVICES } from '@app/clients';
 import { LOGGER_PORT } from '@app/ports/logger';
-import { LokiConsoleLogger } from '@app/utils/loki-console-logger';
+import { LOKI_URL, LokiConsoleLogger } from '@app/utils/loki-console-logger';
 
 import { MeasureModule } from '@gateway/infrastructure/measure';
 import { JwtStrategy } from '@gateway/infrastructure/jwt/jwt-strategies';
@@ -66,6 +66,11 @@ import { GatwayConfigModule, GatewayConfigService } from '@gateway/infrastructur
     }),
   ],
   providers: [
+    {
+      provide: LOKI_URL,
+      inject: [GatewayConfigService],
+      useFactory: (configService: GatewayConfigService) => configService.GRAFANA_LOKI_URL,
+    },
     JwtStrategy,
     GatewayConfigService,
     { provide: LOGGER_PORT, useClass: LokiConsoleLogger },

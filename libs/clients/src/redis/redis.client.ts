@@ -2,7 +2,7 @@ import Redis from 'ioredis';
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
-import { RedisCacheHandler } from '@app/handlers/cache-handler';
+import { RedisCacheHandler } from '@app/handlers/redis-cache-handler';
 
 export const REDIS_HOST = Symbol('REDIS_HOST');
 export const REDIS_PORT = Symbol('REDIS_PORT');

@@ -22,12 +22,8 @@ import {
 } from '@app/clients/redis';
 import { LOGGER_PORT } from '@app/ports/logger';
 import { MESSAGE_BROKER } from '@app/ports/message-broker';
-import {
-  DATABASE_CONFIG,
-  DatabaseResillienceConfig,
-  PrismaDatabaseHandler,
-} from '@app/handlers/database-handler';
-import { KafkaMessageBusHandler } from '@app/handlers/message-bus-handler';
+import { DATABASE_CONFIG, DatabaseConfig, PrismaHandler } from '@app/handlers/database-handler';
+import { KAFKA_CONFIG, KafkaHandler, KafkaHandlerConfig } from '@app/handlers/kafka-bus-handler';
 import { LOKI_URL, LokiConsoleLogger } from '@app/utils/loki-console-logger';
 import { PRISMA_CLIENT, PRISMA_CLIENT_NAME, PrismaDBClient } from '@app/clients/prisma';
 
@@ -39,17 +35,22 @@ import {
 } from '@users/application/ports';
 import { MeasureModule } from '@users/infrastructure/measure';
 import { UserEventHandlers } from '@users/application/events';
-import { RedisCacheHandler } from '@app/handlers/cache-handler';
+import {
+  REDIS_CACHE_CONFIG,
+  RedisCacheHandler,
+  RedisCacheHandlerConfig,
+} from '@app/handlers/redis-cache-handler';
 import { RedisCacheAdapter } from '@users/infrastructure/cache/adapters';
 import { UsersRedisBuffer } from '@users/infrastructure/buffer/adapters';
 import { UserCommandHandlers } from '@users/application/use-cases/commands';
 import { AwsS3StorageAdapter } from '@users/infrastructure/storage/adapters';
 import { UserConfigModule, UserConfigService } from '@users/infrastructure/config';
 import { UserRepositoryAdapter } from '@users/infrastructure/repository/adapters';
-import { KafkaMessageBrokerAdapter } from '@users/infrastructure/message-bus/adapters';
+import { KafkaMessageBusAdapter } from '@users/infrastructure/message-bus/adapters';
 import { UserAggregatePersistanceACL } from '@users/infrastructure/anti-corruption/aggregate-persistance-acl';
 
 import { PrismaClient as UserPrismaClient } from '@persistance/users';
+import { REDIS_BUFFER_CONFIG, RedisBufferHandlerConfig } from '@app/handlers/redis-buffer-handler';
 
 @Global()
 @Module({
@@ -70,19 +71,58 @@ import { PrismaClient as UserPrismaClient } from '@persistance/users';
   ],
   providers: [
     UserAggregatePersistanceACL,
-    KafkaMessageBusHandler,
-    PrismaDatabaseHandler,
+    KafkaHandler,
+    PrismaHandler,
     RedisCacheHandler,
     PrismaDBClient,
     KafkaClient,
     RedisClient,
     {
       provide: DATABASE_CONFIG,
-      useValue: {
-        maxRetries: 3,
-        circuitBreakerThreshold: 10,
-        halfOpenAfterMs: 1500,
-      } satisfies DatabaseResillienceConfig,
+      inject: [UserConfigService],
+      useFactory: (configService: UserConfigService) =>
+        ({
+          host: configService.DATABASE_URL,
+          service: 'users',
+          logErrors: true,
+          resilienceOptions: { maxRetries: 3, circuitBreakerThreshold: 10, halfOpenAfterMs: 1500 },
+        }) satisfies DatabaseConfig,
+    },
+    {
+      provide: KAFKA_CONFIG,
+      inject: [UserConfigService],
+      useFactory: (configService: UserConfigService) =>
+        ({
+          host: configService.KAFKA_HOST,
+          port: configService.KAFKA_PORT,
+          service: 'users',
+          logErrors: true,
+          resilienceOptions: { maxRetries: 3, circuitBreakerThreshold: 10, halfOpenAfterMs: 1500 },
+        }) satisfies KafkaHandlerConfig,
+    },
+    {
+      provide: REDIS_BUFFER_CONFIG,
+      inject: [UserConfigService],
+      useFactory: (configService: UserConfigService) =>
+        ({
+          host: configService.REDIS_HOST,
+          port: configService.REDIS_PORT,
+          service: 'users',
+          logErrors: true,
+          resilienceOptions: { maxRetries: 3, circuitBreakerThreshold: 10, halfOpenAfterMs: 1500 },
+        }) satisfies RedisBufferHandlerConfig,
+    },
+    {
+      provide: REDIS_CACHE_CONFIG,
+      inject: [UserConfigService],
+      useFactory: (configService: UserConfigService) =>
+        ({
+          host: configService.REDIS_HOST,
+          port: configService.REDIS_PORT,
+          service: 'users',
+          logErrors: true,
+          resilienceOptions: { maxRetries: 3, circuitBreakerThreshold: 10, halfOpenAfterMs: 1500 },
+        }) satisfies RedisCacheHandlerConfig,
     },
     {
       provide: USER_REROSITORY_PORT,
@@ -90,7 +130,7 @@ import { PrismaClient as UserPrismaClient } from '@persistance/users';
     },
     {
       provide: MESSAGE_BROKER,
-      useClass: KafkaMessageBrokerAdapter,
+      useClass: KafkaMessageBusAdapter,
     },
     {
       provide: USER_CACHE_PORT,
@@ -176,8 +216,8 @@ import { PrismaClient as UserPrismaClient } from '@persistance/users';
     CacheModule,
     UserAggregatePersistanceACL,
 
-    KafkaMessageBusHandler,
-    PrismaDatabaseHandler,
+    KafkaHandler,
+    PrismaHandler,
     RedisCacheHandler,
 
     KafkaClient,

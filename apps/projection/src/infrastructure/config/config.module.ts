@@ -3,7 +3,7 @@ import * as joi from 'joi';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
-import { AppConfigService } from './config.service';
+import { ProjectionConfigService } from './config.service';
 
 @Module({
   imports: [
@@ -31,7 +31,7 @@ import { AppConfigService } from './config.service';
       }),
     }),
   ],
-  providers: [AppConfigService],
-  exports: [AppConfigService],
+  providers: [ProjectionConfigService],
+  exports: [ProjectionConfigService],
 })
-export class AppConfigModule {}
+export class ProjectionConfigModule {}

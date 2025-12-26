@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Components } from '@app/common/components';
 import { PrismaDBClient } from '@app/clients/prisma';
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
-import { PrismaDatabaseHandler } from '@app/handlers/database-handler';
+import { PrismaHandler } from '@app/handlers/database-handler';
 
 import { CommentAggregate } from '@comments/domain/aggregates';
 import { CommentRepositoryPort } from '@comments/application/ports';
@@ -15,7 +15,7 @@ import { PrismaClient as CommentsPrismaClient } from '@peristance/comments';
 export class PrismaMongoDBRepositoryAdapter implements CommentRepositoryPort {
   public constructor(
     private readonly commentPersistanceACL: CommentAggregatePersistance,
-    private readonly prismaDatabaseHandler: PrismaDatabaseHandler,
+    private readonly prismaDatabaseHandler: PrismaHandler,
     private readonly prisma: PrismaDBClient<CommentsPrismaClient>,
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
   ) {}
@@ -44,7 +44,7 @@ export class PrismaMongoDBRepositoryAdapter implements CommentRepositoryPort {
 
     const createdEntities = await this.prismaDatabaseHandler.execute(createdEntitiesFunc, {
       operationType: 'CREATE',
-      entry: dataToCreate,
+      entity: dataToCreate,
     });
     return createdEntities.count;
   }
@@ -58,7 +58,7 @@ export class PrismaMongoDBRepositoryAdapter implements CommentRepositoryPort {
 
     const updatedLike = await this.prismaDatabaseHandler.execute(updateLikeOperation, {
       operationType: 'UPDATE',
-      entry: {},
+      entity: {},
       filter: { newCommentText },
     });
 

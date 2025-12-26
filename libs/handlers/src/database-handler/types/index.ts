@@ -1,1 +1,1 @@
-export * from './database-handler.options';
+export * from './prisma-handler.options';

@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import * as joi from 'joi';
 
-import { AppConfigService } from './config.service';
+import { CommentsConfigService } from './config.service';
 
 @Module({
   imports: [
@@ -33,7 +33,7 @@ import { AppConfigService } from './config.service';
       }),
     }),
   ],
-  providers: [AppConfigService],
-  exports: [AppConfigService],
+  providers: [CommentsConfigService],
+  exports: [CommentsConfigService],
 })
-export class AppConfigModule {}
+export class CommentsConfigModule {}

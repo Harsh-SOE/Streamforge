@@ -1,1 +1,1 @@
-export * from './kafka-message-broker.adapter';
+export * from './kafka-message-bus.adapter';

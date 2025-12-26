@@ -3,10 +3,10 @@ import { ConfigModule } from '@nestjs/config';
 import * as joi from 'joi';
 import { join } from 'path';
 
-import { AppConfigService } from './config.service';
+import { ReactionConfigService } from './config.service';
 
 @Module({
-  providers: [AppConfigService],
+  providers: [ReactionConfigService],
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
@@ -35,6 +35,6 @@ import { AppConfigService } from './config.service';
       }),
     }),
   ],
-  exports: [AppConfigService],
+  exports: [ReactionConfigService],
 })
-export class AppConfigModule {}
+export class ReactionConfigModule {}

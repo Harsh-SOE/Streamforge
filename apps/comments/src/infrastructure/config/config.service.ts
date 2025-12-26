@@ -9,7 +9,7 @@ import { HealthImplementation, protoPath as HealthCheckProto } from 'grpc-health
 import { COMMENT_PACKAGE_NAME } from '@app/contracts/comments';
 
 @Injectable()
-export class AppConfigService {
+export class CommentsConfigService {
   public constructor(private configService: ConfigService) {}
 
   public get GRPC_PORT() {

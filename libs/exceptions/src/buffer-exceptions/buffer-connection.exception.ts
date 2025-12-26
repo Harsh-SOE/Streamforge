@@ -9,7 +9,6 @@ import {
 export type BufferConnectionExceptionMetaData = {
   host?: string;
   port?: number;
-  retryAttempt?: number;
 };
 
 export type BufferConnectionExceptionOptions = {

@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { PrismaDBClient } from '@app/clients/prisma';
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
-import { PrismaDatabaseHandler } from '@app/handlers/database-handler';
+import { PrismaHandler } from '@app/handlers/database-handler';
 
 import { UserAggregate } from '@users/domain/aggregates';
 import { UserRepositoryPort } from '@users/application/ports';
@@ -14,7 +14,7 @@ import { PrismaClient } from '@persistance/users';
 export class UserRepositoryAdapter implements UserRepositoryPort {
   public constructor(
     private userPersistanceACL: UserAggregatePersistanceACL,
-    private readonly prismaDatabaseHandler: PrismaDatabaseHandler,
+    private readonly prismaDatabaseHandler: PrismaHandler,
     private readonly prisma: PrismaDBClient<PrismaClient>,
     @Inject(LOGGER_PORT) private logger: LoggerPort,
   ) {

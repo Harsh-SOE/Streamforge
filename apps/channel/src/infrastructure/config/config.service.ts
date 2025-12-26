@@ -9,7 +9,7 @@ import { HealthImplementation, protoPath as HealthCheckProto } from 'grpc-health
 import { CHANNEL_PACKAGE_NAME } from '@app/contracts/channel';
 
 @Injectable()
-export class AppConfigService {
+export class ChannelConfigService {
   public constructor(private configService: ConfigService) {}
 
   get SERVICE_PORT() {

@@ -3,11 +3,11 @@ import { join } from 'path';
 import { ConfigModule } from '@nestjs/config';
 import { Global, Module } from '@nestjs/common';
 
-import { AppConfigService } from './config.service';
+import { ViewsConfigService } from './config.service';
 
 @Global()
 @Module({
-  providers: [AppConfigService],
+  providers: [ViewsConfigService],
   imports: [
     ConfigModule.forRoot({
       envFilePath: join(__dirname, '../.env'),
@@ -36,6 +36,6 @@ import { AppConfigService } from './config.service';
       }),
     }),
   ],
-  exports: [AppConfigService],
+  exports: [ViewsConfigService],
 })
-export class AppConfigModule {}
+export class ViewsConfigModule {}

@@ -1,5 +1,5 @@
-import { Controller, Inject, UseFilters } from '@nestjs/common';
 import { Observable } from 'rxjs';
+import { Controller, Inject, UseFilters } from '@nestjs/common';
 
 import {
   ChannelActivateMonitizationDto,
@@ -18,15 +18,15 @@ import {
 
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
 
-import { GrpcService } from './rpc.service';
 import { GrpcFilter } from '../filters';
+import { RpcService } from './rpc.service';
 
 @Controller('channel')
 @UseFilters(GrpcFilter)
 @ChannelServiceControllerMethods()
-export class GrpcController implements ChannelServiceController {
+export class RpcController implements ChannelServiceController {
   constructor(
-    private readonly grpcService: GrpcService,
+    private readonly grpcService: RpcService,
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
   ) {}
 

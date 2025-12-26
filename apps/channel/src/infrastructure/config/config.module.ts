@@ -3,10 +3,10 @@ import { ConfigModule } from '@nestjs/config';
 import * as joi from 'joi';
 import { join } from 'path';
 
-import { AppConfigService } from './config.service';
+import { ChannelConfigService } from './config.service';
 
 @Module({
-  providers: [AppConfigService],
+  providers: [ChannelConfigService],
   imports: [
     ConfigModule.forRoot({
       envFilePath: join(__dirname, '../../.env'),
@@ -41,4 +41,4 @@ import { AppConfigService } from './config.service';
     }),
   ],
 })
-export class AppConfigModule {}
+export class ChannelConfigModule {}

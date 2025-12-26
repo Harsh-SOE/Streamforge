@@ -3,17 +3,13 @@ import { execSync } from 'child_process';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 
-import { LOGGER_PORT } from '@app/ports/logger';
-import {
-  DATABASE_CONFIG,
-  DatabaseResillienceConfig,
-  PrismaDatabaseHandler,
-} from '@app/handlers/database-handler';
-import { PRISMA_CLIENT, PRISMA_CLIENT_NAME, PrismaDBClient } from '@app/clients/prisma';
+import { DATABASE_CONFIG, DatabaseConfig, PrismaHandler } from '@app/handlers/database-handler';
 import {
   DatabaseEntityAlreadyExistsException,
   DatabaseEntityDoesNotExistsException,
 } from '@app/exceptions/database-exceptions';
+import { LOGGER_PORT } from '@app/ports/logger';
+import { PRISMA_CLIENT, PRISMA_CLIENT_NAME, PrismaDBClient } from '@app/clients/prisma';
 
 import {
   InvalidAvatarUrlException,
@@ -60,7 +56,7 @@ describe('UserRepositoryAdapter (Integration)', () => {
       providers: [
         UserRepositoryAdapter,
         UserAggregatePersistanceACL,
-        PrismaDatabaseHandler,
+        PrismaHandler,
         PrismaDBClient,
         {
           provide: PRISMA_CLIENT,
@@ -68,11 +64,17 @@ describe('UserRepositoryAdapter (Integration)', () => {
         },
         {
           provide: DATABASE_CONFIG,
-          useValue: {
-            maxRetries: 3,
-            circuitBreakerThreshold: 10,
-            halfOpenAfterMs: 1500,
-          } satisfies DatabaseResillienceConfig,
+          useFactory: () =>
+            ({
+              host: 'test-container',
+              service: 'users',
+              logErrors: true,
+              resilienceOptions: {
+                maxRetries: 3,
+                circuitBreakerThreshold: 10,
+                halfOpenAfterMs: 2_500,
+              },
+            }) satisfies DatabaseConfig,
         },
         {
           provide: PRISMA_CLIENT_NAME,
@@ -81,10 +83,10 @@ describe('UserRepositoryAdapter (Integration)', () => {
         {
           provide: LOGGER_PORT,
           useValue: {
-            info: console.log,
-            error: console.error,
-            alert: console.warn,
-            fatal: console.error,
+            info: jest.fn(),
+            error: jest.fn(),
+            alert: jest.fn(),
+            fatal: jest.fn(),
           },
         },
       ],

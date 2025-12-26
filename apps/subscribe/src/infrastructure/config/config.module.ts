@@ -3,7 +3,7 @@ import * as joi from 'joi';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
-import { AppConfigService } from './config.service';
+import { SubscribeConfigService } from './config.service';
 
 @Module({
   imports: [
@@ -16,6 +16,6 @@ import { AppConfigService } from './config.service';
       }),
     }),
   ],
-  providers: [AppConfigService],
+  providers: [SubscribeConfigService],
 })
-export class AppConfigModule {}
+export class SubscribeConfigModule {}

@@ -1,3 +1,33 @@
+x-grpc-healthcheck: &grpc_healthcheck
+  test: ["CMD", "grpc_health_probe", "-addr=:5000"]
+  interval: 10s
+  timeout: 5s
+  retries: 12
+  start_period: 90s
+
+x-http-healthcheck: &http_healthcheck
+  test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+  interval: 10s
+  timeout: 5s
+  retries: 5
+  start_period: 60s
+
+x-kafka-healthcheck: &kafka_healthcheck
+  test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+  interval: 10s
+  timeout: 5s
+  retries: 12
+  start_period: 180s
+
+x-service-resources: &service_resources
+  resources:
+    reservations:
+      cpus: "0.25"
+      memory: "256M"
+    limits:
+      cpus: "0.25"
+      memory: "512M"
+
 services:
   analytics-database:
     image: clickhouse/clickhouse-server:latest
@@ -9,10 +39,6 @@ services:
       - analytics_logs:/var/log/clickhouse-server
     networks:
       - analytics-database-network
-
-  #-------------------------------------------------------------------------------------------------------------#
-  #                                          METRICS AND OBSERVABILITY                                          #
-  #-------------------------------------------------------------------------------------------------------------#
 
   prom-server:
     image: prom/prometheus
@@ -100,10 +126,6 @@ services:
           cpus: "0.5"
     logging: *logging
 
-  #-------------------------------------------------------------------------------------------------------------#
-  #                                              AUTHORIZATION                                                  #
-  #-------------------------------------------------------------------------------------------------------------#
-
   postgres:
     image: postgres:17
     container_name: postgres
@@ -178,44 +200,6 @@ services:
       migrate:
         condition: service_completed_successfully
 
-x-healthcheck-grpc: &grpc_healthcheck
-  healthcheck:
-    test: ["CMD", "grpc_health_probe", "-addr=:5000"]
-    interval: 10s
-    timeout: 5s
-    retries: 12
-    start_period: 90s
-
-x-deploy-resource: &service_resources
-  deploy:
-    resources:
-      reservations:
-        cpus: "0.25"
-        memory: "256M"
-      limits:
-        cpus: "0.25"
-        memory: "512M"
-
-x-http-healthcheck: &http_healthcheck
-  healthcheck:
-    test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
-    interval: 10s
-    timeout: 5s
-    retries: 5
-    start_period: 1m
-
-x-kafka-healthcheck: &kafka_healthcheck
-  healthcheck:
-    test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
-    interval: 10s
-    timeout: 5s
-    retries: 12
-    start_period: 180s
-
-  #-------------------------------------------------------------------------------------------------------------#
-  #                                              MICROSERVICES                                                  #
-  #-------------------------------------------------------------------------------------------------------------#
-
   gateway:
     image: mytube/gateway/production:latest
     container_name: gateway
@@ -247,8 +231,10 @@ x-kafka-healthcheck: &kafka_healthcheck
         condition: service_healthy
       email:
         condition: service_healthy
-    deploy: *http_healthcheck
-    healthcheck: *service_resources
+    deploy:
+      <<: *service_resources
+    healthcheck:
+      <<: *http_healthcheck
 
   users:
     image: mytube/users/production:latest
@@ -261,13 +247,15 @@ x-kafka-healthcheck: &kafka_healthcheck
     networks:
       - services
       - observer
-    deploy: *grpc_healthcheck
-    healthcheck: *service_resources
     depends_on:
       users-migrate:
         condition: service_completed_successfully
       email:
         condition: service_healthy
+    deploy:
+      <<: *service_resources
+    healthcheck:
+      <<: *grpc_healthcheck
 
   authz:
     image: mytube/authz/production:latest
@@ -281,8 +269,10 @@ x-kafka-healthcheck: &kafka_healthcheck
       - services
       - observer
       - authorization
-    deploy: *service_resources
-    healthcheck: *grpc_healthcheck
+    deploy:
+      <<: *service_resources
+    healthcheck:
+      <<: *grpc_healthcheck
 
   users-migrate:
     image: mytube/users/production:latest
@@ -314,8 +304,10 @@ x-kafka-healthcheck: &kafka_healthcheck
         condition: service_completed_successfully
       email:
         condition: service_healthy
-    deploy: *service_resources
-    healthcheck: *grpc_healthcheck
+    deploy:
+      <<: *service_resources
+    healthcheck:
+      <<: *grpc_healthcheck
 
   channel-migrate:
     image: mytube/channel/production:latest
@@ -349,8 +341,10 @@ x-kafka-healthcheck: &kafka_healthcheck
         condition: service_completed_successfully
       email:
         condition: service_healthy
-    deploy: *service_resources
-    healthcheck: *grpc_healthcheck
+    deploy:
+      <<: *service_resources
+    healthcheck:
+      <<: *grpc_healthcheck
 
   videos-migrate:
     image: mytube/videos/production:latest
@@ -381,8 +375,10 @@ x-kafka-healthcheck: &kafka_healthcheck
     depends_on:
       videos:
         condition: service_healthy
-    deploy: *service_resources
-    healthcheck: *kafka_healthcheck
+    deploy:
+      <<: *service_resources
+    healthcheck:
+      <<: *kafka_healthcheck
 
   views:
     image: mytube/views/production:latest
@@ -400,8 +396,10 @@ x-kafka-healthcheck: &kafka_healthcheck
     depends_on:
       views-migrate:
         condition: service_completed_successfully
-    deploy: *service_resources
-    healthcheck: *grpc_healthcheck
+    deploy:
+      <<: *service_resources
+    healthcheck:
+      <<: *grpc_healthcheck
 
   views-migrate:
     image: mytube/views/production:latest
@@ -427,8 +425,10 @@ x-kafka-healthcheck: &kafka_healthcheck
     networks:
       - services
       - observer
-    deploy: *service_resources
-    healthcheck: *grpc_healthcheck
+    deploy:
+      <<: *service_resources
+    healthcheck:
+      <<: *grpc_healthcheck
 
   comments:
     image: mytube/comments/production:latest
@@ -446,8 +446,10 @@ x-kafka-healthcheck: &kafka_healthcheck
     depends_on:
       comments-migrate:
         condition: service_completed_successfully
-    deploy: *service_resources
-    healthcheck: *grpc_healthcheck
+    deploy:
+      <<: *service_resources
+    healthcheck:
+      <<: *grpc_healthcheck
 
   comments-migrate:
     image: mytube/comments/production:latest
@@ -476,8 +478,10 @@ x-kafka-healthcheck: &kafka_healthcheck
     depends_on:
       playlist-migrate:
         condition: service_completed_successfully
-    healthcheck: *grpc_healthcheck
-    deploy: *service_resources
+    deploy:
+      <<: *service_resources
+    healthcheck:
+      <<: *grpc_healthcheck
 
   playlist-migrate:
     image: mytube/playlist/production:latest
@@ -506,8 +510,10 @@ x-kafka-healthcheck: &kafka_healthcheck
     depends_on:
       subscribe-migrate:
         condition: service_completed_successfully
-    healthcheck: *grpc_healthcheck
-    deploy: *service_resources
+    deploy:
+      <<: *service_resources
+    healthcheck:
+      <<: *grpc_healthcheck
 
   subscribe-migrate:
     image: mytube/subscribe/production:latest
@@ -536,8 +542,10 @@ x-kafka-healthcheck: &kafka_healthcheck
     depends_on:
       history-migrate:
         condition: service_completed_successfully
-    healthcheck: *grpc_healthcheck
-    deploy: *service_resources
+    deploy:
+      <<: *service_resources
+    healthcheck:
+      <<: *grpc_healthcheck
 
   history-migrate:
     image: mytube/history/production:latest
@@ -563,8 +571,10 @@ x-kafka-healthcheck: &kafka_healthcheck
     networks:
       - services
       - observer
-    healthcheck: *kafka_healthcheck
-    deploy: *service_resources
+    deploy:
+      <<: *service_resources
+    healthcheck:
+      <<: *kafka_healthcheck
 
   projection:
     image: mytube/projection/production:latest
@@ -579,8 +589,10 @@ x-kafka-healthcheck: &kafka_healthcheck
     networks:
       - services
       - observer
-    healthcheck: *kafka_healthcheck
-    deploy: *service_resources
+    deploy:
+      <<: *service_resources
+    healthcheck:
+      <<: *kafka_healthcheck
 
   query:
     image: mytube/query/production:latest
@@ -595,22 +607,16 @@ x-kafka-healthcheck: &kafka_healthcheck
     networks:
       - services
       - observer
-    healthcheck: *kafka_healthcheck
-    deploy: *service_resources
-
-#-------------------------------------------------------------------------------------------------------------#
-#                                                  VOLUMES                                                    #
-#-------------------------------------------------------------------------------------------------------------#
+    deploy:
+      <<: *service_resources
+    healthcheck:
+      <<: *grpc_healthcheck
 
 volumes:
   grafana-storage: {}
   transcoder-volume: {}
   analytics_data: {}
   analytics_logs: {}
-
-#-------------------------------------------------------------------------------------------------------------#
-#                                                 NETWORKS                                                    #
-#-------------------------------------------------------------------------------------------------------------#
 
 networks:
   services: {}

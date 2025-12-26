@@ -6,7 +6,7 @@ import { PROJECTION_EVENTS } from '@app/clients';
 import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
 import { VideoUploadedEventDto } from '@app/contracts/videos';
 import { UserProfileCreatedEventDto } from '@app/contracts/users';
-import { KafkaMessageBusHandler } from '@app/handlers/message-bus-handler';
+import { KafkaHandler } from '@app/handlers/kafka-bus-handler';
 
 import {
   USER_PROJECTION_REPOSITORY_PORT,
@@ -15,19 +15,19 @@ import {
   VIDEO_PROJECTION_REPOSITORY_PORT,
   VideoProjectionRepositoryPort,
 } from '@projection/application/ports';
-import { AppConfigService } from '@projection/infrastructure/config';
+import { ProjectionConfigService } from '@projection/infrastructure/config';
 
 @Injectable()
 export class KafkaBufferAdapter implements OnModuleInit, ProjectionBufferPort {
   public constructor(
-    private readonly configService: AppConfigService,
+    private readonly configService: ProjectionConfigService,
     @Inject(USER_PROJECTION_REPOSITORY_PORT)
     private readonly userProjectionRepo: UserProjectionRepositoryPort,
     @Inject(VIDEO_PROJECTION_REPOSITORY_PORT)
     private readonly videoProjectionRepo: VideoProjectionRepositoryPort,
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
     private readonly kafkaClient: KafkaClient,
-    private readonly kafkaHandler: KafkaMessageBusHandler,
+    private readonly kafkaHandler: KafkaHandler,
   ) {}
 
   public async onModuleInit() {
@@ -43,11 +43,11 @@ export class KafkaBufferAdapter implements OnModuleInit, ProjectionBufferPort {
         fromBeginning: false,
       });
 
-    await this.kafkaHandler.handle(userSubscribeOperation, {
+    await this.kafkaHandler.execute(userSubscribeOperation, {
       operationType: 'CONNECT_OR_DISCONNECT',
     });
 
-    await this.kafkaHandler.handle(videosubscribeOperation, {
+    await this.kafkaHandler.execute(videosubscribeOperation, {
       operationType: 'CONNECT_OR_DISCONNECT',
     });
 

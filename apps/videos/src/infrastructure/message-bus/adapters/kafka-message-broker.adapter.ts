@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 
 import { KafkaClient } from '@app/clients/kafka';
-import { MessageBrokerPort } from '@app/ports/message-broker';
-import { KafkaMessageBusHandler } from '@app/handlers/message-bus-handler';
+import { MessageBusPort } from '@app/ports/message-broker';
+import { KafkaHandler } from '@app/handlers/kafka-bus-handler';
 
 @Injectable()
-export class KafkaMessageBrokerAdapter implements MessageBrokerPort {
+export class KafkaMessageBusAdapter implements MessageBusPort {
   public constructor(
     private readonly videosKafkaClient: KafkaClient,
-    private readonly kafkaFilter: KafkaMessageBusHandler,
+    private readonly kafkaFilter: KafkaHandler,
   ) {}
 
   public async publishMessage(topic: string, payload: string): Promise<void> {
@@ -18,23 +18,19 @@ export class KafkaMessageBrokerAdapter implements MessageBrokerPort {
         messages: [{ key: 'videos', value: payload }],
       });
 
-    await this.kafkaFilter.handle(kafkaPublishMessageOperation, {
+    await this.kafkaFilter.execute(kafkaPublishMessageOperation, {
       operationType: 'PUBLISH_OR_SEND',
       topic,
       message: String(payload),
-      logErrors: true,
-      suppressErrors: false,
     });
   }
 
   public async subscribeTo(topic: string): Promise<void> {
     const kafkaSubscribeOperation = () =>
       this.videosKafkaClient.consumer.subscribe({ topic, fromBeginning: true });
-    await this.kafkaFilter.handle(kafkaSubscribeOperation, {
+    await this.kafkaFilter.execute(kafkaSubscribeOperation, {
       operationType: 'SUBSCRIBE',
       topic,
-      logErrors: true,
-      suppressErrors: false,
     });
   }
 }
