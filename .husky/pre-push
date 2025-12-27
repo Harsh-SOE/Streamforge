@@ -1,1 +1,1 @@
-yarn test
+yarn test --maxWorkers=4
