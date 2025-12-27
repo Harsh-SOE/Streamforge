@@ -47,7 +47,7 @@
       "@history/*": ["apps/history/src/*"],
       "@persistance/channel": ["apps/channel/generated/prisma"],
       "@persistance/comments": ["apps/comments/generated/prisma"],
-      "@peristance/reaction": ["apps/reaction/generated/prisma"],
+      "@persistance/reaction": ["apps/reaction/generated/prisma"],
       "@persistance/users": ["apps/users/generated/prisma"],
       "@peristance/videos": ["apps/videos/generated/prisma"],
       "@persistance/auth": ["apps/auth/generated/prisma"],

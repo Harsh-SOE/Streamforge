@@ -37,7 +37,7 @@ import {
   REACTION_DATABASE_PORT,
 } from '@reaction/application/ports';
 
-import { PrismaClient as ReactionPrismaClient } from '@peristance/reaction';
+import { PrismaClient as ReactionPrismaClient } from '@persistance/reaction';
 
 import { MeasureModule } from '../measure';
 import { ReactionConfigService } from '../config';
