@@ -49,7 +49,7 @@
       "@persistance/comments": ["apps/comments/generated/prisma"],
       "@persistance/reaction": ["apps/reaction/generated/prisma"],
       "@persistance/users": ["apps/users/generated/prisma"],
-      "@peristance/videos": ["apps/videos/generated/prisma"],
+      "@persistance/videos": ["apps/videos/generated/prisma"],
       "@persistance/auth": ["apps/auth/generated/prisma"],
       "@persistance/views": ["apps/views/generated/prisma"],
       "@playlist/*": ["apps/playlist/src/*"],
