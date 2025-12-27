@@ -4,7 +4,7 @@ import { IAggregatePersistanceACL } from '@app/ports/anti-corruption';
 
 import { ReactionAggregate } from '@reaction/domain/aggregates';
 
-import { VideoReactions } from '@peristance/reaction';
+import { VideoReactions } from '@persistance/reaction';
 
 @Injectable()
 export class ReactionAggregatePersistanceACL implements IAggregatePersistanceACL<

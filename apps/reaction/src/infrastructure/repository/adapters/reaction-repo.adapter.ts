@@ -10,7 +10,7 @@ import { ReactionAggregate } from '@reaction/domain/aggregates';
 import { ReactionRepositoryPort } from '@reaction/application/ports';
 import { ReactionAggregatePersistanceACL } from '@reaction/infrastructure/anti-corruption';
 
-import { PrismaClient } from '@peristance/reaction';
+import { PrismaClient } from '@persistance/reaction';
 
 @Injectable()
 export class ReactionRepositoryAdapter implements ReactionRepositoryPort {

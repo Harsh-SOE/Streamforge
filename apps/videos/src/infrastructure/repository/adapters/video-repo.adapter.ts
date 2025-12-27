@@ -9,7 +9,7 @@ import { VideoRepositoryPort } from '@videos/application/ports';
 import { VideoAggregatePersistanceACL } from '@videos/infrastructure/anti-corruption';
 import { VideoDomainPublishStatus, VideoDomainVisibiltyStatus } from '@videos/domain/enums';
 
-import { PrismaClient as VideoPrismaClient } from '@peristance/videos';
+import { PrismaClient as VideoPrismaClient } from '@persistance/videos';
 
 @Injectable()
 export class VideoRepositoryAdapter implements VideoRepositoryPort {

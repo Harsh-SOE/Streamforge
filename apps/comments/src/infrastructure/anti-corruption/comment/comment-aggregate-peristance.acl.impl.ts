@@ -4,7 +4,7 @@ import { IAggregatePersistanceACL } from '@app/ports/anti-corruption';
 
 import { CommentAggregate } from '@comments/domain/aggregates';
 
-import { Comment } from '@peristance/comments';
+import { Comment } from '@persistance/comments';
 
 @Injectable()
 export class CommentAggregatePersistance implements IAggregatePersistanceACL<

@@ -49,7 +49,7 @@ import { CommentAggregatePersistance } from '../anti-corruption';
 import { KafkaMessageBusAdapter } from '../message-bus/adapters';
 import { PrismaMongoDBRepositoryAdapter } from '../repository/adapters';
 
-import { PrismaClient as CommentsPrismaClient } from '@peristance/comments';
+import { PrismaClient as CommentsPrismaClient } from '@persistance/comments';
 
 @Global()
 @Module({

@@ -49,7 +49,7 @@ import { VideoRepositoryAdapter } from '@videos/infrastructure/repository/adapte
 import { VideoAggregatePersistanceACL } from '@videos/infrastructure/anti-corruption';
 import { KafkaMessageBusAdapter } from '@videos/infrastructure/message-bus/adapters';
 
-import { PrismaClient as VideoPrismaClient } from '@peristance/videos';
+import { PrismaClient as VideoPrismaClient } from '@persistance/videos';
 
 @Global()
 @Module({

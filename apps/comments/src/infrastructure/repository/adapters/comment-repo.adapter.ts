@@ -9,7 +9,7 @@ import { CommentAggregate } from '@comments/domain/aggregates';
 import { CommentRepositoryPort } from '@comments/application/ports';
 import { CommentAggregatePersistance } from '@comments/infrastructure/anti-corruption';
 
-import { PrismaClient as CommentsPrismaClient } from '@peristance/comments';
+import { PrismaClient as CommentsPrismaClient } from '@persistance/comments';
 
 @Injectable()
 export class PrismaMongoDBRepositoryAdapter implements CommentRepositoryPort {

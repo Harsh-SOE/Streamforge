@@ -4,7 +4,7 @@ import { IAggregatePersistanceACL } from '@app/ports/anti-corruption';
 
 import { VideoAggregate } from '@videos/domain/aggregates';
 
-import { Video } from '@peristance/videos';
+import { Video } from '@persistance/videos';
 
 @Injectable()
 export class VideoAggregatePersistanceACL implements IAggregatePersistanceACL<
