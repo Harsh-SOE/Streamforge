@@ -1,6 +1,6 @@
+import { Queue } from 'bullmq';
 import { Injectable } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
-import { Queue } from 'bullmq';
 
 import { TranscodeVideoEventDto } from '@app/contracts/video-transcoder';
 

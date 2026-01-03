@@ -3,10 +3,10 @@ import { ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 
 import { VIDEO_SERVICE_NAME, VideoServiceClient } from '@app/contracts/videos';
-import { SERVICES } from '@app/clients/constant';
+import { SERVICES } from '@app/common';
 import { UserAuthPayload } from '@app/contracts/auth';
 import { CHANNEL_SERVICE_NAME, ChannelServiceClient } from '@app/contracts/channel';
-import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
+import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
 import { QUERY_SERVICE_NAME, QueryServiceClient } from '@app/contracts/query';
 
 import { ClientTransportVideoVisibilityEnumMapper } from './mappers/video-visibility-status';

@@ -1,8 +1,5 @@
-import { Admin, Consumer, Kafka, Producer } from 'kafkajs';
-import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-
-import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
-import { KafkaHandler } from '@app/handlers/kafka-bus-handler';
+import { Inject, Injectable } from '@nestjs/common';
+import { Consumer, ConsumerConfig, Kafka, Producer, ProducerConfig } from 'kafkajs';
 
 export const KAFKA_HOST = Symbol('KAFKA_HOST');
 export const KAFKA_PORT = Symbol('KAFKA_PORT');
@@ -13,11 +10,8 @@ export const KAFKA_CLIENT = Symbol('KAFKA_CLIENT');
 export const KAFKA_CONSUMER = Symbol('KAFKA_CONSUMER');
 
 @Injectable()
-export class KafkaClient implements OnModuleInit, OnModuleDestroy {
+export class KafkaClient {
   private client: Kafka;
-  public admin: Admin;
-  public producer: Producer;
-  public consumer: Consumer;
 
   public constructor(
     @Inject(KAFKA_HOST) private readonly host: string,
@@ -26,75 +20,28 @@ export class KafkaClient implements OnModuleInit, OnModuleDestroy {
     @Inject(KAFKA_ACCESS_CERT) private readonly accessCert: string,
     @Inject(KAFKA_ACCESS_KEY) private readonly accessKey: string,
     @Inject(KAFKA_CLIENT) private readonly kafkaClient: string,
-    @Inject(KAFKA_CONSUMER) private readonly kafkaConsumer: string,
-    @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
-    private readonly kafkaMessageHandler: KafkaHandler,
   ) {
-    this.logger.alert(`Kafka client connecting...`);
+    this.client = new Kafka({
+      brokers: [`${this.host}:${this.port}`],
+      clientId: this.kafkaClient,
+      ssl: {
+        rejectUnauthorized: true,
+        ca: [this.ca],
+        key: this.accessKey,
+        cert: this.accessCert,
+      },
+    });
   }
 
-  public async onModuleInit() {
-    const kafkaInitializationOperation = () => {
-      this.client = new Kafka({
-        brokers: [`${this.host}:${this.port}`],
-        clientId: this.kafkaClient,
-        ssl: {
-          rejectUnauthorized: true,
-          ca: [this.ca],
-          key: this.accessKey,
-          cert: this.accessCert,
-        },
-      });
-
-      this.producer = this.client.producer({ allowAutoTopicCreation: true });
-
-      this.consumer = this.client.consumer({
-        groupId: this.kafkaConsumer,
-      });
-
-      this.admin = this.client.admin();
-    };
-
-    const producerConnectOperation = async () => await this.producer.connect();
-    const consumerConnectOperation = async () => await this.consumer.connect();
-    const adminConnectOperation = async () => await this.admin.connect();
-
-    await this.kafkaMessageHandler.execute(kafkaInitializationOperation, {
-      operationType: 'CONNECT_OR_DISCONNECT',
-    });
-
-    await this.kafkaMessageHandler.execute(producerConnectOperation, {
-      operationType: 'CONNECT_OR_DISCONNECT',
-    });
-
-    await this.kafkaMessageHandler.execute(consumerConnectOperation, {
-      operationType: 'CONNECT_OR_DISCONNECT',
-    });
-
-    await this.kafkaMessageHandler.execute(adminConnectOperation, {
-      operationType: 'CONNECT_OR_DISCONNECT',
-    });
-
-    this.logger.alert(`Kafka client connected successfully`);
+  public getProducer(config?: ProducerConfig): Producer {
+    return this.client.producer(config);
   }
 
-  public async onModuleDestroy() {
-    const producerDisconnectOperation = async () => await this.producer.disconnect();
-    const consumerDisconnectOperation = async () => await this.consumer.disconnect();
-    const adminDisconnectOperation = async () => await this.consumer.disconnect();
+  public getConsumer(config: ConsumerConfig): Consumer {
+    return this.client.consumer(config);
+  }
 
-    await this.kafkaMessageHandler.execute(producerDisconnectOperation, {
-      operationType: 'CONNECT_OR_DISCONNECT',
-    });
-
-    await this.kafkaMessageHandler.execute(consumerDisconnectOperation, {
-      operationType: 'CONNECT_OR_DISCONNECT',
-    });
-
-    await this.kafkaMessageHandler.execute(adminDisconnectOperation, {
-      operationType: 'CONNECT_OR_DISCONNECT',
-    });
-
-    this.logger.alert(`Kafka client disconnected successfully`);
+  public getAdmin() {
+    return this.client.admin();
   }
 }

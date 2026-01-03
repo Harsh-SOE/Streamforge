@@ -14,18 +14,34 @@ import {
   KafkaClient,
 } from '@app/clients/kafka';
 import {
-  REDIS_HOST,
-  REDIS_PORT,
-  REDIS_STREAM_GROUPNAME,
-  REDIS_STREAM_KEY,
-  RedisClient,
-} from '@app/clients/redis';
-import { LOGGER_PORT } from '@app/ports/logger';
-import { MESSAGE_BROKER } from '@app/ports/message-broker';
-import { DATABASE_CONFIG, DatabaseConfig, PrismaHandler } from '@app/handlers/database-handler';
-import { KAFKA_CONFIG, KafkaHandler, KafkaHandlerConfig } from '@app/handlers/kafka-bus-handler';
+  REDIS_CACHE_CONFIG,
+  RedisCacheHandler,
+  RedisCacheHandlerConfig,
+} from '@app/handlers/cache-handler/redis';
+import {
+  DATABASE_CONFIG,
+  DatabaseConfig,
+  PrismaHandler,
+} from '@app/handlers/database-handler/prisma';
+import { LOGGER_PORT } from '@app/common/ports/logger';
+import {
+  KAFKA_EVENT_CONSUMER_CONFIG,
+  KafkaEventConsumerHandler,
+  KafkaEventConsumerHandlerConfig,
+} from '@app/handlers/event-bus-handler/kafka/consumer-handler';
+import {
+  KAFKA_EVENT_PUBLISHER_HANDLER_CONFIG,
+  KafkaEventPublisherHandler,
+  KafkaEventPublisherHandlerConfig,
+} from '@app/handlers/event-bus-handler/kafka/publisher-handler';
+import { REDIS_HOST, REDIS_PORT, RedisClient } from '@app/clients/redis';
+import { EVENT_CONSUMER, EVENT_PUBLISHER } from '@app/common/ports/events';
 import { LOKI_URL, LokiConsoleLogger } from '@app/utils/loki-console-logger';
 import { PRISMA_CLIENT, PRISMA_CLIENT_NAME, PrismaDBClient } from '@app/clients/prisma';
+import {
+  REDIS_BUFFER_HANDLER_CONFIG,
+  RedisBufferHandlerConfig,
+} from '@app/handlers/buffer-handler/redis';
 
 import {
   USER_CACHE_PORT,
@@ -34,23 +50,19 @@ import {
   USERS_STORAGE_PORT,
 } from '@users/application/ports';
 import { MeasureModule } from '@users/infrastructure/measure';
-import { UserEventHandlers } from '@users/application/events';
-import {
-  REDIS_CACHE_CONFIG,
-  RedisCacheHandler,
-  RedisCacheHandlerConfig,
-} from '@app/handlers/redis-cache-handler';
-import { RedisCacheAdapter } from '@users/infrastructure/cache/adapters';
+import { UserCommandHandlers } from '@users/application/commands';
 import { UsersRedisBuffer } from '@users/infrastructure/buffer/adapters';
-import { UserCommandHandlers } from '@users/application/use-cases/commands';
+import { RedisCacheAdapter } from '@users/infrastructure/cache/adapters';
+import { UserEventHandlers } from '@users/application/intergration-events';
 import { AwsS3StorageAdapter } from '@users/infrastructure/storage/adapters';
-import { UserConfigModule, UserConfigService } from '@users/infrastructure/config';
 import { UserRepositoryAdapter } from '@users/infrastructure/repository/adapters';
-import { KafkaMessageBusAdapter } from '@users/infrastructure/message-bus/adapters';
+import { UserConfigModule, UserConfigService } from '@users/infrastructure/config';
 import { UserAggregatePersistanceACL } from '@users/infrastructure/anti-corruption/aggregate-persistance-acl';
 
 import { PrismaClient as UserPrismaClient } from '@persistance/users';
-import { REDIS_BUFFER_CONFIG, RedisBufferHandlerConfig } from '@app/handlers/redis-buffer-handler';
+
+import { UsersKafkaPublisherAdapter } from '../events-bus/publisher/adapters';
+import { UsersKafkaConsumerAdapter } from '../events-bus/consumer/adapters';
 
 @Global()
 @Module({
@@ -71,9 +83,10 @@ import { REDIS_BUFFER_CONFIG, RedisBufferHandlerConfig } from '@app/handlers/red
   ],
   providers: [
     UserAggregatePersistanceACL,
-    KafkaHandler,
     PrismaHandler,
     RedisCacheHandler,
+    KafkaEventPublisherHandler,
+    KafkaEventConsumerHandler,
     PrismaDBClient,
     KafkaClient,
     RedisClient,
@@ -89,19 +102,7 @@ import { REDIS_BUFFER_CONFIG, RedisBufferHandlerConfig } from '@app/handlers/red
         }) satisfies DatabaseConfig,
     },
     {
-      provide: KAFKA_CONFIG,
-      inject: [UserConfigService],
-      useFactory: (configService: UserConfigService) =>
-        ({
-          host: configService.KAFKA_HOST,
-          port: configService.KAFKA_PORT,
-          service: 'users',
-          logErrors: true,
-          resilienceOptions: { maxRetries: 3, circuitBreakerThreshold: 10, halfOpenAfterMs: 1500 },
-        }) satisfies KafkaHandlerConfig,
-    },
-    {
-      provide: REDIS_BUFFER_CONFIG,
+      provide: REDIS_BUFFER_HANDLER_CONFIG,
       inject: [UserConfigService],
       useFactory: (configService: UserConfigService) =>
         ({
@@ -129,12 +130,58 @@ import { REDIS_BUFFER_CONFIG, RedisBufferHandlerConfig } from '@app/handlers/red
       useClass: UserRepositoryAdapter,
     },
     {
-      provide: MESSAGE_BROKER,
-      useClass: KafkaMessageBusAdapter,
-    },
-    {
       provide: USER_CACHE_PORT,
       useClass: RedisCacheAdapter,
+    },
+    {
+      provide: KAFKA_EVENT_CONSUMER_CONFIG,
+      inject: [UserConfigService],
+      useFactory: (configService: UserConfigService) =>
+        ({
+          host: configService.KAFKA_HOST,
+          port: configService.KAFKA_PORT,
+          service: 'users',
+          logErrors: true,
+          resilienceOptions: {
+            circuitBreakerThreshold: 50,
+            halfOpenAfterMs: 10_000,
+            maxRetries: 5,
+          },
+          enableDlq: true,
+          dlqOnApplicationException: true,
+          dlqOnDomainException: false,
+          sendToDlqAfterAttempts: 5,
+          dlqTopic: `dlq.users`,
+        }) satisfies KafkaEventConsumerHandlerConfig,
+    },
+    {
+      provide: KAFKA_EVENT_PUBLISHER_HANDLER_CONFIG,
+      inject: [UserConfigService],
+      useFactory: (configService: UserConfigService) =>
+        ({
+          host: configService.KAFKA_HOST,
+          port: configService.KAFKA_PORT,
+          service: 'users',
+          logErrors: true,
+          resilienceOptions: {
+            circuitBreakerThreshold: 50,
+            halfOpenAfterMs: 10_000,
+            maxRetries: 5,
+          },
+          enableDlq: true,
+          dlqOnApplicationException: true,
+          dlqOnDomainException: false,
+          sendToDlqAfterAttempts: 5,
+          dlqTopic: `dlq.users`,
+        }) satisfies KafkaEventPublisherHandlerConfig,
+    },
+    {
+      provide: EVENT_PUBLISHER,
+      useClass: UsersKafkaPublisherAdapter,
+    },
+    {
+      provide: EVENT_CONSUMER,
+      useClass: UsersKafkaConsumerAdapter,
     },
     {
       provide: LOKI_URL,
@@ -190,16 +237,6 @@ import { REDIS_BUFFER_CONFIG, RedisBufferHandlerConfig } from '@app/handlers/red
       useFactory: (configService: UserConfigService) => configService.REDIS_PORT,
     },
     {
-      provide: REDIS_STREAM_KEY,
-      inject: [UserConfigService],
-      useFactory: (configService: UserConfigService) => configService.REDIS_STREAM_KEY,
-    },
-    {
-      provide: REDIS_STREAM_GROUPNAME,
-      inject: [UserConfigService],
-      useFactory: (configService: UserConfigService) => configService.REDIS_STREAM_GROUPNAME,
-    },
-    {
       provide: PRISMA_CLIENT,
       useValue: UserPrismaClient,
     },
@@ -216,21 +253,24 @@ import { REDIS_BUFFER_CONFIG, RedisBufferHandlerConfig } from '@app/handlers/red
     CacheModule,
     UserAggregatePersistanceACL,
 
-    KafkaHandler,
     PrismaHandler,
     RedisCacheHandler,
+    KafkaEventPublisherHandler,
+    KafkaEventConsumerHandler,
 
     KafkaClient,
     RedisClient,
     PrismaDBClient,
 
     USER_REROSITORY_PORT,
-    MESSAGE_BROKER,
+
     USER_CACHE_PORT,
     LOKI_URL,
     LOGGER_PORT,
     USERS_STORAGE_PORT,
     USERS_BUFFER_PORT,
+    EVENT_PUBLISHER,
+    EVENT_CONSUMER,
     PRISMA_CLIENT,
     PRISMA_CLIENT_NAME,
     KAFKA_CLIENT,
@@ -242,8 +282,6 @@ import { REDIS_BUFFER_CONFIG, RedisBufferHandlerConfig } from '@app/handlers/red
     KAFKA_PORT,
     REDIS_HOST,
     REDIS_PORT,
-    REDIS_STREAM_GROUPNAME,
-    REDIS_STREAM_KEY,
 
     ...UserCommandHandlers,
     ...UserEventHandlers,

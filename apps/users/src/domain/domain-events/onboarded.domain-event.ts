@@ -1,0 +1,15 @@
+import { DomainEvent } from '@app/common/events';
+
+export class OnboardedDomainEvent implements DomainEvent {
+  public readonly eventId: string;
+  public readonly occurredAt: Date = new Date();
+
+  public constructor(
+    public readonly userId: string,
+    public readonly authId: string,
+    public readonly email: string,
+    public readonly handle: string,
+  ) {
+    this.eventId = userId;
+  }
+}

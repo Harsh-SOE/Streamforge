@@ -12,23 +12,18 @@ import {
   KAFKA_PORT,
   KafkaClient,
 } from '@app/clients/kafka';
-import {
-  REDIS_HOST,
-  REDIS_PORT,
-  REDIS_STREAM_GROUPNAME,
-  REDIS_STREAM_KEY,
-  RedisClient,
-} from '@app/clients/redis';
+import { REDIS_HOST, REDIS_PORT, RedisClient } from '@app/clients/redis';
 import {
   REDIS_CACHE_CONFIG,
   RedisCacheHandler,
   RedisCacheHandlerConfig,
-} from '@app/handlers/redis-cache-handler';
-import { LOGGER_PORT } from '@app/ports/logger';
-import { MESSAGE_BROKER } from '@app/ports/message-broker';
+} from '@app/handlers/cache-handler/redis';
+import { LOGGER_PORT } from '@app/common/ports/logger';
 import { LOKI_URL, LokiConsoleLogger } from '@app/utils/loki-console-logger';
-import { KAFKA_CONFIG, KafkaHandler, KafkaHandlerConfig } from '@app/handlers/kafka-bus-handler';
-import { REDIS_BUFFER_CONFIG, RedisBufferHandlerConfig } from '@app/handlers/redis-buffer-handler';
+import {
+  REDIS_BUFFER_HANDLER_CONFIG,
+  RedisBufferHandlerConfig,
+} from '@app/handlers/buffer-handler/redis';
 
 import {
   SEGMENT_DELETE_QUEUE,
@@ -41,9 +36,15 @@ import { MeasureModule } from '../measure';
 import { AwsS3StorageAdapter } from '../storage/adapters';
 import { TranscoderConfigModule, TranscoderConfigService } from '../config';
 import { SegmentWatcher } from '../transcoder/segment-watcher';
-import { KafkaMessageBusAdapter } from '../message-bus/adapters';
 import { FFmpegVideoTranscoderUploaderAdapter } from '../transcoder/adapters';
 import { BullSegmentUploadWorker, BullTranscodeJobsWorker } from '../workers';
+import { KafkaEventConsumerHandler } from '@app/handlers/event-bus-handler/kafka/consumer-handler';
+import {
+  KAFKA_EVENT_PUBLISHER_HANDLER_CONFIG,
+  KafkaEventPublisherHandler,
+  KafkaEventPublisherHandlerConfig,
+} from '@app/handlers/event-bus-handler/kafka/publisher-handler';
+import { EVENT_CONSUMER, EVENT_PUBLISHER } from '@app/common/ports/events';
 
 @Global()
 @Module({
@@ -66,30 +67,52 @@ import { BullSegmentUploadWorker, BullTranscodeJobsWorker } from '../workers';
     ),
   ],
   providers: [
-    KafkaHandler,
     KafkaClient,
     RedisClient,
     SegmentWatcher,
     BullTranscodeJobsWorker,
     BullSegmentUploadWorker,
     TranscoderConfigService,
-    KafkaHandler,
+
+    KafkaEventPublisherHandler,
+    KafkaEventConsumerHandler,
+
     RedisCacheHandler,
     SegmentWatcher,
+
     {
-      provide: KAFKA_CONFIG,
+      provide: EVENT_PUBLISHER,
+      useClass: KafkaEventPublisherHandler,
+    },
+    {
+      provide: KAFKA_EVENT_PUBLISHER_HANDLER_CONFIG,
       inject: [TranscoderConfigService],
       useFactory: (configService: TranscoderConfigService) =>
         ({
           host: configService.KAFKA_HOST,
           port: configService.KAFKA_PORT,
-          service: 'transcoder',
+          service: 'views',
           logErrors: true,
-          resilienceOptions: { maxRetries: 3, circuitBreakerThreshold: 10, halfOpenAfterMs: 1500 },
-        }) satisfies KafkaHandlerConfig,
+          resilienceOptions: {
+            circuitBreakerThreshold: 50,
+            halfOpenAfterMs: 10_000,
+            maxRetries: 5,
+          },
+          enableDlq: true,
+          dlqOnApplicationException: true,
+          dlqOnDomainException: false,
+          sendToDlqAfterAttempts: 5,
+          dlqTopic: `dlq.views`,
+        }) satisfies KafkaEventPublisherHandlerConfig,
     },
+
     {
-      provide: REDIS_BUFFER_CONFIG,
+      provide: EVENT_CONSUMER,
+      useClass: KafkaEventConsumerHandler,
+    },
+
+    {
+      provide: REDIS_BUFFER_HANDLER_CONFIG,
       inject: [TranscoderConfigService],
       useFactory: (configService: TranscoderConfigService) =>
         ({
@@ -117,7 +140,6 @@ import { BullSegmentUploadWorker, BullTranscodeJobsWorker } from '../workers';
       inject: [TranscoderConfigService],
       useFactory: (configService: TranscoderConfigService) => configService.GRAFANA_LOKI_URL,
     },
-    { provide: MESSAGE_BROKER, useClass: KafkaMessageBusAdapter },
     { provide: LOGGER_PORT, useClass: LokiConsoleLogger },
     { provide: TRANSCODER_STORAGE_PORT, useClass: AwsS3StorageAdapter },
     {
@@ -169,16 +191,6 @@ import { BullSegmentUploadWorker, BullTranscodeJobsWorker } from '../workers';
       inject: [TranscoderConfigService],
       useFactory: (configService: TranscoderConfigService) => configService.REDIS_PORT,
     },
-    {
-      provide: REDIS_STREAM_KEY,
-      inject: [TranscoderConfigService],
-      useFactory: (configService: TranscoderConfigService) => configService.REDIS_STREAM_KEY,
-    },
-    {
-      provide: REDIS_STREAM_GROUPNAME,
-      inject: [TranscoderConfigService],
-      useFactory: (configService: TranscoderConfigService) => configService.REDIS_STREAM_GROUPNAME,
-    },
   ],
   exports: [
     MeasureModule,
@@ -188,7 +200,6 @@ import { BullSegmentUploadWorker, BullTranscodeJobsWorker } from '../workers';
     KafkaClient,
     RedisClient,
 
-    KafkaHandler,
     RedisCacheHandler,
 
     SegmentWatcher,
@@ -196,7 +207,6 @@ import { BullSegmentUploadWorker, BullTranscodeJobsWorker } from '../workers';
     BullSegmentUploadWorker,
     SegmentWatcher,
 
-    MESSAGE_BROKER,
     LOGGER_PORT,
     KAFKA_CLIENT,
     KAFKA_CONSUMER,
@@ -207,9 +217,7 @@ import { BullSegmentUploadWorker, BullTranscodeJobsWorker } from '../workers';
     KAFKA_PORT,
     REDIS_HOST,
     REDIS_PORT,
-    REDIS_STREAM_GROUPNAME,
     TRANSCODER_STORAGE_PORT,
-    REDIS_STREAM_KEY,
     TRANSCODER_PORT,
 
     BullModule,

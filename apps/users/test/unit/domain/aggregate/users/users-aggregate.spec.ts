@@ -1,4 +1,4 @@
-import { UserProfileUpdatedEvent } from '@users/application/events/user-profile-updated-event';
+import { UserProfileUpdatedEvent } from '@users/application/intergration-events/profile-updated-integration-event';
 import { UserAggregate } from '@users/domain/aggregates';
 import {
   InvalidAvatarUrlException,

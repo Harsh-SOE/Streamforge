@@ -10,29 +10,36 @@ import {
   KAFKA_PORT,
   KafkaClient,
 } from '@app/clients/kafka';
-import {
-  REDIS_HOST,
-  REDIS_PORT,
-  REDIS_STREAM_GROUPNAME,
-  REDIS_STREAM_KEY,
-  RedisClient,
-} from '@app/clients/redis';
+import { REDIS_HOST, REDIS_PORT, RedisClient } from '@app/clients/redis';
 import {
   REDIS_CACHE_CONFIG,
   RedisCacheHandler,
   RedisCacheHandlerConfig,
-} from '@app/handlers/redis-cache-handler';
+} from '@app/handlers/cache-handler/redis';
 import {
-  REDIS_BUFFER_CONFIG,
+  REDIS_BUFFER_HANDLER_CONFIG,
   RedisBufferHandler,
   RedisBufferHandlerConfig,
-} from '@app/handlers/redis-buffer-handler';
-import { LOGGER_PORT } from '@app/ports/logger';
-import { MESSAGE_BROKER } from '@app/ports/message-broker';
+} from '@app/handlers/buffer-handler/redis';
+import { LOGGER_PORT } from '@app/common/ports/logger';
 import { LOKI_URL, LokiConsoleLogger } from '@app/utils/loki-console-logger';
 import { PRISMA_CLIENT, PRISMA_CLIENT_NAME, PrismaDBClient } from '@app/clients/prisma';
-import { DATABASE_CONFIG, DatabaseConfig, PrismaHandler } from '@app/handlers/database-handler';
-import { KAFKA_CONFIG, KafkaHandler, KafkaHandlerConfig } from '@app/handlers/kafka-bus-handler';
+import {
+  KAFKA_EVENT_CONSUMER_CONFIG,
+  KafkaEventConsumerHandler,
+  KafkaEventConsumerHandlerConfig,
+} from '@app/handlers/event-bus-handler/kafka/consumer-handler';
+import {
+  KAFKA_EVENT_PUBLISHER_HANDLER_CONFIG,
+  KafkaEventPublisherHandler,
+  KafkaEventPublisherHandlerConfig,
+} from '@app/handlers/event-bus-handler/kafka/publisher-handler';
+import { EVENT_CONSUMER, EVENT_PUBLISHER } from '@app/common/ports/events';
+import {
+  DATABASE_CONFIG,
+  DatabaseConfig,
+  PrismaHandler,
+} from '@app/handlers/database-handler/prisma';
 
 import {
   STORAGE_PORT,
@@ -43,13 +50,19 @@ import {
 import { MeasureModule } from '@videos/infrastructure/measure';
 import { RedisCacheAdapter } from '@videos/infrastructure/cache/adapters';
 import { AwsS3StorageAdapter } from '@videos/infrastructure/storage/adapters';
-import { RedisStreamBufferAdapter } from '@videos/infrastructure/buffer/adapters';
+import {
+  RedisStreamBufferAdapter,
+  StreamConfig,
+  VIDEOS_REDIS_STREAM_CONFIG,
+} from '@videos/infrastructure/buffer/adapters';
 import { VideosConfigModule, VideosConfigService } from '@videos/infrastructure/config';
 import { VideoRepositoryAdapter } from '@videos/infrastructure/repository/adapters';
 import { VideoAggregatePersistanceACL } from '@videos/infrastructure/anti-corruption';
-import { KafkaMessageBusAdapter } from '@videos/infrastructure/message-bus/adapters';
 
 import { PrismaClient as VideoPrismaClient } from '@persistance/videos';
+
+import { VideosKafkaPublisherAdapter } from '../events/publisher/adapters';
+import { VideosKafkaConsumerAdapter } from '../events/consumer/adapters';
 
 @Global()
 @Module({
@@ -59,7 +72,8 @@ import { PrismaClient as VideoPrismaClient } from '@persistance/videos';
     VideoAggregatePersistanceACL,
     RedisBufferHandler,
     RedisCacheHandler,
-    KafkaHandler,
+    KafkaEventConsumerHandler,
+    KafkaEventPublisherHandler,
     PrismaHandler,
     RedisClient,
     KafkaClient,
@@ -77,19 +91,7 @@ import { PrismaClient as VideoPrismaClient } from '@persistance/videos';
         }) satisfies DatabaseConfig,
     },
     {
-      provide: KAFKA_CONFIG,
-      inject: [VideosConfigService],
-      useFactory: (configService: VideosConfigService) =>
-        ({
-          host: configService.KAFKA_HOST,
-          port: configService.KAFKA_PORT,
-          service: 'videos',
-          logErrors: true,
-          resilienceOptions: { maxRetries: 3, circuitBreakerThreshold: 10, halfOpenAfterMs: 1500 },
-        }) satisfies KafkaHandlerConfig,
-    },
-    {
-      provide: REDIS_BUFFER_CONFIG,
+      provide: REDIS_BUFFER_HANDLER_CONFIG,
       inject: [VideosConfigService],
       useFactory: (configService: VideosConfigService) =>
         ({
@@ -122,7 +124,65 @@ import { PrismaClient as VideoPrismaClient } from '@persistance/videos';
       useFactory: (configService: VideosConfigService) => configService.GRAFANA_LOKI_URL,
     },
     { provide: VIDEOS_BUFFER_PORT, useClass: RedisStreamBufferAdapter },
-    { provide: MESSAGE_BROKER, useClass: KafkaMessageBusAdapter },
+    {
+      provide: VIDEOS_REDIS_STREAM_CONFIG,
+      inject: [VideosConfigService],
+      useFactory: (configService: VideosConfigService) =>
+        ({
+          groupName: configService.REDIS_STREAM_GROUPNAME,
+          key: configService.REDIS_STREAM_KEY,
+        }) satisfies StreamConfig,
+    },
+    {
+      provide: KAFKA_EVENT_CONSUMER_CONFIG,
+      inject: [VideosConfigService],
+      useFactory: (configService: VideosConfigService) =>
+        ({
+          host: configService.KAFKA_HOST,
+          port: configService.KAFKA_PORT,
+          service: 'users',
+          logErrors: true,
+          resilienceOptions: {
+            circuitBreakerThreshold: 50,
+            halfOpenAfterMs: 10_000,
+            maxRetries: 5,
+          },
+          enableDlq: true,
+          dlqOnApplicationException: true,
+          dlqOnDomainException: false,
+          sendToDlqAfterAttempts: 5,
+          dlqTopic: `dlq.users`,
+        }) satisfies KafkaEventConsumerHandlerConfig,
+    },
+    {
+      provide: KAFKA_EVENT_PUBLISHER_HANDLER_CONFIG,
+      inject: [VideosConfigService],
+      useFactory: (configService: VideosConfigService) =>
+        ({
+          host: configService.KAFKA_HOST,
+          port: configService.KAFKA_PORT,
+          service: 'users',
+          logErrors: true,
+          resilienceOptions: {
+            circuitBreakerThreshold: 50,
+            halfOpenAfterMs: 10_000,
+            maxRetries: 5,
+          },
+          enableDlq: true,
+          dlqOnApplicationException: true,
+          dlqOnDomainException: false,
+          sendToDlqAfterAttempts: 5,
+          dlqTopic: `dlq.users`,
+        }) satisfies KafkaEventPublisherHandlerConfig,
+    },
+    {
+      provide: EVENT_PUBLISHER,
+      useClass: VideosKafkaPublisherAdapter,
+    },
+    {
+      provide: EVENT_CONSUMER,
+      useClass: VideosKafkaConsumerAdapter,
+    },
     { provide: VIDEOS_CACHE_PORT, useClass: RedisCacheAdapter },
     { provide: STORAGE_PORT, useClass: AwsS3StorageAdapter },
     { provide: LOGGER_PORT, useClass: LokiConsoleLogger },
@@ -166,20 +226,11 @@ import { PrismaClient as VideoPrismaClient } from '@persistance/videos';
       inject: [VideosConfigService],
       useFactory: (configService: VideosConfigService) => configService.REDIS_HOST,
     },
+
     {
       provide: REDIS_PORT,
       inject: [VideosConfigService],
       useFactory: (configService: VideosConfigService) => configService.REDIS_PORT,
-    },
-    {
-      provide: REDIS_STREAM_KEY,
-      inject: [VideosConfigService],
-      useFactory: (configService: VideosConfigService) => configService.REDIS_STREAM_KEY,
-    },
-    {
-      provide: REDIS_STREAM_GROUPNAME,
-      inject: [VideosConfigService],
-      useFactory: (configService: VideosConfigService) => configService.REDIS_STREAM_GROUPNAME,
     },
     {
       provide: PRISMA_CLIENT,
@@ -196,25 +247,25 @@ import { PrismaClient as VideoPrismaClient } from '@persistance/videos';
     VideosConfigModule,
     VideosConfigService,
 
-    KafkaHandler,
     PrismaHandler,
     RedisCacheHandler,
     RedisBufferHandler,
+    VideosKafkaConsumerAdapter,
+    VideosKafkaPublisherAdapter,
 
     VideoPrismaClient,
     KafkaClient,
     RedisClient,
+    KafkaEventConsumerHandler,
+    KafkaEventPublisherHandler,
 
     VIDEOS_RESPOSITORY_PORT,
     VIDEOS_BUFFER_PORT,
-    MESSAGE_BROKER,
     VIDEOS_CACHE_PORT,
     STORAGE_PORT,
     LOGGER_PORT,
     REDIS_HOST,
     REDIS_PORT,
-    REDIS_STREAM_GROUPNAME,
-    REDIS_STREAM_KEY,
     KAFKA_CLIENT,
     KAFKA_CONSUMER,
     KAFKA_HOST,

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 
-import { CommentEventHandler } from '@comments/application/events';
-import { CommentCommandHandler } from '@comments/application/use-cases';
+import { CommentEventHandler } from '@comments/application/integration-events';
+import { CommentCommandHandler } from '@comments/application/commands';
 
 import { RpcService } from './rpc.service';
 import { RpcController } from './rpc.controller';

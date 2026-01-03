@@ -11,10 +11,24 @@ import {
   KAFKA_PORT,
   KafkaClient,
 } from '@app/clients/kafka';
-import { LOGGER_PORT } from '@app/ports/logger';
-import { REDIS_CACHE_CONFIG, RedisCacheHandlerConfig } from '@app/handlers/redis-cache-handler';
-import { KAFKA_CONFIG, KafkaHandler, KafkaHandlerConfig } from '@app/handlers/kafka-bus-handler';
-import { REDIS_BUFFER_CONFIG, RedisBufferHandlerConfig } from '@app/handlers/redis-buffer-handler';
+import { LOGGER_PORT } from '@app/common/ports/logger';
+import {
+  KAFKA_EVENT_CONSUMER_CONFIG,
+  KafkaEventConsumerHandler,
+  KafkaEventConsumerHandlerConfig,
+} from '@app/handlers/event-bus-handler/kafka/consumer-handler';
+import {
+  KAFKA_EVENT_PUBLISHER_HANDLER_CONFIG,
+  KafkaEventPublisherHandler,
+  KafkaEventPublisherHandlerConfig,
+} from '@app/handlers/event-bus-handler/kafka/publisher-handler';
+import { EVENT_CONSUMER, EVENT_PUBLISHER } from '@app/common/ports/events';
+import { LOKI_URL, LokiConsoleLogger } from '@app/utils/loki-console-logger';
+import { REDIS_CACHE_CONFIG, RedisCacheHandlerConfig } from '@app/handlers/cache-handler/redis';
+import {
+  REDIS_BUFFER_HANDLER_CONFIG,
+  RedisBufferHandlerConfig,
+} from '@app/handlers/buffer-handler/redis';
 
 import {
   CHANNEL_PROJECTION_REPOSITORY_PORT,
@@ -39,7 +53,6 @@ import {
 import { KafkaBufferAdapter } from '../buffer/adapters';
 import { ProjectionConfigModule, ProjectionConfigService } from '../config';
 import { ChannelProjectionACL, UserProjectionACL, VideoProjectionACL } from '../anti-corruption';
-import { LOKI_URL, LokiConsoleLogger } from '@app/utils/loki-console-logger';
 
 @Global()
 @Module({
@@ -73,26 +86,15 @@ import { LOKI_URL, LokiConsoleLogger } from '@app/utils/loki-console-logger';
     ChannelProjectionACL,
     UserProjectionACL,
     KafkaClient,
-    KafkaHandler,
+    KafkaEventConsumerHandler,
+    KafkaEventPublisherHandler,
     {
       provide: LOKI_URL,
       inject: [ProjectionConfigService],
       useFactory: (configService: ProjectionConfigService) => configService.GRAFANA_LOKI_URL,
     },
     {
-      provide: KAFKA_CONFIG,
-      inject: [ProjectionConfigService],
-      useFactory: (configService: ProjectionConfigService) =>
-        ({
-          host: configService.KAFKA_HOST,
-          port: configService.KAFKA_PORT,
-          service: 'projection',
-          logErrors: true,
-          resilienceOptions: { maxRetries: 3, circuitBreakerThreshold: 10, halfOpenAfterMs: 1500 },
-        }) satisfies KafkaHandlerConfig,
-    },
-    {
-      provide: REDIS_BUFFER_CONFIG,
+      provide: REDIS_BUFFER_HANDLER_CONFIG,
       inject: [ProjectionConfigService],
       useFactory: (configService: ProjectionConfigService) =>
         ({
@@ -122,6 +124,56 @@ import { LOKI_URL, LokiConsoleLogger } from '@app/utils/loki-console-logger';
     {
       provide: LOGGER_PORT,
       useClass: LokiConsoleLogger,
+    },
+    {
+      provide: KAFKA_EVENT_CONSUMER_CONFIG,
+      inject: [ProjectionConfigService],
+      useFactory: (configService: ProjectionConfigService) =>
+        ({
+          host: configService.KAFKA_HOST,
+          port: configService.KAFKA_PORT,
+          service: 'users',
+          logErrors: true,
+          resilienceOptions: {
+            circuitBreakerThreshold: 50,
+            halfOpenAfterMs: 10_000,
+            maxRetries: 5,
+          },
+          enableDlq: true,
+          dlqOnApplicationException: true,
+          dlqOnDomainException: false,
+          sendToDlqAfterAttempts: 5,
+          dlqTopic: `dlq.users`,
+        }) satisfies KafkaEventConsumerHandlerConfig,
+    },
+    {
+      provide: KAFKA_EVENT_PUBLISHER_HANDLER_CONFIG,
+      inject: [ProjectionConfigService],
+      useFactory: (configService: ProjectionConfigService) =>
+        ({
+          host: configService.KAFKA_HOST,
+          port: configService.KAFKA_PORT,
+          service: 'users',
+          logErrors: true,
+          resilienceOptions: {
+            circuitBreakerThreshold: 50,
+            halfOpenAfterMs: 10_000,
+            maxRetries: 5,
+          },
+          enableDlq: true,
+          dlqOnApplicationException: true,
+          dlqOnDomainException: false,
+          sendToDlqAfterAttempts: 5,
+          dlqTopic: `dlq.users`,
+        }) satisfies KafkaEventPublisherHandlerConfig,
+    },
+    {
+      provide: EVENT_CONSUMER,
+      useClass: KafkaEventConsumerHandler,
+    },
+    {
+      provide: EVENT_PUBLISHER,
+      useClass: KafkaEventPublisherHandler,
     },
     {
       provide: VIDEO_PROJECTION_REPOSITORY_PORT,
@@ -177,7 +229,12 @@ import { LOKI_URL, LokiConsoleLogger } from '@app/utils/loki-console-logger';
     ChannelProjectionACL,
     UserProjectionACL,
     KafkaClient,
-    KafkaHandler,
+    KafkaEventConsumerHandler,
+    KafkaEventPublisherHandler,
+    EVENT_PUBLISHER,
+    EVENT_CONSUMER,
+    KAFKA_EVENT_PUBLISHER_HANDLER_CONFIG,
+    KAFKA_EVENT_CONSUMER_CONFIG,
     LOGGER_PORT,
     VIDEO_PROJECTION_REPOSITORY_PORT,
     USER_PROJECTION_REPOSITORY_PORT,

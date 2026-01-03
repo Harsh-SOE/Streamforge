@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 
+import { ChannelEventHandler } from '@channel/application/integration-events';
 import { ChannelCommandHandlers } from '@channel/application/commands/handlers';
-import { ChannelEventHandler } from '@channel/application/events/handlers';
 import { FrameworkModule } from '@channel/infrastructure/framework/framework.module';
 
 import { RpcController } from './rpc.controller';

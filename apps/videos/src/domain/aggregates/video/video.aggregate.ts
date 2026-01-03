@@ -1,11 +1,9 @@
 import { AggregateRoot } from '@nestjs/cqrs';
 
-import { VideoCreatedEvent } from '@videos/application/events/video-created-event';
+import { VideoCreatedDomainEvent } from '@videos/domain/domain-events';
 
-import { TranscodeVideoEventDto } from '@app/contracts/video-transcoder';
-
-import { VideoAggregateOptions } from './options';
 import { VideoEntity } from '../../entities';
+import { VideoAggregateOptions } from './options';
 
 export class VideoAggregate extends AggregateRoot {
   private constructor(public videoEntity: VideoEntity) {
@@ -41,12 +39,12 @@ export class VideoAggregate extends AggregateRoot {
 
     const videoAggregate = new VideoAggregate(videoEntity);
 
-    const transcodeVideoMessage: TranscodeVideoEventDto = {
-      fileIdentifier: videoAggregate.getVideoEntity().getVideoFileIdentifier(),
-      videoId: videoAggregate.getVideoEntity().getId(),
-    };
-
-    videoAggregate.apply(new VideoCreatedEvent(transcodeVideoMessage));
+    videoAggregate.apply(
+      new VideoCreatedDomainEvent(
+        videoAggregate.getSnapshot().videoFileIdentifier,
+        videoAggregate.getSnapshot().id,
+      ),
+    );
 
     return videoAggregate;
   }

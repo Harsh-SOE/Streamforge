@@ -4,9 +4,9 @@ import { JwtService } from '@nestjs/jwt';
 import { ClientGrpc } from '@nestjs/microservices';
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 
-import { SERVICES } from '@app/clients/constant';
+import { SERVICES } from '@app/common';
 import { UserAuthPayload } from '@app/contracts/auth';
-import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
+import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
 import { USER_SERVICE_NAME, UserServiceClient } from '@app/contracts/users';
 import { QUERY_SERVICE_NAME, QueryServiceClient, UserProfileMessage } from '@app/contracts/query';
 

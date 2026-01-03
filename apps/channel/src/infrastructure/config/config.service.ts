@@ -12,6 +12,10 @@ import { CHANNEL_PACKAGE_NAME } from '@app/contracts/channel';
 export class ChannelConfigService {
   public constructor(private configService: ConfigService) {}
 
+  get NODE_ENVIRONMENT() {
+    return this.configService.getOrThrow<string>('NODE_ENVIRONMENT');
+  }
+
   get SERVICE_PORT() {
     return this.configService.getOrThrow<number>('SERVICE_PORT');
   }

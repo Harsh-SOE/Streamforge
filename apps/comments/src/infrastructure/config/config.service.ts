@@ -12,6 +12,10 @@ import { COMMENT_PACKAGE_NAME } from '@app/contracts/comments';
 export class CommentsConfigService {
   public constructor(private configService: ConfigService) {}
 
+  public get NODE_ENVIRONMENT() {
+    return this.configService.getOrThrow<string>('NODE_ENVIRONMENT');
+  }
+
   public get GRPC_PORT() {
     return this.configService.getOrThrow<number>('GRPC_PORT');
   }

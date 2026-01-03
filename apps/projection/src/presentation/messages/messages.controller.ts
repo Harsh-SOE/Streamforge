@@ -2,9 +2,9 @@ import { Controller } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
 
 import { VideoUploadedEventDto } from '@app/contracts/videos';
-import { UserProfileCreatedEventDto, UserProfileUpdatedEventDto } from '@app/contracts/users';
 import { ChannelCreatedEventDto } from '@app/contracts/channel';
-import { CHANNEL_EVENTS, USERS_EVENTS, VIDEO_EVENTS } from '@app/clients';
+import { CHANNEL_EVENTS, USERS_EVENTS, VIDEO_EVENTS } from '@app/common/events';
+import { UserProfileCreatedEventDto, UserProfileUpdatedEventDto } from '@app/contracts/users';
 
 import { MessagesService } from './messages.service';
 

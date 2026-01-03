@@ -1,10 +1,10 @@
 import { EventBus } from '@nestjs/cqrs';
 import { Inject, Injectable } from '@nestjs/common';
 
-import { UserProfileCreatedEventDto, UserProfileUpdatedEventDto } from '@app/contracts/users';
 import { VideoUploadedEventDto } from '@app/contracts/videos';
-import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
 import { ChannelCreatedEventDto } from '@app/contracts/channel';
+import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
+import { UserProfileCreatedEventDto, UserProfileUpdatedEventDto } from '@app/contracts/users';
 
 import {
   ChannelCreatedEvent,

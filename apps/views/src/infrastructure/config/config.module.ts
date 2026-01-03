@@ -13,6 +13,8 @@ import { ViewsConfigService } from './config.service';
       envFilePath: join(__dirname, '../.env'),
       isGlobal: true,
       validationSchema: joi.object({
+        NODE_ENVIRONMENT: joi.number().required(),
+
         HTTP_PORT: joi.number().required(),
         GRPC_PORT: joi.number().required(),
 

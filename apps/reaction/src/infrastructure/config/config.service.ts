@@ -12,6 +12,10 @@ import { REACTION_PACKAGE_NAME } from '@app/contracts/reaction';
 export class ReactionConfigService {
   constructor(private configService: ConfigService) {}
 
+  get NODE_ENVIRONMENT() {
+    return this.configService.getOrThrow<string>('NODE_ENVIRONMENT');
+  }
+
   get HTTP_PORT() {
     return this.configService.getOrThrow<number>('HTTP_PORT');
   }

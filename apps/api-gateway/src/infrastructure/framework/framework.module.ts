@@ -2,8 +2,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { Global, Module } from '@nestjs/common';
 import { ClientsModule } from '@nestjs/microservices';
 
-import { SERVICES } from '@app/clients';
-import { LOGGER_PORT } from '@app/ports/logger';
+import { SERVICES } from '@app/common';
+import { LOGGER_PORT } from '@app/common/ports/logger';
 import { LOKI_URL, LokiConsoleLogger } from '@app/utils/loki-console-logger';
 
 import { MeasureModule } from '@gateway/infrastructure/measure';

@@ -1,7 +1,7 @@
 import { Global, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { LOGGER_PORT } from '@app/ports/logger';
+import { LOGGER_PORT } from '@app/common/ports/logger';
 import { LOKI_URL, LokiConsoleLogger } from '@app/utils/loki-console-logger';
 
 import {

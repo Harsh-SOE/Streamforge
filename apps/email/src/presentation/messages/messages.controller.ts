@@ -1,9 +1,9 @@
 import { Controller, Inject } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
 
-import { USERS_EVENTS } from '@app/clients';
+import { USERS_EVENTS } from '@app/common/events';
 import { CreatedUserMessageDto } from '@app/contracts/email';
-import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
+import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
 
 import { KafkaService } from './messages.service';
 

@@ -1,37 +1,54 @@
-import { EachBatchPayload, KafkaMessage } from 'kafkajs';
-import { Inject, Injectable } from '@nestjs/common';
-
-import { KafkaClient } from '@app/clients/kafka';
-import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
+import { Consumer, EachBatchPayload, KafkaMessage, Producer } from 'kafkajs';
+import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 
 import {
   UsersBufferPort,
   USER_REROSITORY_PORT,
   UserRepositoryPort,
 } from '@users/application/ports';
-import { BUFFER_EVENTS } from '@app/clients';
+import { KafkaClient } from '@app/clients/kafka';
+import { BUFFER_EVENTS } from '@app/common/events';
+import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
+
 import { UserAggregate } from '@users/domain/aggregates';
 
 import { UserMessage } from '../types';
 
 @Injectable()
-export class UsersKafkaBuffer implements UsersBufferPort {
+export class UsersKafkaBuffer implements UsersBufferPort, OnModuleInit, OnModuleDestroy {
+  private consumer: Consumer;
+  private producer: Producer;
+
   public constructor(
     @Inject(USER_REROSITORY_PORT)
     private readonly userRepository: UserRepositoryPort,
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
     private readonly kafka: KafkaClient,
   ) {
+    this.consumer = this.kafka.getConsumer({ groupId: 'users' });
+    this.producer = this.kafka.getProducer({ allowAutoTopicCreation: true });
     this.logger.alert(`Using kafka as buffer for users service`);
   }
 
+  public async connect(): Promise<void> {
+    await this.producer.connect();
+    await this.consumer.connect();
+  }
+
+  public async disconnect(): Promise<void> {
+    await this.producer.disconnect();
+    await this.consumer.disconnect();
+  }
+
   public async onModuleInit() {
-    await this.kafka.consumer.subscribe({
+    await this.connect();
+
+    await this.consumer.subscribe({
       topic: BUFFER_EVENTS.USER_BUFFER_EVENT,
       fromBeginning: false,
     });
 
-    await this.kafka.consumer.run({
+    await this.consumer.run({
       eachBatch: async (payload: EachBatchPayload) => {
         const { batch } = payload;
 
@@ -44,8 +61,12 @@ export class UsersKafkaBuffer implements UsersBufferPort {
     });
   }
 
+  public async onModuleDestroy() {
+    await this.disconnect();
+  }
+
   public async bufferUser(user: UserAggregate): Promise<void> {
-    await this.kafka.producer.send({
+    await this.producer.send({
       topic: BUFFER_EVENTS.USER_BUFFER_EVENT,
       messages: [{ value: JSON.stringify(user.getUserSnapshot()) }],
     });

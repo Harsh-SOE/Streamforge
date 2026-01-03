@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 
-import { LikeActionCommandHandler } from '@reaction/application/use-cases';
+import { LikeActionCommandHandler } from '@reaction/application/commands';
 import { FrameworkModule } from '@reaction/infrastructure/framework/framework.module';
 
 import { RpcController } from './rpc.controller';

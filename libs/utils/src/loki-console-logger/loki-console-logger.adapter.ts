@@ -2,7 +2,7 @@ import LokiTransport from 'winston-loki';
 import { Inject, Injectable } from '@nestjs/common';
 import winston, { createLogger, format, Logger, transport, Logform, transports } from 'winston';
 
-import { LoggerPort } from '@app/ports/logger';
+import { LoggerPort } from '@app/common/ports/logger';
 
 const levels = {
   fatal: 0,

@@ -12,28 +12,36 @@ import {
   KafkaClient,
 } from '@app/clients/kafka';
 import {
-  REDIS_HOST,
-  REDIS_PORT,
-  REDIS_STREAM_GROUPNAME,
-  REDIS_STREAM_KEY,
-  RedisClient,
-} from '@app/clients/redis';
-import {
   REDIS_CACHE_CONFIG,
   RedisCacheHandler,
   RedisCacheHandlerConfig,
-} from '@app/handlers/redis-cache-handler';
+} from '@app/handlers/cache-handler/redis';
 import {
-  REDIS_BUFFER_CONFIG,
+  REDIS_BUFFER_HANDLER_CONFIG,
   RedisBufferHandler,
   RedisBufferHandlerConfig,
-} from '@app/handlers/redis-buffer-handler';
-import { LOGGER_PORT } from '@app/ports/logger';
-import { MESSAGE_BROKER } from '@app/ports/message-broker';
+} from '@app/handlers/buffer-handler/redis';
+import {
+  DATABASE_CONFIG,
+  DatabaseConfig,
+  PrismaHandler,
+} from '@app/handlers/database-handler/prisma';
+import { LOGGER_PORT } from '@app/common/ports/logger';
+import { MESSAGE_BROKER } from '@app/common/ports/message-broker';
+import { REDIS_HOST, REDIS_PORT, RedisClient } from '@app/clients/redis';
+import { EVENT_CONSUMER, EVENT_PUBLISHER } from '@app/common/ports/events';
 import { LOKI_URL, LokiConsoleLogger } from '@app/utils/loki-console-logger';
 import { PRISMA_CLIENT, PRISMA_CLIENT_NAME, PrismaDBClient } from '@app/clients/prisma';
-import { DATABASE_CONFIG, DatabaseConfig, PrismaHandler } from '@app/handlers/database-handler';
-import { KAFKA_CONFIG, KafkaHandler, KafkaHandlerConfig } from '@app/handlers/kafka-bus-handler';
+import {
+  KAFKA_EVENT_CONSUMER_CONFIG,
+  KafkaEventConsumerHandler,
+  KafkaEventConsumerHandlerConfig,
+} from '@app/handlers/event-bus-handler/kafka/consumer-handler';
+import {
+  KAFKA_EVENT_PUBLISHER_HANDLER_CONFIG,
+  KafkaEventPublisherHandler,
+  KafkaEventPublisherHandlerConfig,
+} from '@app/handlers/event-bus-handler/kafka/publisher-handler';
 
 import {
   COMMENTS_BUFFER_PORT,
@@ -41,12 +49,15 @@ import {
   COMMENTS_REPOSITORY_PORT,
 } from '@comments/application/ports';
 
+import {
+  COMMENTS_REDIS_STREAM_CONFIG,
+  RedisStreamBufferAdapter,
+  StreamConfig,
+} from '../buffer/adapters';
 import { MeasureModule } from '../measure';
 import { CommentsConfigService } from '../config';
 import { RedisCacheAdapter } from '../cache/adapters';
-import { RedisStreamBufferAdapter } from '../buffer/adapters';
 import { CommentAggregatePersistance } from '../anti-corruption';
-import { KafkaMessageBusAdapter } from '../message-bus/adapters';
 import { PrismaMongoDBRepositoryAdapter } from '../repository/adapters';
 
 import { PrismaClient as CommentsPrismaClient } from '@persistance/comments';
@@ -58,7 +69,8 @@ import { PrismaClient as CommentsPrismaClient } from '@persistance/comments';
     CommentsConfigService,
     RedisBufferHandler,
     RedisCacheHandler,
-    KafkaHandler,
+    KafkaEventPublisherHandler,
+    KafkaEventConsumerHandler,
     PrismaHandler,
     CommentAggregatePersistance,
     KafkaClient,
@@ -81,19 +93,7 @@ import { PrismaClient as CommentsPrismaClient } from '@persistance/comments';
         }) satisfies DatabaseConfig,
     },
     {
-      provide: KAFKA_CONFIG,
-      inject: [CommentsConfigService],
-      useFactory: (configService: CommentsConfigService) =>
-        ({
-          host: configService.KAFKA_HOST,
-          port: configService.KAFKA_PORT,
-          service: 'comments',
-          logErrors: true,
-          resilienceOptions: { maxRetries: 3, circuitBreakerThreshold: 10, halfOpenAfterMs: 1500 },
-        }) satisfies KafkaHandlerConfig,
-    },
-    {
-      provide: REDIS_BUFFER_CONFIG,
+      provide: REDIS_BUFFER_HANDLER_CONFIG,
       inject: [CommentsConfigService],
       useFactory: (configService: CommentsConfigService) =>
         ({
@@ -103,6 +103,15 @@ import { PrismaClient as CommentsPrismaClient } from '@persistance/comments';
           logErrors: true,
           resilienceOptions: { maxRetries: 3, circuitBreakerThreshold: 10, halfOpenAfterMs: 1500 },
         }) satisfies RedisBufferHandlerConfig,
+    },
+    {
+      provide: COMMENTS_REDIS_STREAM_CONFIG,
+      inject: [CommentsConfigService],
+      useFactory: (configService: CommentsConfigService) =>
+        ({
+          key: configService.REDIS_STREAM_KEY,
+          groupName: configService.REDIS_STREAM_GROUPNAME,
+        }) satisfies StreamConfig,
     },
     {
       provide: REDIS_CACHE_CONFIG,
@@ -121,7 +130,50 @@ import { PrismaClient as CommentsPrismaClient } from '@persistance/comments';
       useClass: PrismaMongoDBRepositoryAdapter,
     },
     { provide: COMMENTS_CACHE_PORT, useClass: RedisCacheAdapter },
-    { provide: MESSAGE_BROKER, useClass: KafkaMessageBusAdapter },
+    {
+      provide: KAFKA_EVENT_CONSUMER_CONFIG,
+      inject: [CommentsConfigService],
+      useFactory: (configService: CommentsConfigService) =>
+        ({
+          host: configService.KAFKA_HOST,
+          port: configService.KAFKA_PORT,
+          service: 'comments',
+          logErrors: true,
+          resilienceOptions: {
+            circuitBreakerThreshold: 50,
+            halfOpenAfterMs: 10_000,
+            maxRetries: 5,
+          },
+          enableDlq: true,
+          dlqOnApplicationException: true,
+          dlqOnDomainException: false,
+          sendToDlqAfterAttempts: 5,
+          dlqTopic: `dlq.comments`,
+        }) satisfies KafkaEventConsumerHandlerConfig,
+    },
+    {
+      provide: KAFKA_EVENT_PUBLISHER_HANDLER_CONFIG,
+      inject: [CommentsConfigService],
+      useFactory: (configService: CommentsConfigService) =>
+        ({
+          host: configService.KAFKA_HOST,
+          port: configService.KAFKA_PORT,
+          service: 'comments',
+          logErrors: true,
+          resilienceOptions: {
+            circuitBreakerThreshold: 50,
+            halfOpenAfterMs: 10_000,
+            maxRetries: 5,
+          },
+          enableDlq: true,
+          dlqOnApplicationException: true,
+          dlqOnDomainException: false,
+          sendToDlqAfterAttempts: 5,
+          dlqTopic: `dlq.comments`,
+        }) satisfies KafkaEventPublisherHandlerConfig,
+    },
+    { provide: EVENT_PUBLISHER, useClass: KafkaEventPublisherHandler },
+    { provide: EVENT_CONSUMER, useClass: KafkaEventConsumerHandler },
     { provide: COMMENTS_BUFFER_PORT, useClass: RedisStreamBufferAdapter },
     {
       provide: LOGGER_PORT,
@@ -173,16 +225,6 @@ import { PrismaClient as CommentsPrismaClient } from '@persistance/comments';
       useFactory: (configService: CommentsConfigService) => configService.REDIS_PORT,
     },
     {
-      provide: REDIS_STREAM_KEY,
-      inject: [CommentsConfigService],
-      useFactory: (configService: CommentsConfigService) => configService.REDIS_STREAM_KEY,
-    },
-    {
-      provide: REDIS_STREAM_GROUPNAME,
-      inject: [CommentsConfigService],
-      useFactory: (configService: CommentsConfigService) => configService.REDIS_STREAM_GROUPNAME,
-    },
-    {
       provide: PRISMA_CLIENT,
       useValue: CommentsPrismaClient,
     },
@@ -194,11 +236,11 @@ import { PrismaClient as CommentsPrismaClient } from '@persistance/comments';
   exports: [
     RedisBufferHandler,
     RedisCacheHandler,
-    KafkaHandler,
     PrismaHandler,
 
     CommentAggregatePersistance,
-    KafkaHandler,
+    KafkaEventPublisherHandler,
+    KafkaEventConsumerHandler,
     PrismaHandler,
     RedisCacheHandler,
 
@@ -210,6 +252,11 @@ import { PrismaClient as CommentsPrismaClient } from '@persistance/comments';
     MeasureModule,
     CommentsConfigService,
 
+    EVENT_CONSUMER,
+    EVENT_PUBLISHER,
+    KAFKA_EVENT_PUBLISHER_HANDLER_CONFIG,
+    KAFKA_EVENT_CONSUMER_CONFIG,
+    COMMENTS_REDIS_STREAM_CONFIG,
     COMMENTS_REPOSITORY_PORT,
     MESSAGE_BROKER,
     COMMENTS_CACHE_PORT,
@@ -226,8 +273,6 @@ import { PrismaClient as CommentsPrismaClient } from '@persistance/comments';
     KAFKA_ACCESS_KEY,
     REDIS_HOST,
     REDIS_PORT,
-    REDIS_STREAM_GROUPNAME,
-    REDIS_STREAM_KEY,
   ],
 })
 export class FrameworkModule {}

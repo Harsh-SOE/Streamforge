@@ -12,6 +12,10 @@ import { VIEWS_PACKAGE_NAME } from '@app/contracts/views';
 export class ViewsConfigService {
   public constructor(private readonly configService: ConfigService) {}
 
+  public get NODE_ENVIRONMENT() {
+    return this.configService.getOrThrow<string>('NODE_ENVIRONMENT');
+  }
+
   public get GRPC_PORT() {
     return this.configService.getOrThrow<number>('GRPC_PORT');
   }

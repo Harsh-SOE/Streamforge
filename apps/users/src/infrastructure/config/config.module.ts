@@ -12,6 +12,8 @@ import { UserConfigService } from './config.service';
       envFilePath: join(__dirname, '../../.env'),
       isGlobal: true,
       validationSchema: joi.object({
+        NODE_ENVIRONMENT: joi.string().required(),
+
         HTTP_PORT: joi.number().required(),
         GRPC_PORT: joi.number().required(),
 

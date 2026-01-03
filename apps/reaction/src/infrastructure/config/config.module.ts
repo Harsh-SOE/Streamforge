@@ -12,6 +12,8 @@ import { ReactionConfigService } from './config.service';
       isGlobal: true,
       envFilePath: join(__dirname, '../../.env'),
       validationSchema: joi.object({
+        NODE_ENVIRONMENT: joi.string().required(),
+
         HTTP_PORT: joi.number().required(),
         GRPC_PORT: joi.number().required(),
 

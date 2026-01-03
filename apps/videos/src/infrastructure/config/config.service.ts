@@ -12,6 +12,10 @@ import { VIDEO_PACKAGE_NAME } from '@app/contracts/videos';
 export class VideosConfigService {
   constructor(private readonly configService: ConfigService) {}
 
+  get NODE_ENVIRONMENT() {
+    return this.configService.getOrThrow<string>('NODE_ENVIRONMENT');
+  }
+
   get HTTP_PORT() {
     return this.configService.getOrThrow<number>('HTTP_PORT');
   }

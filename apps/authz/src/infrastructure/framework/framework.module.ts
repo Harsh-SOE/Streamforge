@@ -1,6 +1,6 @@
 import { Global, Module } from '@nestjs/common';
 
-import { LOGGER_PORT } from '@app/ports/logger';
+import { LOGGER_PORT } from '@app/common/ports/logger';
 import { AUTHORIZE_PORT } from '@authz/application/ports/auth';
 import { LOKI_URL, LokiConsoleLogger } from '@app/utils/loki-console-logger';
 

@@ -1,7 +1,7 @@
 import { Inject } from '@nestjs/common';
 import { EventsHandler, IEventHandler } from '@nestjs/cqrs';
 
-import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
+import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
 
 import {
   UserProjectionRepositoryPort,

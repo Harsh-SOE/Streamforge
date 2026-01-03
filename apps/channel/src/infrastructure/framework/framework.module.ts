@@ -14,32 +14,42 @@ import {
   REDIS_CACHE_CONFIG,
   RedisCacheHandler,
   RedisCacheHandlerConfig,
-} from '@app/handlers/redis-cache-handler';
-import { LOGGER_PORT } from '@app/ports/logger';
-import { MESSAGE_BROKER } from '@app/ports/message-broker';
-import { LOKI_URL, LokiConsoleLogger } from '@app/utils/loki-console-logger';
-import { DATABASE_CONFIG, DatabaseConfig, PrismaHandler } from '@app/handlers/database-handler';
-import { KAFKA_CONFIG, KafkaHandler, KafkaHandlerConfig } from '@app/handlers/kafka-bus-handler';
-import { REDIS_BUFFER_CONFIG, RedisBufferHandlerConfig } from '@app/handlers/redis-buffer-handler';
-
-import { PRISMA_CLIENT, PRISMA_CLIENT_NAME, PrismaDBClient } from '@app/clients/prisma';
-
+} from '@app/handlers/cache-handler/redis';
 import {
-  REDIS_HOST,
-  REDIS_PORT,
-  REDIS_STREAM_GROUPNAME,
-  REDIS_STREAM_KEY,
-  RedisClient,
-} from '@app/clients/redis';
+  DATABASE_CONFIG,
+  DatabaseConfig,
+  PrismaHandler,
+} from '@app/handlers/database-handler/prisma';
+import { LOGGER_PORT } from '@app/common/ports/logger';
+import {
+  KAFKA_EVENT_CONSUMER_CONFIG,
+  KafkaEventConsumerHandler,
+  KafkaEventConsumerHandlerConfig,
+} from '@app/handlers/event-bus-handler/kafka/consumer-handler';
+import {
+  KAFKA_EVENT_PUBLISHER_HANDLER_CONFIG,
+  KafkaEventPublisherHandler,
+  KafkaEventPublisherHandlerConfig,
+} from '@app/handlers/event-bus-handler/kafka/publisher-handler';
+import { REDIS_HOST, REDIS_PORT, RedisClient } from '@app/clients/redis';
+import { EVENT_CONSUMER, EVENT_PUBLISHER } from '@app/common/ports/events';
+import { LOKI_URL, LokiConsoleLogger } from '@app/utils/loki-console-logger';
+import { PRISMA_CLIENT, PRISMA_CLIENT_NAME, PrismaDBClient } from '@app/clients/prisma';
+import {
+  REDIS_BUFFER_HANDLER_CONFIG,
+  RedisBufferHandlerConfig,
+} from '@app/handlers/buffer-handler/redis';
+
 import { CHANNEL_REPOSITORY, CHANNEL_STORAGE_PORT } from '@channel/application/ports';
 
-import { ChannelConfigModule, ChannelConfigService } from '../config';
-import { AwsS3StorageAdapter } from '../storage/adapters';
-import { KafkaMessageBusAdapter } from '../message-bus/adapters';
-import { ChannelAggregatePersistanceACL } from '../anti-corruption';
-import { ChannelRepositoryAdapter } from '../repository/adapters';
-
 import { PrismaClient } from '@persistance/channel';
+
+import { AwsS3StorageAdapter } from '../storage/adapters';
+import { ChannelRepositoryAdapter } from '../repository/adapters';
+import { ChannelAggregatePersistanceACL } from '../anti-corruption';
+import { ChannelConfigModule, ChannelConfigService } from '../config';
+import { ChannelKafkaConsumerAdapter } from '../events/consumer/adapters';
+import { ChannelKafkaPublisherAdapter } from '../events/publisher/adapters';
 
 @Global()
 @Module({
@@ -49,7 +59,8 @@ import { PrismaClient } from '@persistance/channel';
     ChannelAggregatePersistanceACL,
     RedisCacheHandler,
     PrismaHandler,
-    KafkaHandler,
+    KafkaEventConsumerHandler,
+    KafkaEventPublisherHandler,
     PrismaDBClient,
     KafkaClient,
     RedisClient,
@@ -70,19 +81,7 @@ import { PrismaClient } from '@persistance/channel';
         }) satisfies DatabaseConfig,
     },
     {
-      provide: KAFKA_CONFIG,
-      inject: [ChannelConfigService],
-      useFactory: (configService: ChannelConfigService) =>
-        ({
-          host: configService.KAFKA_HOST,
-          port: configService.KAFKA_PORT,
-          service: 'channel',
-          logErrors: true,
-          resilienceOptions: { maxRetries: 3, circuitBreakerThreshold: 10, halfOpenAfterMs: 1500 },
-        }) satisfies KafkaHandlerConfig,
-    },
-    {
-      provide: REDIS_BUFFER_CONFIG,
+      provide: REDIS_BUFFER_HANDLER_CONFIG,
       inject: [ChannelConfigService],
       useFactory: (configService: ChannelConfigService) =>
         ({
@@ -109,7 +108,50 @@ import { PrismaClient } from '@persistance/channel';
       provide: CHANNEL_REPOSITORY,
       useClass: ChannelRepositoryAdapter,
     },
-    { provide: MESSAGE_BROKER, useClass: KafkaMessageBusAdapter },
+    {
+      provide: KAFKA_EVENT_CONSUMER_CONFIG,
+      inject: [ChannelConfigService],
+      useFactory: (configService: ChannelConfigService) =>
+        ({
+          host: configService.KAFKA_HOST,
+          port: configService.KAFKA_PORT,
+          service: 'channel',
+          logErrors: true,
+          resilienceOptions: {
+            circuitBreakerThreshold: 50,
+            halfOpenAfterMs: 10_000,
+            maxRetries: 5,
+          },
+          enableDlq: true,
+          dlqOnApplicationException: true,
+          dlqOnDomainException: false,
+          sendToDlqAfterAttempts: 5,
+          dlqTopic: `dlq.channel`,
+        }) satisfies KafkaEventConsumerHandlerConfig,
+    },
+    {
+      provide: KAFKA_EVENT_PUBLISHER_HANDLER_CONFIG,
+      inject: [ChannelConfigService],
+      useFactory: (configService: ChannelConfigService) =>
+        ({
+          host: configService.KAFKA_HOST,
+          port: configService.KAFKA_PORT,
+          service: 'channel',
+          logErrors: true,
+          resilienceOptions: {
+            circuitBreakerThreshold: 50,
+            halfOpenAfterMs: 10_000,
+            maxRetries: 5,
+          },
+          enableDlq: true,
+          dlqOnApplicationException: true,
+          dlqOnDomainException: false,
+          sendToDlqAfterAttempts: 5,
+          dlqTopic: `dlq.channel`,
+        }) satisfies KafkaEventPublisherHandlerConfig,
+    },
+    { provide: EVENT_PUBLISHER, useClass: ChannelKafkaPublisherAdapter },
+    { provide: EVENT_CONSUMER, useClass: ChannelKafkaConsumerAdapter },
     { provide: CHANNEL_STORAGE_PORT, useClass: AwsS3StorageAdapter },
     { provide: LOGGER_PORT, useClass: LokiConsoleLogger },
     {
@@ -158,16 +200,6 @@ import { PrismaClient } from '@persistance/channel';
       useFactory: (configService: ChannelConfigService) => configService.REDIS_PORT,
     },
     {
-      provide: REDIS_STREAM_KEY,
-      inject: [ChannelConfigService],
-      useFactory: (configService: ChannelConfigService) => configService.REDIS_STREAM_KEY,
-    },
-    {
-      provide: REDIS_STREAM_GROUPNAME,
-      inject: [ChannelConfigService],
-      useFactory: (configService: ChannelConfigService) => configService.REDIS_STREAM_GROUPNAME,
-    },
-    {
       provide: PRISMA_CLIENT,
       useValue: PrismaClient,
     },
@@ -181,13 +213,17 @@ import { PrismaClient } from '@persistance/channel';
     ChannelAggregatePersistanceACL,
     RedisCacheHandler,
     PrismaHandler,
-    KafkaHandler,
     PrismaDBClient,
+    KafkaEventPublisherHandler,
+    KafkaEventConsumerHandler,
     KafkaClient,
     RedisClient,
     CHANNEL_REPOSITORY,
-    MESSAGE_BROKER,
     CHANNEL_STORAGE_PORT,
+    KAFKA_EVENT_CONSUMER_CONFIG,
+    KAFKA_EVENT_PUBLISHER_HANDLER_CONFIG,
+    EVENT_CONSUMER,
+    EVENT_PUBLISHER,
     LOGGER_PORT,
     PRISMA_CLIENT,
     PRISMA_CLIENT_NAME,
@@ -200,8 +236,6 @@ import { PrismaClient } from '@persistance/channel';
     KAFKA_PORT,
     REDIS_HOST,
     REDIS_PORT,
-    REDIS_STREAM_GROUPNAME,
-    REDIS_STREAM_KEY,
   ],
 })
 export class FrameworkModule {}

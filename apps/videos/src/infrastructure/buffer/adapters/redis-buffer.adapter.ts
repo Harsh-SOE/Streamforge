@@ -1,8 +1,9 @@
-import { Inject, Injectable } from '@nestjs/common';
+import Redis from 'ioredis';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { Inject, Injectable, OnModuleInit, Optional } from '@nestjs/common';
 
 import { RedisClient } from '@app/clients/redis';
-import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
+import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
 
 import {
   VideosBufferPort,
@@ -14,18 +15,70 @@ import { VideosConfigService } from '@videos/infrastructure/config';
 
 import { VideoMessage, StreamData } from '../types';
 
+export interface StreamConfig {
+  key: string;
+  groupName: string;
+}
+
+export const VIDEOS_REDIS_STREAM_CONFIG = Symbol('VIDEOS_REDIS_STREAM_CONFIG');
+
 @Injectable()
-export class RedisStreamBufferAdapter implements VideosBufferPort {
+export class RedisStreamBufferAdapter implements VideosBufferPort, OnModuleInit {
+  private readonly client: Redis;
+
   public constructor(
     private readonly configService: VideosConfigService,
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
     @Inject(VIDEOS_RESPOSITORY_PORT)
     private readonly videosRepository: VideoRepositoryPort,
-    private readonly redisBufferClient: RedisClient,
-  ) {}
+    private readonly redis: RedisClient,
+    @Optional()
+    @Inject(VIDEOS_REDIS_STREAM_CONFIG)
+    private readonly streamConfig?: StreamConfig,
+  ) {
+    this.client = redis.getClient();
+  }
+
+  public async connect(): Promise<void> {
+    await this.client.connect();
+  }
+
+  public async disconnect(): Promise<void> {
+    await this.client.quit();
+  }
+
+  public async createStream() {
+    if (!this.streamConfig) return;
+    try {
+      await this.client.xgroup(
+        'CREATE',
+        this.streamConfig.key,
+        this.streamConfig.groupName,
+        '0',
+        'MKSTREAM',
+      );
+
+      this.logger.info(`Stream with key:${this.streamConfig.key} was created successfully`);
+    } catch (error) {
+      const err = error as Error;
+      if (err.message.includes('BUSYGROUP')) {
+        this.logger.alert(
+          `Stream with key: ${this.streamConfig.key} already exists, skipping creation`,
+        );
+      } else {
+        throw err;
+      }
+    }
+  }
+
+  public async onModuleInit() {
+    await this.connect();
+    await this.disconnect();
+    await this.createStream();
+  }
 
   public async bufferVideo(video: VideoAggregate): Promise<void> {
-    await this.redisBufferClient.client.xadd(
+    await this.client.xadd(
       this.configService.REDIS_STREAM_KEY,
       '*',
       'like-message',
@@ -37,7 +90,7 @@ export class RedisStreamBufferAdapter implements VideosBufferPort {
   public async processVideosBatch() {
     this.logger.alert(`Processing videos in batches now`);
 
-    const streamData = (await this.redisBufferClient.client.xreadgroup(
+    const streamData = (await this.client.xreadgroup(
       'GROUP',
       this.configService.REDIS_STREAM_GROUPNAME,
       this.configService.REDIS_STREAM_CONSUMER_ID,
@@ -91,7 +144,7 @@ export class RedisStreamBufferAdapter implements VideosBufferPort {
 
     const processedMessagesNumber = await this.videosRepository.saveManyVideos(models);
 
-    await this.redisBufferClient.client.xack(
+    await this.client.xack(
       this.configService.REDIS_STREAM_KEY,
       this.configService.REDIS_STREAM_GROUPNAME,
       ...ids,

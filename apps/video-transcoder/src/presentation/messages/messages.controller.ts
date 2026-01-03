@@ -1,8 +1,8 @@
 import { Controller, Inject } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
 
-import { VIDEO_TRANSCODER_EVENTS } from '@app/clients';
-import { LOGGER_PORT, LoggerPort } from '@app/ports/logger';
+import { VIDEO_TRANSCODER_EVENTS } from '@app/common/events';
+import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
 import { TranscodeVideoEventDto } from '@app/contracts/video-transcoder';
 
 import { VideoTranscoderService } from './messages.service';
