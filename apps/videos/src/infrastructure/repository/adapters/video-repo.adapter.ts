@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { PrismaDBClient } from '@app/clients/prisma';
 import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
-import { PrismaHandler } from '@app/handlers/database-handler/prisma';
+import { PrismaHandler } from '@app/handlers/database/prisma';
 
 import { VideoAggregate } from '@videos/domain/aggregates';
 import { VideoRepositoryPort } from '@videos/application/ports';

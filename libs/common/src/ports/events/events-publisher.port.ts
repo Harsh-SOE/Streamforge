@@ -1,9 +1,9 @@
 import { IntegrationEvent } from '@app/common/events';
 
-export interface EventsPublisher {
+export interface EventsPublisherPort {
   connect(): Promise<void>;
   disconnect(): Promise<void>;
   publishMessage(message: IntegrationEvent<any>): Promise<void>;
 }
 
-export const EVENT_PUBLISHER = Symbol('EVENT_PUBLISHER');
+export const EVENT_PUBLISHER_PORT = Symbol('EVENT_PUBLISHER_PORT');

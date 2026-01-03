@@ -1,15 +1,16 @@
 import { Consumer, EachBatchPayload, KafkaMessage, Producer } from 'kafkajs';
 import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 
+import { KafkaClient } from '@app/clients/kafka';
+import { BUFFER_EVENTS } from '@app/common/events';
+import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
+import { KafkaBufferHandler } from '@app/handlers/buffer/kafka';
+
 import {
   UsersBufferPort,
   USER_REROSITORY_PORT,
   UserRepositoryPort,
 } from '@users/application/ports';
-import { KafkaClient } from '@app/clients/kafka';
-import { BUFFER_EVENTS } from '@app/common/events';
-import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
-
 import { UserAggregate } from '@users/domain/aggregates';
 
 import { UserMessage } from '../types';
@@ -22,8 +23,10 @@ export class UsersKafkaBuffer implements UsersBufferPort, OnModuleInit, OnModule
   public constructor(
     @Inject(USER_REROSITORY_PORT)
     private readonly userRepository: UserRepositoryPort,
-    @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
+    @Inject(LOGGER_PORT)
+    private readonly logger: LoggerPort,
     private readonly kafka: KafkaClient,
+    private readonly handler: KafkaBufferHandler,
   ) {
     this.consumer = this.kafka.getConsumer({ groupId: 'users' });
     this.producer = this.kafka.getProducer({ allowAutoTopicCreation: true });
@@ -31,44 +34,67 @@ export class UsersKafkaBuffer implements UsersBufferPort, OnModuleInit, OnModule
   }
 
   public async connect(): Promise<void> {
+    this.logger.alert(`Kafka buffer connecting...`);
     await this.producer.connect();
     await this.consumer.connect();
+    this.logger.alert(`Kafka buffer connected successfully`);
   }
 
   public async disconnect(): Promise<void> {
+    this.logger.alert(`Kafka buffer disconnecting...`);
     await this.producer.disconnect();
     await this.consumer.disconnect();
+    this.logger.alert(`Kafka buffer disconnected successfully`);
   }
 
   public async onModuleInit() {
-    await this.connect();
-
-    await this.consumer.subscribe({
-      topic: BUFFER_EVENTS.USER_BUFFER_EVENT,
-      fromBeginning: false,
+    await this.handler.execute(async () => await this.connect(), {
+      operationType: 'CONNECT',
     });
 
-    await this.consumer.run({
-      eachBatch: async (payload: EachBatchPayload) => {
-        const { batch } = payload;
-
-        if (batch.topic !== BUFFER_EVENTS.USER_BUFFER_EVENT.toString()) {
-          return;
-        }
-
-        await this.processUsersMessages(batch.messages);
+    await this.handler.execute(
+      async () =>
+        await this.consumer.subscribe({
+          topic: BUFFER_EVENTS.USER_BUFFER_EVENT,
+          fromBeginning: false,
+        }),
+      {
+        operationType: 'CONNECT',
       },
-    });
+    );
+
+    const startConsumerOperation = async () =>
+      await this.consumer.run({
+        eachBatch: async (payload: EachBatchPayload) => {
+          const { batch } = payload;
+
+          if (batch.topic !== BUFFER_EVENTS.USER_BUFFER_EVENT.toString()) {
+            return;
+          }
+
+          await this.processUsersMessages(batch.messages);
+        },
+      });
+
+    await this.handler.execute(startConsumerOperation, { operationType: 'FLUSH' });
   }
 
   public async onModuleDestroy() {
-    await this.disconnect();
+    await this.handler.execute(async () => await this.disconnect(), {
+      operationType: 'DISCONNECT',
+    });
   }
 
   public async bufferUser(user: UserAggregate): Promise<void> {
-    await this.producer.send({
-      topic: BUFFER_EVENTS.USER_BUFFER_EVENT,
-      messages: [{ value: JSON.stringify(user.getUserSnapshot()) }],
+    const publishToKafkaBufferOperation = async () =>
+      await this.producer.send({
+        topic: BUFFER_EVENTS.USER_BUFFER_EVENT,
+        messages: [{ value: JSON.stringify(user.getUserSnapshot()) }],
+      });
+
+    await this.handler.execute(publishToKafkaBufferOperation, {
+      operationType: 'SAVE',
+      valueToBuffer: JSON.stringify(user.getUserSnapshot()),
     });
   }
 

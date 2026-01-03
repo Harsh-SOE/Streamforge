@@ -4,10 +4,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 
 import {
-  DATABASE_CONFIG,
+  DATABASE_HANDLER_CONFIG,
   DatabaseConfig,
   PrismaHandler,
-} from '@app/handlers/database-handler/prisma';
+} from '@app/handlers/database/prisma';
 import { LOGGER_PORT } from '@app/common/ports/logger';
 import {
   DatabaseEntityAlreadyExistsException,
@@ -67,7 +67,7 @@ describe('UserRepositoryAdapter (Integration)', () => {
           useValue: UserPrismaClient,
         },
         {
-          provide: DATABASE_CONFIG,
+          provide: DATABASE_HANDLER_CONFIG,
           useFactory: () =>
             ({
               host: 'test-container',

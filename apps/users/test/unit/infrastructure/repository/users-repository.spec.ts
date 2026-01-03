@@ -1,7 +1,7 @@
 import { Test } from '@nestjs/testing';
 
 import { LOGGER_PORT } from '@app/common/ports/logger';
-import { PrismaHandler } from '@app/handlers/database-handler/prisma';
+import { PrismaHandler } from '@app/handlers/database/prisma';
 
 import { PrismaDBClient } from '@app/clients/prisma';
 import { UserRepositoryAdapter } from '@users/infrastructure/repository/adapters';

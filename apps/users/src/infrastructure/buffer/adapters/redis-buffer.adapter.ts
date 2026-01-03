@@ -1,10 +1,10 @@
 import Redis from 'ioredis';
-import { Inject, Injectable, OnModuleInit, Optional } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { Inject, Injectable, OnModuleInit, Optional } from '@nestjs/common';
 
 import { RedisClient } from '@app/clients/redis';
 import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
-import { RedisBufferHandler } from '@app/handlers/buffer-handler/redis';
+import { RedisBufferHandler } from '@app/handlers/buffer/redis';
 
 import { UserAggregate } from '@users/domain/aggregates';
 import { UserConfigService } from '@users/infrastructure/config';
@@ -13,12 +13,12 @@ import { UserRepositoryAdapter } from '@users/infrastructure/repository/adapters
 
 import { UserMessage, StreamData } from '../types';
 
-export interface StreamConfig {
+export interface RedisBufferConfig {
   key: string;
   groupName: string;
 }
 
-export const REDIS_STREAM_CONFIG = Symbol('REDIS_STREAM_CONFIG');
+export const REDIS_BUFFER_CONFIG = Symbol('REDIS_STREAM_CONFIG');
 
 @Injectable()
 export class UsersRedisBuffer implements UsersBufferPort, OnModuleInit {
@@ -35,19 +35,23 @@ export class UsersRedisBuffer implements UsersBufferPort, OnModuleInit {
     private readonly handler: RedisBufferHandler,
 
     @Optional()
-    @Inject(REDIS_STREAM_CONFIG)
-    private readonly streamConfig?: StreamConfig,
+    @Inject(REDIS_BUFFER_CONFIG)
+    private readonly streamConfig?: RedisBufferConfig,
   ) {
     this.client = redis.getClient();
     this.logger.alert(`Using Redis stream as buffer for users service`);
   }
 
   public async connect(): Promise<void> {
+    this.logger.alert(`Redis buffer connecting...`);
     await this.client.connect();
+    this.logger.alert(`Redis buffer connected successfully!`);
   }
 
   public async disconnect(): Promise<void> {
+    this.logger.alert(`Redis buffer disconnecting...`);
     await this.client.quit();
+    this.logger.alert(`Redis buffer disconnected successfully!`);
   }
 
   public async onModuleInit() {

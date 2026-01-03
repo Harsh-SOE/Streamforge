@@ -6,6 +6,10 @@ import { KafkaOptions, Transport } from '@nestjs/microservices';
 export class EmailConfigService {
   constructor(private readonly configService: ConfigService) {}
 
+  get NODE_ENVIRONMENT() {
+    return this.configService.getOrThrow<string>('NODE_ENVIRONMENT');
+  }
+
   get HTTP_PORT() {
     return this.configService.getOrThrow<number>('HTTP_PORT');
   }

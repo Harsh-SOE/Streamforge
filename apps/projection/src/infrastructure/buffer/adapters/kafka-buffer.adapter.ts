@@ -6,8 +6,8 @@ import { VideoUploadedEventDto } from '@app/contracts/videos';
 import { UserProfileCreatedEventDto } from '@app/contracts/users';
 import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
 import { IntegrationEvent, PROJECTION_EVENTS } from '@app/common/events';
-import { KafkaEventConsumerHandler } from '@app/handlers/event-bus-handler/kafka/consumer-handler';
-import { KafkaEventPublisherHandler } from '@app/handlers/event-bus-handler/kafka/publisher-handler';
+import { KafkaEventConsumerHandler } from '@app/handlers/events-consumer/kafka';
+import { KafkaEventPublisherHandler } from '@app/handlers/events-publisher/kafka';
 
 import {
   USER_PROJECTION_REPOSITORY_PORT,

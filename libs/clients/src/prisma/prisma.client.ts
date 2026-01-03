@@ -1,7 +1,7 @@
 import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 
 import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
-import { PrismaHandler } from '@app/handlers/database-handler/prisma';
+import { PrismaHandler } from '@app/handlers/database/prisma';
 
 import { PRISMA_CLIENT, PRISMA_CLIENT_NAME } from './constants';
 

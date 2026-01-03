@@ -4,7 +4,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 
 import { RedisClient } from '@app/clients/redis';
 import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
-import { RedisBufferHandler } from '@app/handlers/buffer-handler/redis';
+import { RedisBufferHandler } from '@app/handlers/buffer/redis';
 
 import {
   ViewsBufferPort,

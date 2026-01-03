@@ -5,7 +5,7 @@ import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { RedisClient } from '@app/clients/redis';
 import { getShardFor } from '@app/common/counters';
 import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
-import { RedisCacheHandler } from '@app/handlers/cache-handler/redis';
+import { RedisCacheHandler } from '@app/handlers/cache/redis';
 
 import { CommentCachePort } from '@comments/application/ports';
 

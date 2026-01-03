@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Components } from '@app/common';
 import { PrismaDBClient } from '@app/clients/prisma';
 import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
-import { PrismaHandler } from '@app/handlers/database-handler/prisma';
+import { PrismaHandler } from '@app/handlers/database/prisma';
 
 import { ChannelAggregate } from '@channel/domain/aggregates';
 import { ChannelCommandRepositoryPort } from '@channel/application/ports';

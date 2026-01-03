@@ -4,7 +4,7 @@ import { Inject, Injectable, OnModuleDestroy, OnModuleInit, Optional } from '@ne
 
 import { RedisClient } from '@app/clients/redis';
 import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
-import { RedisBufferHandler } from '@app/handlers/buffer-handler/redis';
+import { RedisBufferHandler } from '@app/handlers/buffer/redis';
 
 import {
   ReactionBufferPort,
@@ -17,12 +17,12 @@ import { TransportDomainReactionStatusEnumMapper } from '@reaction/infrastructur
 
 import { ReactionMessage, StreamData } from '../types';
 
-export interface StreamConfig {
+export interface RedisStreamConfig {
   key: string;
   groupName: string;
 }
 
-export const REDIS_STREAM_CONFIG = Symbol('REDIS_STREAM_CONFIG');
+export const REDIS_BUFFER_CONFIG = Symbol('REDIS_BUFFER_CONFIG');
 
 @Injectable()
 export class RedisStreamBufferAdapter implements ReactionBufferPort, OnModuleInit, OnModuleDestroy {
@@ -39,8 +39,8 @@ export class RedisStreamBufferAdapter implements ReactionBufferPort, OnModuleIni
     private readonly handler: RedisBufferHandler,
 
     @Optional()
-    @Inject(REDIS_STREAM_CONFIG)
-    private readonly streamConfig?: StreamConfig,
+    @Inject(REDIS_BUFFER_CONFIG)
+    private readonly streamConfig?: RedisStreamConfig,
   ) {
     this.client = redis.getClient();
   }

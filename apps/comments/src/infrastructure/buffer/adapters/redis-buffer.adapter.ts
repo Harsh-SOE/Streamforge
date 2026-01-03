@@ -4,7 +4,7 @@ import { Inject, Injectable, OnModuleDestroy, OnModuleInit, Optional } from '@ne
 
 import { RedisClient } from '@app/clients/redis';
 import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
-import { RedisBufferHandler } from '@app/handlers/buffer-handler/redis';
+import { RedisBufferHandler } from '@app/handlers/buffer/redis';
 
 import {
   CommentBufferPort,
@@ -16,12 +16,12 @@ import { CommentsConfigService } from '@comments/infrastructure/config';
 
 import { CommentMessage, StreamData } from '../types';
 
-export interface StreamConfig {
+export interface RedisBufferConfig {
   key: string;
   groupName: string;
 }
 
-export const COMMENTS_REDIS_STREAM_CONFIG = Symbol('COMMENTS_REDIS_STREAM_CONFIG');
+export const REDIS_BUFFER_CONFIG = Symbol('REDIS_BUFFER_CONFIG');
 
 @Injectable()
 export class RedisStreamBufferAdapter implements OnModuleInit, OnModuleDestroy, CommentBufferPort {
@@ -35,8 +35,8 @@ export class RedisStreamBufferAdapter implements OnModuleInit, OnModuleDestroy, 
     private readonly redis: RedisClient,
     private readonly handler: RedisBufferHandler,
     @Optional()
-    @Inject(COMMENTS_REDIS_STREAM_CONFIG)
-    private readonly streamConfig?: StreamConfig,
+    @Inject(REDIS_BUFFER_CONFIG)
+    private readonly streamConfig?: RedisBufferConfig,
   ) {
     this.client = redis.getClient();
   }

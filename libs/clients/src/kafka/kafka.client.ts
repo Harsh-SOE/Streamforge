@@ -1,34 +1,30 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Consumer, ConsumerConfig, Kafka, Producer, ProducerConfig } from 'kafkajs';
 
-export const KAFKA_HOST = Symbol('KAFKA_HOST');
-export const KAFKA_PORT = Symbol('KAFKA_PORT');
-export const KAFKA_ACCESS_KEY = Symbol('KAFKA_ACCESS_KEY');
-export const KAFKA_ACCESS_CERT = Symbol('KAFKA_ACCESS_CERT');
-export const KAFKA_CA_CERT = Symbol('KAFKA_CA_CERT');
-export const KAFKA_CLIENT = Symbol('KAFKA_CLIENT');
-export const KAFKA_CONSUMER = Symbol('KAFKA_CONSUMER');
+export interface KafkaClientConfig {
+  host: string;
+  port: number;
+  clientId: string;
+  caCert: string;
+  accessKey: string;
+  accessCert: string;
+}
+
+export const KAFKA_CLIENT_CONFIG = Symbol('KAFKA_CLIENT_CONFIG');
 
 @Injectable()
 export class KafkaClient {
   private client: Kafka;
 
-  public constructor(
-    @Inject(KAFKA_HOST) private readonly host: string,
-    @Inject(KAFKA_PORT) private readonly port: number,
-    @Inject(KAFKA_CA_CERT) private readonly ca: string,
-    @Inject(KAFKA_ACCESS_CERT) private readonly accessCert: string,
-    @Inject(KAFKA_ACCESS_KEY) private readonly accessKey: string,
-    @Inject(KAFKA_CLIENT) private readonly kafkaClient: string,
-  ) {
+  public constructor(@Inject(KAFKA_CLIENT_CONFIG) private readonly config: KafkaClientConfig) {
     this.client = new Kafka({
-      brokers: [`${this.host}:${this.port}`],
-      clientId: this.kafkaClient,
+      brokers: [`${this.config.host}:${this.config.port}`],
+      clientId: this.config.clientId,
       ssl: {
         rejectUnauthorized: true,
-        ca: [this.ca],
-        key: this.accessKey,
-        cert: this.accessCert,
+        ca: [this.config.caCert],
+        key: this.config.accessKey,
+        cert: this.config.accessCert,
       },
     });
   }

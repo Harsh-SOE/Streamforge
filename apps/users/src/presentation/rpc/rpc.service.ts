@@ -30,7 +30,7 @@ import {
 } from '@users/application/commands';
 
 @Injectable()
-export class GrpcService {
+export class RpcService {
   constructor(private readonly commandBus: CommandBus) {}
 
   async generatePreSignedUrl(

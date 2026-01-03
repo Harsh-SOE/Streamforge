@@ -11,6 +11,8 @@ import { ProjectionConfigService } from './config.service';
       isGlobal: true,
       envFilePath: path.join(__dirname, '../../.env'),
       validationSchema: joi.object({
+        NODE_ENVIRONMENT: joi.string().valid('development', 'staging', 'production').required(),
+
         HTTP_PORT: joi.number().required(),
 
         KAFKA_HOST: joi.string().required(),
