@@ -9,9 +9,17 @@ type KafkaConsumerOperations = {
     topic?: never;
     message?: IntegrationEvent<any>;
   };
-  CONSUME: {
+  SUBSCRIBE: {
     topic: string;
-    message: IntegrationEvent<any>;
+    message?: IntegrationEvent<any>;
+  };
+  PUBLISH: {
+    topic?: string;
+    message?: IntegrationEvent<any>;
+  };
+  CONSUME: {
+    topic?: string;
+    message?: IntegrationEvent<any>;
   };
 };
 

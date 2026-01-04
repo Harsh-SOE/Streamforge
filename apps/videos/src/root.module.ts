@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
 
 import { RpcModule } from './presentation/rpc';
-import { MessagesModule } from './presentation/messages';
+import { MessagesModule } from './presentation/events';
 import { PlatformModule } from './infrastructure/platform/platform.module';
 
 @Module({

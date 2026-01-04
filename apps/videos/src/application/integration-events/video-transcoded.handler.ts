@@ -3,9 +3,8 @@ import { EventsHandler, IEventHandler } from '@nestjs/cqrs';
 
 import { VIDEOS_RESPOSITORY_PORT } from '@videos/application/ports';
 import { VideoNotFoundException } from '@videos/application/exceptions';
+import { VideoTranscodedDomainEvent } from '@videos/domain/domain-events';
 import { VideoRepositoryAdapter } from '@videos/infrastructure/repository/adapters';
-
-import { VideoTranscodedDomainEvent } from './video-transcoded.event';
 
 @EventsHandler(VideoTranscodedDomainEvent)
 export class VideoTranscodedEventHandler implements IEventHandler<VideoTranscodedDomainEvent> {

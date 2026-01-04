@@ -1,4 +1,4 @@
-import { VideoCreatedEventHandler } from './video-created-integration-event/video-created.handler';
-import { VideoTranscodedEventHandler } from './video-transcoded-integration-event/video-transcoded.handler';
+import { VideoCreatedEventHandler } from './video-created.handler';
+import { VideoTranscodedEventHandler } from './video-transcoded.handler';
 
 export const VideoEventHandler = [VideoCreatedEventHandler, VideoTranscodedEventHandler];
