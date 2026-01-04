@@ -1,10 +1,11 @@
 import { Consumer } from 'kafkajs';
-import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 
 import { KafkaClient } from '@app/clients/kafka';
-import { CHANNEL_EVENTS, IntegrationEvent, USERS_EVENTS, VIDEO_EVENTS } from '@app/common/events';
 import { EventsConsumerPort } from '@app/common/ports/events';
+import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
 import { KafkaEventConsumerHandler } from '@app/handlers/events-consumer/kafka';
+import { CHANNEL_EVENTS, IntegrationEvent, USERS_EVENTS, VIDEO_EVENTS } from '@app/common/events';
 
 import { ProjectionConfigService } from '@projection/infrastructure/config';
 
@@ -18,6 +19,7 @@ export class ProjectionKafkaConsumerAdapter
     private readonly configService: ProjectionConfigService,
     private readonly handler: KafkaEventConsumerHandler,
     private readonly kafka: KafkaClient,
+    @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
   ) {
     this.consumer = kafka.getConsumer({
       groupId: 'comments',
@@ -34,21 +36,30 @@ export class ProjectionKafkaConsumerAdapter
     });
   }
 
-  public async connect(): Promise<void> {
-    await this.consumer.connect();
+  public async subscribe(eventNames: Array<string>): Promise<void> {
     await this.consumer.subscribe({
-      topics: [
-        USERS_EVENTS.USER_ONBOARDED_EVENT,
-        USERS_EVENTS.USER_PROFILE_UPDATED_EVENT,
-        VIDEO_EVENTS.VIDEO_UPLOADED_EVENT,
-        CHANNEL_EVENTS.CHANNEL_CREATED,
-      ].map((event) => event.toString()),
+      topics: eventNames,
       fromBeginning: this.configService.NODE_ENVIRONMENT === 'development',
     });
   }
 
+  public async connect(): Promise<void> {
+    await this.consumer.connect();
+    this.logger.alert('Kafka Consumer connected successfully');
+
+    const eventsToSubscribe = [
+      USERS_EVENTS.USER_ONBOARDED_EVENT,
+      USERS_EVENTS.USER_PROFILE_UPDATED_EVENT,
+      VIDEO_EVENTS.VIDEO_UPLOADED_EVENT,
+      CHANNEL_EVENTS.CHANNEL_CREATED,
+    ];
+    await this.subscribe(eventsToSubscribe.map((event) => event.toString()));
+    this.logger.info(`Kafka Consumer subscribed to events: [${eventsToSubscribe.join(', ')}]`);
+  }
+
   public async disconnect(): Promise<void> {
     await this.consumer.disconnect();
+    this.logger.alert('Kafka Consumer disconnected successfully');
   }
 
   public async consumeMessage(
