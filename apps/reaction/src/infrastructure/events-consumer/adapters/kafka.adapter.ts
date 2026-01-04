@@ -1,9 +1,10 @@
 import { Consumer } from 'kafkajs';
-import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 
 import { KafkaClient } from '@app/clients/kafka';
 import { IntegrationEvent } from '@app/common/events';
 import { EventsConsumerPort } from '@app/common/ports/events';
+import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
 import { KafkaEventConsumerHandler } from '@app/handlers/events-consumer/kafka';
 
 import { ReactionConfigService } from '@reaction/infrastructure/config';
@@ -18,6 +19,7 @@ export class ReactionKafkaConsumerAdapter
     private readonly configService: ReactionConfigService,
     private readonly handler: KafkaEventConsumerHandler,
     private readonly kafka: KafkaClient,
+    @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
   ) {
     this.consumer = kafka.getConsumer({
       groupId: 'users',
@@ -36,15 +38,21 @@ export class ReactionKafkaConsumerAdapter
 
   public async connect(): Promise<void> {
     await this.consumer.connect();
+    this.logger.alert('Kafka Consumer connected successfully');
+
+    const eventsToSubscribe = [];
+    await this.subscribe(eventsToSubscribe);
+
+    this.logger.alert(`Kafka Consumer subscribed to events: [${eventsToSubscribe.join(', ')}]`);
   }
 
   public async disconnect(): Promise<void> {
     await this.consumer.disconnect();
   }
 
-  public async subscribe(eventName: string): Promise<void> {
+  public async subscribe(eventNames: Array<string>): Promise<void> {
     await this.consumer.subscribe({
-      topic: eventName,
+      topics: eventNames,
       fromBeginning: this.configService.NODE_ENVIRONMENT === 'development',
     });
   }
