@@ -40,10 +40,7 @@ export class VideosKafkaConsumerAdapter
     await this.consumer.connect();
     this.logger.alert('Kafka Consumer connected successfully');
 
-    const eventsToSubscribe = [
-      VIDEO_TRANSCODER_EVENTS.VIDEO_TRANSCODED_EVENT,
-      VIDEO_TRANSCODER_EVENTS.VIDEO_TRANSCODE_EVENT,
-    ];
+    const eventsToSubscribe = [VIDEO_TRANSCODER_EVENTS.VIDEO_TRANSCODED_EVENT];
     await this.subscribe(eventsToSubscribe.map((e) => e.toString()));
 
     this.logger.alert(`Kafka Consumer subscribed to events: ${eventsToSubscribe.join(', ')}`);
