@@ -1,10 +1,10 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 
 import { IntegrationEvent, USERS_EVENTS } from '@app/common/events';
+import { OnboardedIntegrationEvent } from '@app/common/events/users';
 import { EVENT_CONSUMER_PORT, EventsConsumerPort } from '@app/common/ports/events';
 
 import { EventsService } from './events.service';
-import { UserOnboardedEvent } from '@app/contracts/users';
 
 @Injectable()
 export class EventsListener implements OnModuleInit {
@@ -21,7 +21,7 @@ export class EventsListener implements OnModuleInit {
 
       switch (event.eventName) {
         case USERS_EVENTS.USER_ONBOARDED_EVENT.toString(): {
-          await this.eventsService.sendEMail((event as UserOnboardedEvent).payload.email);
+          await this.eventsService.sendEMail((event as OnboardedIntegrationEvent).payload.email);
           break;
         }
       }
