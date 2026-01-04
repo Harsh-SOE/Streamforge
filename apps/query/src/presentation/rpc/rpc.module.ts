@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 
-import { QueryHandlers } from '@query/queries/handlers';
+import { QueryHandlers } from '@query/queries';
 import { PlatformModule } from '@query/infrastructure/platform/platform.module';
 
 import { RpcService } from './rpc.service';
