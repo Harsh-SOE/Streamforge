@@ -37,26 +37,29 @@ export class UsersKafkaEventsConsumerAdapter
   }
 
   public async connect(): Promise<void> {
-    this.logger.alert(`Consumer connecting to kafka...`);
     await this.consumer.connect();
     this.logger.alert(`Consumer successfully connected to kafka!`);
+
+    // subscribe to topics here only...
+    await this.subscribe([]);
+    this.logger.alert(`Consumer successfully subscribed to topics!`);
   }
 
   public async disconnect(): Promise<void> {
-    this.logger.alert(`Consumer disconnecting from kafka...`);
     await this.consumer.disconnect();
     this.logger.alert(`Consumer successfully disconnected from kafka!`);
   }
 
-  public async subscribe(eventName: string): Promise<void> {
+  public async subscribe(eventNames: Array<string>): Promise<void> {
     await this.handler.execute(
       async () =>
         await this.consumer.subscribe({
-          topic: eventName,
+          topics: eventNames,
           fromBeginning: this.configService.NODE_ENVIRONMENT === 'development',
         }),
       {
-        operationType: 'CONNECT',
+        operationType: 'SUBSCRIBE',
+        topic: eventNames.join(', '),
       },
     );
   }
@@ -84,7 +87,7 @@ export class UsersKafkaEventsConsumerAdapter
       });
     // todo: fix this to consume operation type...
     await this.handler.execute(startConsumerOperation, {
-      operationType: 'CONNECT',
+      operationType: 'CONSUME',
     });
   }
 }
