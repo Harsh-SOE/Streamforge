@@ -3,7 +3,7 @@ import { Module } from '@nestjs/common';
 import { VideoTranscoderCommandHandlers } from '@transcoder/application/commands';
 import { PlatformModule } from '@transcoder/infrastructure/platform/platform.module';
 
-import { VideoTranscoderService } from './video-transcoder.service';
+import { VideoTranscoderService } from '../transcoder/video-transcoder.service';
 import { EventsListenerService } from './events-listener.service';
 
 @Module({

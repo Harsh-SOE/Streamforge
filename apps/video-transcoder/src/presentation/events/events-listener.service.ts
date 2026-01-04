@@ -5,7 +5,7 @@ import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
 import { TranscodeVideoEventDto } from '@app/contracts/video-transcoder';
 import { EVENT_CONSUMER_PORT, EventsConsumerPort } from '@app/common/ports/events';
 
-import { VideoTranscoderService } from './video-transcoder.service';
+import { VideoTranscoderService } from '../transcoder/video-transcoder.service';
 
 export class EventsListenerService implements OnModuleInit {
   public constructor(

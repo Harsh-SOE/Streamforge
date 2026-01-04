@@ -1,9 +1,10 @@
 import { Consumer } from 'kafkajs';
-import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 
 import { KafkaClient } from '@app/clients/kafka';
-import { IntegrationEvent } from '@app/common/events';
 import { EventsConsumerPort } from '@app/common/ports/events';
+import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
+import { IntegrationEvent, VIDEO_TRANSCODER_EVENTS } from '@app/common/events';
 import { KafkaEventConsumerHandler } from '@app/handlers/events-consumer/kafka';
 
 import { TranscoderConfigService } from '@transcoder/infrastructure/config';
@@ -18,9 +19,10 @@ export class TranscoderKafkaConsumerAdapter
     private readonly configService: TranscoderConfigService,
     private readonly handler: KafkaEventConsumerHandler,
     private readonly kafka: KafkaClient,
+    @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
   ) {
     this.consumer = kafka.getConsumer({
-      groupId: 'transcoder',
+      groupId: 'videos-transcoder',
     });
   }
 
@@ -36,15 +38,23 @@ export class TranscoderKafkaConsumerAdapter
 
   public async connect(): Promise<void> {
     await this.consumer.connect();
+    this.logger.alert('Kafka Consumer connected successfully');
+    const eventsToSubscribe = [
+      VIDEO_TRANSCODER_EVENTS.VIDEO_TRANSCODE_EVENT,
+      VIDEO_TRANSCODER_EVENTS.VIDEO_TRANSCODED_EVENT,
+    ];
+    await this.subscribe(eventsToSubscribe.map((e) => e.toString()));
+    this.logger.info('Kafka Consumer subscribed to events: ' + eventsToSubscribe.join(', '));
   }
 
   public async disconnect(): Promise<void> {
     await this.consumer.disconnect();
+    this.logger.alert('Kafka Consumer disconnected successfully');
   }
 
-  public async subscribe(eventName: string): Promise<void> {
+  public async subscribe(eventNames: Array<string>): Promise<void> {
     await this.consumer.subscribe({
-      topic: eventName,
+      topics: eventNames,
       fromBeginning: this.configService.NODE_ENVIRONMENT === 'development',
     });
   }
