@@ -27,6 +27,8 @@ jobs:
     steps:
       - name: Get the latest code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup node
         uses: actions/setup-node@v4
