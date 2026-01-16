@@ -31,12 +31,6 @@ import { GatwayConfigModule, GatewayConfigService } from '@gateway/infrastructur
       {
         imports: [GatwayConfigModule],
         inject: [GatewayConfigService],
-        name: SERVICES.QUERY,
-        useFactory: (configService: GatewayConfigService) => configService.QUERY_SERVICE_OPTIONS,
-      },
-      {
-        imports: [GatwayConfigModule],
-        inject: [GatewayConfigService],
         name: SERVICES.COMMENTS,
         useFactory: (configService: GatewayConfigService) => configService.COMMENT_SERVICE_OPTIONS,
       },
@@ -57,6 +51,12 @@ import { GatwayConfigModule, GatewayConfigService } from '@gateway/infrastructur
         inject: [GatewayConfigService],
         name: SERVICES.WATCH,
         useFactory: (configService: GatewayConfigService) => configService.WATCH_SERVICE_OPTION,
+      },
+      {
+        imports: [GatwayConfigModule],
+        inject: [GatewayConfigService],
+        name: SERVICES.READ,
+        useFactory: (configService: GatewayConfigService) => configService.READ_SERVICE_OPTION,
       },
     ]),
     JwtModule.registerAsync({

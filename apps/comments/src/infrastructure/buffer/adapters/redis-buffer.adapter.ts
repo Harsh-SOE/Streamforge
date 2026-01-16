@@ -102,7 +102,7 @@ export class RedisStreamBufferAdapter implements OnModuleInit, OnModuleDestroy, 
     });
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   public async processCommentsMessages() {
     this.logger.info(`Processing batches of comments now...`);
 

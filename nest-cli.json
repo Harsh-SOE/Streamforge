@@ -140,16 +140,16 @@
         "watchAssets": true
       }
     },
-    "projection": {
+    "read": {
       "type": "application",
-      "root": "apps/projection",
+      "root": "apps/read",
       "entryFile": "main",
-      "sourceRoot": "apps/projection/src",
+      "sourceRoot": "apps/read/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/projection/tsconfig.app.json",
+        "tsConfigPath": "apps/read/tsconfig.app.json",
         "webpack": true,
         "watchAssets": true,
-        "webpackConfigPath": "apps/projection/webpack.config.js"
+        "webpackConfigPath": "apps/read/webpack.config.js"
       }
     },
     "proto": {

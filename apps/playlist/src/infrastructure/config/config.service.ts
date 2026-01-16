@@ -26,11 +26,11 @@ export class PlaylistConfigService {
   }
 
   get GRPC_OPTIONS(): GrpcOptions {
-    return {
+    const options: GrpcOptions = {
       transport: Transport.GRPC,
       options: {
-        package: [PLAYLIST_PACKAGE_NAME],
         protoPath: [join(__dirname, 'proto/playlist.proto'), HealthCheckProto],
+        package: [PLAYLIST_PACKAGE_NAME],
         url: `0.0.0.0:${this.GRPC_PORT}`,
         onLoadPackageDefinition(
           pkg: protoLoader.PackageDefinition,
@@ -45,5 +45,6 @@ export class PlaylistConfigService {
         },
       },
     };
+    return options;
   }
 }

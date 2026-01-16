@@ -7,7 +7,6 @@ export class LanguageChangedDomainEvent implements DomainEvent {
   public readonly occurredAt: Date = new Date();
 
   public constructor(
-    public readonly userId: string,
-    public readonly language: string,
+    public readonly payload: { readonly userId: string; readonly language: string },
   ) {}
 }

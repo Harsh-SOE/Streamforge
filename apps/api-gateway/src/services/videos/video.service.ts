@@ -1,40 +1,40 @@
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
-import { ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
+import { ClientGrpc } from '@nestjs/microservices';
+import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 
-import { VIDEO_SERVICE_NAME, VideoServiceClient } from '@app/contracts/videos';
 import { SERVICES } from '@app/common';
 import { UserAuthPayload } from '@app/contracts/auth';
-import { CHANNEL_SERVICE_NAME, ChannelServiceClient } from '@app/contracts/channel';
 import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
-import { QUERY_SERVICE_NAME, QueryServiceClient } from '@app/contracts/query';
+import { VIDEO_SERVICE_NAME, VideoServiceClient } from '@app/contracts/videos';
+import { CHANNEL_SERVICE_NAME, ChannelServiceClient } from '@app/contracts/channel';
+import { READ_QUERY_SERVICE_NAME, ReadQueryServiceClient } from '@app/contracts/read';
 
-import { ClientTransportVideoVisibilityEnumMapper } from './mappers/video-visibility-status';
-import { ClientTransportVideoPublishEnumMapper } from './mappers/video-publish-status';
-import { CreateVideoRequestDto, PreSignedUrlRequestDto, UpdateVideoRequestDto } from './request';
 import {
   PreSignedUrlRequestResponse,
   PublishedVideoRequestResponse,
   UpdatedVideoRequestResponse,
 } from './response';
+import { ClientTransportVideoPublishEnumMapper } from './mappers/video-publish-status';
+import { ClientTransportVideoVisibilityEnumMapper } from './mappers/video-visibility-status';
+import { CreateVideoRequestDto, PreSignedUrlRequestDto, UpdateVideoRequestDto } from './request';
 
 @Injectable()
 export class VideoService implements OnModuleInit {
   private videoService: VideoServiceClient;
   private channelService: ChannelServiceClient;
-  private queryService: QueryServiceClient;
+  private queryService: ReadQueryServiceClient;
 
   constructor(
     @Inject(SERVICES.VIDEO) private readonly videoClient: ClientGrpc,
     @Inject(SERVICES.CHANNEL) private readonly channelClient: ClientGrpc,
-    @Inject(SERVICES.QUERY) private readonly queryClient: ClientGrpc,
+    @Inject(SERVICES.READ) private readonly queryClient: ClientGrpc,
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
   ) {}
 
   onModuleInit() {
     this.videoService = this.videoClient.getService(VIDEO_SERVICE_NAME);
     this.channelService = this.channelClient.getService(CHANNEL_SERVICE_NAME);
-    this.queryService = this.queryClient.getService(QUERY_SERVICE_NAME);
+    this.queryService = this.queryClient.getService(READ_QUERY_SERVICE_NAME);
   }
 
   async getPresignedUploadVideoUrl(

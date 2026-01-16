@@ -47,7 +47,7 @@
       "@persistance/auth": ["apps/auth/generated/prisma"],
       "@persistance/views": ["apps/views/generated/prisma"],
       "@playlist/*": ["apps/playlist/src/*"],
-      "@projection/*": ["apps/projection/src/*"],
+      "@read/*": ["apps/read/src/*"],
       "@query/*": ["apps/query/src/*"],
       "@reaction/*": ["apps/reaction/src/*"],
       "@subscribe/*": ["apps/subscribe/src/*"],

@@ -5,6 +5,7 @@ export interface OnboardedIntegrationEventPayload {
   authId: string;
   email: string;
   handle: string;
+  avatar: string;
 }
 
 export class OnboardedIntegrationEvent implements IntegrationEvent<OnboardedIntegrationEventPayload> {
@@ -19,19 +20,10 @@ export class OnboardedIntegrationEvent implements IntegrationEvent<OnboardedInte
     occuredAt: string;
     payload: OnboardedIntegrationEventPayload;
   }) {
-    const {
-      eventId,
-      occuredAt,
-      payload: { authId, userId, email, handle },
-    } = config;
+    const { eventId, occuredAt, payload } = config;
 
     this.eventId = eventId;
     this.occurredAt = occuredAt;
-    this.payload = {
-      userId,
-      authId,
-      email,
-      handle,
-    };
+    this.payload = payload;
   }
 }

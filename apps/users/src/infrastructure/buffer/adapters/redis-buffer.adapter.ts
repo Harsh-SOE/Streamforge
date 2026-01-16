@@ -103,7 +103,7 @@ export class UsersRedisBuffer implements UsersBufferPort, OnModuleInit, OnModule
     });
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   public async processUsersBatch() {
     this.logger.alert(`Processing user in batches now`);
 

@@ -7,9 +7,12 @@ export class OnboardedDomainEvent implements DomainEvent {
   public readonly occurredAt: Date = new Date();
 
   public constructor(
-    public readonly userId: string,
-    public readonly authId: string,
-    public readonly email: string,
-    public readonly handle: string,
+    public readonly payload: {
+      readonly userId: string;
+      readonly authId: string;
+      readonly email: string;
+      readonly handle: string;
+      readonly avatar: string;
+    },
   ) {}
 }

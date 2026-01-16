@@ -5,8 +5,8 @@ import { ConfigService } from '@nestjs/config';
 import { GrpcOptions, Transport } from '@nestjs/microservices';
 
 import { ENVIRONMENT } from '@app/utils/enums';
+import { READ_PACKAGE_NAME } from '@app/contracts/read';
 import { USER_PACKAGE_NAME } from '@app/contracts/users';
-import { QUERY_PACKAGE_NAME } from '@app/contracts/query';
 import { VIEWS_PACKAGE_NAME } from '@app/contracts/views';
 import { VIDEO_PACKAGE_NAME } from '@app/contracts/videos';
 import { CHANNEL_PACKAGE_NAME } from '@app/contracts/channel';
@@ -97,12 +97,12 @@ export class GatewayConfigService {
     return this.configService.getOrThrow<number>('WATCH_SERVICE_PORT');
   }
 
-  get QUERY_SERVICE_PORT() {
-    return this.configService.getOrThrow<number>('QUERY_SERVICE_PORT');
+  get READ_SERVICE_PORT() {
+    return this.configService.getOrThrow<number>('READ_SERVICE_PORT');
   }
 
-  get QUERY_SERVICE_HOST() {
-    return this.configService.getOrThrow<string>('QUERY_SERVICE_HOST');
+  get READ_SERVICE_HOST() {
+    return this.configService.getOrThrow<string>('READ_SERVICE_HOST');
   }
 
   get AUTH0_CLIENT_ID() {
@@ -177,17 +177,6 @@ export class GatewayConfigService {
     };
   }
 
-  get QUERY_SERVICE_OPTIONS(): GrpcOptions {
-    return {
-      transport: Transport.GRPC,
-      options: {
-        protoPath: join(__dirname, 'proto/query.proto'),
-        package: QUERY_PACKAGE_NAME,
-        url: `${this.QUERY_SERVICE_HOST}:${this.QUERY_SERVICE_PORT}`,
-      },
-    };
-  }
-
   get CHANNEL_SERVICE_OPTIONS(): GrpcOptions {
     return {
       transport: Transport.GRPC,
@@ -216,6 +205,17 @@ export class GatewayConfigService {
       options: {
         package: VIEWS_PACKAGE_NAME,
         protoPath: join(__dirname, 'proto/views.proto'),
+        url: `${this.WATCH_SERVICE_HOST}:${this.WATCH_SERVICE_PORT}`,
+      },
+    };
+  }
+
+  get READ_SERVICE_OPTION(): GrpcOptions {
+    return {
+      transport: Transport.GRPC,
+      options: {
+        package: READ_PACKAGE_NAME,
+        protoPath: join(__dirname, 'proto/read.proto'),
         url: `${this.WATCH_SERVICE_HOST}:${this.WATCH_SERVICE_PORT}`,
       },
     };

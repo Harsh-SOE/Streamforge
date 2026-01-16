@@ -17,14 +17,16 @@ export class LanguageChangedHandler implements IEventHandler<LanguageChangedDoma
   ) {}
 
   public async handle(languageChangedDomainEvent: LanguageChangedDomainEvent) {
+    const payload = languageChangedDomainEvent.payload;
+
     this.logger.info(
-      `User with id:${languageChangedDomainEvent.userId} changed its language to '${languageChangedDomainEvent.language}'`,
+      `User with id:${payload.userId} changed its language to '${payload.language}'`,
     );
 
     const userLanguageChangedIntegrationEvent = new LanguageChangedIntergrationEvent({
       eventId: languageChangedDomainEvent.eventId,
       occurredAt: languageChangedDomainEvent.occurredAt.toString(),
-      payload: languageChangedDomainEvent,
+      payload,
     });
 
     await this.publisher.publishMessage(userLanguageChangedIntegrationEvent);

@@ -1,12 +1,13 @@
-import { Inject, Injectable, OnModuleInit, UnauthorizedException } from '@nestjs/common';
+import { Request } from 'express';
+import { firstValueFrom } from 'rxjs';
 import { ClientGrpc } from '@nestjs/microservices';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { firstValueFrom } from 'rxjs';
+import { Inject, Injectable, OnModuleInit, UnauthorizedException } from '@nestjs/common';
 
 import { SERVICES } from '@app/common';
 import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
-import { QUERY_SERVICE_NAME, QueryServiceClient } from '@app/contracts/query';
+import { READ_QUERY_SERVICE_NAME, ReadQueryServiceClient } from '@app/contracts/read';
 
 import { GatewayConfigService } from '@gateway/infrastructure/config';
 
@@ -17,16 +18,21 @@ export class JwtStrategy
   extends PassportStrategy(Strategy, GATEWAY_GAURD_STRATEGY)
   implements OnModuleInit
 {
-  private queryService: QueryServiceClient;
+  private queryService: ReadQueryServiceClient;
 
   constructor(
     readonly configService: GatewayConfigService,
     @Inject(SERVICES.USER) private readonly userClient: ClientGrpc,
-    @Inject(SERVICES.QUERY) private readonly queryClient: ClientGrpc,
+    @Inject(SERVICES.READ) private readonly queryClient: ClientGrpc,
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        (request: Request): string | null => {
+          const data = request?.cookies as Record<string, string> | undefined;
+          return data?.access_info ?? null;
+        },
+      ]),
       ignoreExpiration: false,
       algorithms: ['HS256'],
       secretOrKey: configService.JWT_ACCESS_TOKEN_SECRET,
@@ -34,7 +40,7 @@ export class JwtStrategy
   }
 
   onModuleInit() {
-    this.queryService = this.queryClient.getService(QUERY_SERVICE_NAME);
+    this.queryService = this.queryClient.getService(READ_QUERY_SERVICE_NAME);
   }
 
   async validate(payload: UserJwtAuthPayload): Promise<UserJwtAuthPayload> {

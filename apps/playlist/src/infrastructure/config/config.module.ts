@@ -1,11 +1,12 @@
 import * as joi from 'joi';
-import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { Global, Module } from '@nestjs/common';
 
 import { ENVIRONMENT } from '@app/utils/enums';
 
 import { PlaylistConfigService } from './config.service';
 
+@Global()
 @Module({
   imports: [
     ConfigModule.forRoot({

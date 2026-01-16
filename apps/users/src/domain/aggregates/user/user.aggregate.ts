@@ -60,12 +60,13 @@ export class UserAggregate extends AggregateRoot {
     if (emitOnboardingEvent) {
       const userEntity = userAggregate.getUserEntity();
       userAggregate.apply(
-        new OnboardedDomainEvent(
-          userEntity.getId(),
-          userEntity.getUserAuthId(),
-          userEntity.getEmail(),
-          userEntity.getUserHandle(),
-        ),
+        new OnboardedDomainEvent({
+          userId: userEntity.getId(),
+          authId: userEntity.getUserAuthId(),
+          email: userEntity.getEmail(),
+          handle: userEntity.getUserHandle(),
+          avatar: userEntity.getAvatarUrl(),
+        }),
       );
     }
 
@@ -138,7 +139,10 @@ export class UserAggregate extends AggregateRoot {
 
     if (emitLanguageEvent) {
       this.apply(
-        new LanguageChangedDomainEvent(userEntity.getId(), userEntity.getLanguagePreference()),
+        new LanguageChangedDomainEvent({
+          userId: userEntity.getId(),
+          language: userEntity.getLanguagePreference(),
+        }),
       );
     }
 
@@ -154,7 +158,10 @@ export class UserAggregate extends AggregateRoot {
 
     if (emitNotificationEvent) {
       this.apply(
-        new NotificationStatusChangedDomainEvent(userEntity.getId(), userEntity.getNotification()),
+        new NotificationStatusChangedDomainEvent({
+          userId: userEntity.getId(),
+          status: userEntity.getNotification(),
+        }),
       );
     }
     return true;

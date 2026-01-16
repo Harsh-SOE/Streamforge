@@ -17,19 +17,16 @@ export class UserProfileHandler implements IEventHandler<OnboardedDomainEvent> {
   ) {}
 
   async handle(onboardedDomainEvent: OnboardedDomainEvent) {
+    const payload = onboardedDomainEvent.payload;
+
     this.logger.info(
-      `User with email:${onboardedDomainEvent.email}, created a profile: ${JSON.stringify(onboardedDomainEvent)}`,
+      `User with email:${payload.email}, created a profile: ${JSON.stringify(onboardedDomainEvent)}`,
     );
 
     const onboardedIntegrationEvent = new OnboardedIntegrationEvent({
       eventId: onboardedDomainEvent.eventId,
       occuredAt: onboardedDomainEvent.occurredAt.toISOString(),
-      payload: {
-        userId: onboardedDomainEvent.userId,
-        authId: onboardedDomainEvent.authId,
-        email: onboardedDomainEvent.email,
-        handle: onboardedDomainEvent.handle,
-      },
+      payload,
     });
 
     await this.eventPublisher.publishMessage(onboardedIntegrationEvent);

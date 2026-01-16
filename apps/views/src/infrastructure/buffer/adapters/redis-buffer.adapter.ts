@@ -101,7 +101,7 @@ export class RedisStreamBufferAdapter implements OnModuleInit, OnModuleDestroy, 
     );
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   public async processViewsBatch() {
     const getStreamDataOperation = async () =>
       (await this.client.xreadgroup(

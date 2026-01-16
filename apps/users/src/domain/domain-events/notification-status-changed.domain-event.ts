@@ -7,7 +7,6 @@ export class NotificationStatusChangedDomainEvent implements DomainEvent {
   public readonly occurredAt: Date = new Date();
 
   public constructor(
-    public readonly userId: string,
-    public readonly status: boolean,
+    public readonly payload: { readonly userId: string; readonly status: boolean },
   ) {}
 }
