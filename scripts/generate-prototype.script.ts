@@ -11,7 +11,7 @@ const allowedServices = [
   'comments',
   'history',
   'playlist',
-  'query',
+  'read',
   'reaction',
   'saga',
   'subscribe',

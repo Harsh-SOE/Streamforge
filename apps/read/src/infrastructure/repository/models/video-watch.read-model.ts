@@ -1,0 +1,59 @@
+import { Document } from 'mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+
+@Schema({ timestamps: true })
+export class VideoWatchReadMongooseModel extends Document {
+  @Prop({ required: true, unique: true, index: true })
+  videoId: string;
+
+  @Prop({ required: true, index: true })
+  ownerId: string;
+
+  @Prop({ required: true, index: true })
+  channelId: string;
+
+  @Prop()
+  ownerName: string;
+
+  @Prop()
+  ownerAvatar: string;
+
+  @Prop({ index: true })
+  ownerHandle: string;
+
+  @Prop({ required: true })
+  title: string;
+
+  @Prop()
+  thumbnailUrl: string;
+
+  @Prop()
+  videoUrl: string;
+
+  @Prop()
+  durationSeconds: number;
+
+  @Prop({ index: true })
+  visibility: string;
+
+  @Prop({ type: [String], index: true })
+  categories: string[];
+
+  @Prop({ index: true })
+  publishedAt: Date;
+
+  @Prop({ default: 0 })
+  views: number;
+
+  @Prop({ default: 0 })
+  likes: number;
+
+  @Prop({ default: 0 })
+  commentsCount: number;
+
+  updatedAt: Date;
+}
+
+export const VideoWatchReadMongooseSchema = SchemaFactory.createForClass(
+  VideoWatchReadMongooseModel,
+);

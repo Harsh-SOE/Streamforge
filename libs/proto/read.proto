@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+// todo: add documentation for messages and proto file...
+
+package Read;
+
+message GetUserProfileFromIdDto {
+  string user_id = 1;
+}
+
+message GetUserProfileFromAuthIdDto {
+  string user_auth_id = 1;
+}
+
+message UserProfileMessage {
+  string user_id = 1;
+  string email = 2;
+  string user_auth_id = 3;
+  string avatar = 4;
+  string handle = 5;
+  optional string phone_number = 6;
+  optional bool is_phone_number_verified = 7;
+  optional string dob = 8;
+}
+
+message GetChannelFromIdDto {
+  string channel_id = 1;
+}
+
+message GetChannelFromUserIdDto {
+  string user_id = 1;
+}
+
+message ChannelMessage {
+  string channel_id = 1;
+  string user_id = 2;
+  string cover_image = 3;
+  string bio = 4;
+}
+
+message GetUserProfileResponse {
+  bool found = 1;
+  optional UserProfileMessage user = 2;
+}
+
+message GetChannelResponse {
+  bool found = 1;
+  optional ChannelMessage channel = 2;
+}
+
+// QueryService provides read-only query RPCs for retrieving user profiles and channels.
+service ReadQueryService {
+  // GetUserProfileFromId returns the user profile for a given user ID.
+  rpc GetUserProfileFromId(GetUserProfileFromIdDto) returns (GetUserProfileResponse) {}
+
+  // GetUserProfileFromAuthId returns the user profile for a given authentication ID.
+  rpc GetUserProfileFromAuthId(GetUserProfileFromAuthIdDto) returns (GetUserProfileResponse) {}
+  
+  // GetChannelFromId returns the channel for a given channel ID.
+  rpc GetChannelFromId(GetChannelFromIdDto) returns (GetChannelResponse) {}
+  
+  // GetChannelFromUserId returns the channel associated with a user ID.
+  rpc GetChannelFromUserId(GetChannelFromUserIdDto) returns (GetChannelResponse) {}
+}

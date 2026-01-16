@@ -17,14 +17,16 @@ export class NotificationStatusChangedHandler implements IEventHandler<Notificat
   ) {}
 
   public async handle(notificationStatusChangedDomainEvent: NotificationStatusChangedDomainEvent) {
+    const payload = notificationStatusChangedDomainEvent.payload;
+
     this.logger.info(
-      `User with id:${notificationStatusChangedDomainEvent.userId} turned ${notificationStatusChangedDomainEvent.status ? 'on' : 'off'} its notification status`,
+      `User with id:${payload.userId} turned ${payload.status ? 'on' : 'off'} its notification status`,
     );
 
     const userLanguageChangedIntegrationEvent = new NotificationStatusChangedIntegrationEvent({
       eventId: notificationStatusChangedDomainEvent.eventId,
       occurredAt: notificationStatusChangedDomainEvent.occurredAt.toString(),
-      payload: notificationStatusChangedDomainEvent,
+      payload,
     });
 
     await this.eventPublisher.publishMessage(userLanguageChangedIntegrationEvent);

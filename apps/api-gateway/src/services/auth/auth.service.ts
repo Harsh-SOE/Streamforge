@@ -5,11 +5,15 @@ import { ClientGrpc } from '@nestjs/microservices';
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 
 import { SERVICES } from '@app/common';
+import {
+  READ_QUERY_SERVICE_NAME,
+  ReadQueryServiceClient,
+  UserProfileMessage,
+} from '@app/contracts/read';
 import { ENVIRONMENT } from '@app/utils/enums';
 import { UserAuthPayload } from '@app/contracts/auth';
 import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
 import { USER_SERVICE_NAME, UserServiceClient } from '@app/contracts/users';
-import { QUERY_SERVICE_NAME, QueryServiceClient, UserProfileMessage } from '@app/contracts/query';
 
 import { UserProfile } from '@gateway/infrastructure/oauth/types';
 import { GatewayConfigService } from '@gateway/infrastructure/config';
@@ -21,11 +25,11 @@ const USER_METADATA_COOKIE_NAME = 'user_metadata';
 @Injectable()
 export class AuthService implements OnModuleInit {
   private userService: UserServiceClient;
-  private queryService: QueryServiceClient;
+  private queryService: ReadQueryServiceClient;
 
   constructor(
     @Inject(SERVICES.USER) private readonly userClient: ClientGrpc,
-    @Inject(SERVICES.QUERY) private readonly queryClient: ClientGrpc,
+    @Inject(SERVICES.READ) private readonly queryClient: ClientGrpc,
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
     private readonly jwtService: JwtService,
     private readonly configService: GatewayConfigService,
@@ -33,7 +37,7 @@ export class AuthService implements OnModuleInit {
 
   onModuleInit() {
     this.userService = this.userClient.getService(USER_SERVICE_NAME);
-    this.queryService = this.queryClient.getService(QUERY_SERVICE_NAME);
+    this.queryService = this.queryClient.getService(READ_QUERY_SERVICE_NAME);
   }
 
   private prepareAndSendOnboardingCookie(response: Response, userAuthCredentials: UserProfile) {
@@ -78,8 +82,9 @@ export class AuthService implements OnModuleInit {
       email: foundUser.email,
       avatar: foundUser.avatar,
       handle: foundUser.handle,
-      hasChannel: foundUser.hasChannel,
     };
+
+    this.logger.info(`User metadata is`, userMetaData);
 
     response.cookie(USER_METADATA_COOKIE_NAME, JSON.stringify(userMetaData), {
       httpOnly: false,

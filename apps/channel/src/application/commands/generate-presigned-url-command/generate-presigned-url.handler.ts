@@ -6,6 +6,7 @@ import { GetPresignedUrlDto, GetPreSignedUrlResponse } from '@app/contracts/chan
 import { CHANNEL_STORAGE_PORT, ChannelStoragePort } from '@channel/application/ports';
 
 import { GeneratePreSignedUrlCommand } from './generate-presigned-url.command';
+import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
 
 @CommandHandler(GeneratePreSignedUrlCommand)
 export class GeneratePreSignedUrlHandler implements ICommandHandler<
@@ -15,6 +16,7 @@ export class GeneratePreSignedUrlHandler implements ICommandHandler<
   public constructor(
     @Inject(CHANNEL_STORAGE_PORT)
     private readonly storageAdapter: ChannelStoragePort,
+    @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
   ) {}
 
   public async execute({ fileName, userId }: GetPresignedUrlDto): Promise<GetPreSignedUrlResponse> {
@@ -25,10 +27,11 @@ export class GeneratePreSignedUrlHandler implements ICommandHandler<
     const storageIdentifierResponse =
       await this.storageAdapter.getPresignedUrlForChannelCoverImage(fileName);
 
+    this.logger.info(`Generated URL:${storageIdentifierResponse.presignedUrl}`);
+
     return {
       response: 'Presigned url generated successfully',
-      fileIdentifier: storageIdentifierResponse.fileIdentifier,
-      presignedUrl: storageIdentifierResponse.presignedUrl,
+      ...storageIdentifierResponse,
     };
   }
 }

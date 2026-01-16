@@ -40,7 +40,7 @@ import { GatewayConfigService } from './config.service';
         VIDEO_SERVICE_HOST: joi.string().required(),
         WATCH_SERVICE_HOST: joi.string().required(),
         COMMENT_SERVICE_HOST: joi.string().required(),
-        QUERY_SERVICE_HOST: joi.string().required(),
+        READ_SERVICE_HOST: joi.string().required(),
 
         CHANNEL_SERVICE_PORT: joi.number().required(),
         USER_SERVICE_PORT: joi.number().required(),
@@ -48,7 +48,7 @@ import { GatewayConfigService } from './config.service';
         VIDEO_SERVICE_PORT: joi.number().required(),
         WATCH_SERVICE_PORT: joi.number().required(),
         COMMENT_SERVICE_PORT: joi.number().required(),
-        QUERY_SERVICE_PORT: joi.number().required(),
+        READ_SERVICE_PORT: joi.number().required(),
 
         GRAFANA_LOKI_URL: joi.string().required(),
         FRONTEND_URL: joi.string().required(),

@@ -104,7 +104,7 @@ export class RedisStreamBufferAdapter implements VideosBufferPort, OnModuleInit,
     );
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   public async processVideosBatch() {
     this.logger.alert(`Processing videos in batches now`);
 

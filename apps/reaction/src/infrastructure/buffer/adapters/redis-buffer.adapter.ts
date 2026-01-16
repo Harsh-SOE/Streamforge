@@ -106,7 +106,7 @@ export class RedisStreamBufferAdapter implements ReactionBufferPort, OnModuleIni
     );
   }
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_10_MINUTES)
   public async processReactionsBatch() {
     const getStreamDataOperation = async () =>
       (await this.client.xreadgroup(

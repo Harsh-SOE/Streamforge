@@ -1,11 +1,11 @@
-name: Projection CI
+name: Read CI
 
 on:
   push:
     paths:
-      - '.github/workflows/projection-service.yml'
+      - '.github/workflows/read-service.yml'
       - '.github/workflows/template-ci.yml'
-      - 'apps/projection/**'
+      - 'apps/read/**'
       - 'libs/**'
       - 'package.json'
       - 'yarn.lock'
@@ -16,9 +16,9 @@ on:
       - 'tsconfig.build.json'
   pull_request:
     paths:
-      - '.github/workflows/projection-service.yml'
+      - '.github/workflows/read-service.yml'
       - '.github/workflows/template-ci.yml'
-      - 'apps/projection/**'
+      - 'apps/read/**'
       - 'libs/**'
       - 'package.json'
       - 'yarn.lock'
@@ -29,10 +29,10 @@ on:
       - 'tsconfig.build.json'
 
 jobs:
-  projection-pipeline:
+  read-pipeline:
     uses: ./.github/workflows/template-ci.yml
     with:
-      service-name: 'projection'
+      service-name: 'read'
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

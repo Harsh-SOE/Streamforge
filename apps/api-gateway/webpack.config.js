@@ -41,7 +41,7 @@ module.exports = (options) => {
             to: path.join(__dirname, '../../dist/apps/api-gateway/proto'),
           },
           {
-            from: path.join('libs/proto/query.proto'),
+            from: path.join('libs/proto/read.proto'),
             to: path.join(__dirname, '../../dist/apps/api-gateway/proto'),
           },
           {
