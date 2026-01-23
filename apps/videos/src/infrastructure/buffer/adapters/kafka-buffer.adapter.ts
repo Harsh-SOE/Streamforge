@@ -1,8 +1,10 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Consumer, EachBatchPayload, KafkaMessage, Producer } from 'kafkajs';
 
+import { Entity } from '@app/common';
 import { KafkaClient } from '@app/clients/kafka';
-import { BUFFER_EVENTS } from '@app/common/events';
+import { BufferMessage } from '@app/common/buffer';
+import { INTERNAL_BUFFER } from '@app/common/events';
 import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
 
 import {
@@ -12,10 +14,11 @@ import {
 } from '@videos/application/ports';
 import { VideoAggregate } from '@videos/domain/aggregates';
 
-import { VideoMessage } from '../types';
+import { isVideoBufferMessage } from '../guards';
+import { VideoBufferMessage, VideoBufferMessagePayload } from '../types';
 
 @Injectable()
-export class KafkaBufferAdapter implements VideosBufferPort {
+export class KafkaBufferAdapter implements OnModuleInit, OnModuleDestroy, VideosBufferPort {
   private readonly consumer: Consumer;
   private readonly producer: Producer;
 
@@ -31,10 +34,9 @@ export class KafkaBufferAdapter implements VideosBufferPort {
 
   public async onModuleInit() {
     await this.connect();
-    await this.disconnect();
 
     await this.consumer.subscribe({
-      topic: BUFFER_EVENTS.VIDEOS_BUFFER_EVENT,
+      topic: INTERNAL_BUFFER,
       fromBeginning: true,
     });
 
@@ -42,13 +44,17 @@ export class KafkaBufferAdapter implements VideosBufferPort {
       eachBatch: async (payload: EachBatchPayload) => {
         const { batch } = payload;
 
-        if (batch.topic !== BUFFER_EVENTS.VIDEOS_BUFFER_EVENT.toString()) {
+        if (batch.topic !== INTERNAL_BUFFER) {
           return;
         }
 
-        await this.processVideosMessages(batch.messages);
+        await this.processVideosMessages(this.getVideoMessages(batch.messages));
       },
     });
+  }
+
+  public async onModuleDestroy() {
+    await this.disconnect();
   }
 
   public async connect(): Promise<void> {
@@ -62,18 +68,51 @@ export class KafkaBufferAdapter implements VideosBufferPort {
   }
 
   public async bufferVideo(video: VideoAggregate): Promise<void> {
+    const {
+      id,
+      channelId,
+      ownerId,
+      categories,
+      publishStatus,
+      title,
+      videoFileIdentifier,
+      videoThumbnailIdentifier,
+      visibilityStatus,
+      description,
+    } = video.getSnapshot();
+
+    const videoBufferMessage = new VideoBufferMessage({
+      id,
+      channelId,
+      description,
+      ownerId,
+      publishStatus,
+      title,
+      videoCategories: categories,
+      videoFileIdentifier,
+      videoThumbnailIdentifier,
+      visibilityStatus,
+    });
+
     await this.producer.send({
-      topic: BUFFER_EVENTS.VIDEOS_BUFFER_EVENT,
-      messages: [{ value: JSON.stringify(video.getSnapshot()) }],
+      topic: INTERNAL_BUFFER,
+      messages: [{ value: JSON.stringify(videoBufferMessage) }],
     });
   }
 
-  private async processVideosMessages(messages: KafkaMessage[]) {
-    const videosMessages = messages
-      .filter((message) => message.value)
-      .map((message) => JSON.parse(message.value!.toString()) as VideoMessage);
+  private getVideoMessages(messages: KafkaMessage[]): VideoBufferMessage[] {
+    return messages
+      .map(
+        (message) =>
+          JSON.parse(message.value!.toString()) as BufferMessage<Entity, VideoBufferMessagePayload>,
+      )
+      .filter(isVideoBufferMessage);
+  }
 
-    const models = videosMessages.map((message) => {
+  private async processVideosMessages(messages: VideoBufferMessage[]) {
+    const videoPayload = messages.map((message) => message.payload);
+
+    const models = videoPayload.map((message) => {
       return VideoAggregate.create({
         id: message.id,
         userId: message.ownerId,

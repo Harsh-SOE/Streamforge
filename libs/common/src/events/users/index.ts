@@ -1,4 +1,5 @@
 export * from './onboarded';
+export * from './event-types';
 export * from './theme-changed';
 export * from './language-changed';
 export * from './user-profile-updated';

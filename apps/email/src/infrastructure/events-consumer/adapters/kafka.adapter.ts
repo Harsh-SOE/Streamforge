@@ -4,7 +4,7 @@ import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/commo
 import { ENVIRONMENT } from '@app/utils/enums';
 import { KafkaClient } from '@app/clients/kafka';
 import { EventsConsumerPort } from '@app/common/ports/events';
-import { IntegrationEvent, USERS_EVENTS } from '@app/common/events';
+import { AGGREGATE_EVENT, IntegrationEvent } from '@app/common/events';
 import { KafkaEventConsumerHandler } from '@app/handlers/events-consumer/kafka';
 
 import { EmailConfigService } from '@email/infrastructure/config';
@@ -41,7 +41,7 @@ export class EmailKafkaEventsConsumerAdapter
     await this.consumer.connect();
     this.logger.alert('Kafka Consumer connected successfully');
 
-    const eventsToSubscribe = [USERS_EVENTS.USER_ONBOARDED_EVENT];
+    const eventsToSubscribe = [AGGREGATE_EVENT];
     await this.subscribe(eventsToSubscribe.map((event) => event.toString()));
     this.logger.info(`Kafka Consumer subscribed to events: [${eventsToSubscribe.join(', ')}]`);
   }
@@ -65,7 +65,7 @@ export class EmailKafkaEventsConsumerAdapter
   }
 
   public async consumeMessage(
-    onConsumeMessageHandler: (message: IntegrationEvent<any>) => Promise<void>,
+    onConsumeMessageHandler: (message: IntegrationEvent<unknown>) => Promise<void>,
   ): Promise<void> {
     const startConsumerOperation = async () =>
       await this.consumer.run({
@@ -74,7 +74,7 @@ export class EmailKafkaEventsConsumerAdapter
             return;
           }
 
-          const eventMessage = JSON.parse(message.value.toString()) as IntegrationEvent<any>;
+          const eventMessage = JSON.parse(message.value.toString()) as IntegrationEvent<unknown>;
 
           const consumeMessageOperation = async () => await onConsumeMessageHandler(eventMessage);
 

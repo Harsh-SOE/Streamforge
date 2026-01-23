@@ -21,6 +21,14 @@ export class UsersKafkaEventsPublisherAdapter
     this.producer = kafka.getProducer({ allowAutoTopicCreation: true });
   }
 
+  public async onModuleInit() {
+    await this.connect();
+  }
+
+  public async onModuleDestroy() {
+    await this.disconnect();
+  }
+
   public async connect(): Promise<void> {
     this.logger.alert(`Producer connecting to kafka...`);
     await this.producer.connect();
@@ -31,14 +39,6 @@ export class UsersKafkaEventsPublisherAdapter
     this.logger.alert(`Producer disconnecting from kafka...`);
     await this.producer.disconnect();
     this.logger.alert(`Producer successfully disconnected from kafka!`);
-  }
-
-  public async onModuleInit() {
-    await this.connect();
-  }
-
-  public async onModuleDestroy() {
-    await this.disconnect();
   }
 
   public async publishMessage<TPayload extends { userId?: string }>(

@@ -1,4 +1,6 @@
-import { IntegrationEvent, USERS_EVENTS } from '@app/common/events';
+import { AGGREGATE_EVENT, IntegrationEvent } from '@app/common/events';
+
+import { USER_EVENTS } from './event-types';
 
 export interface PhoneNumberVerifiedIntegrationEventPayload {
   userId: string;
@@ -6,9 +8,10 @@ export interface PhoneNumberVerifiedIntegrationEventPayload {
 }
 
 export class PhoneNumberVerifiedIntegrationEvent implements IntegrationEvent<PhoneNumberVerifiedIntegrationEventPayload> {
+  public readonly eventName: string;
   public readonly eventId: string;
   public readonly eventVersion: number = 1;
-  public readonly eventName: string = USERS_EVENTS.USER_PHONE_NUMBER_UPDATED_EVENT;
+  public readonly eventType: string = USER_EVENTS.USER_PHONE_NUMBER_UPDATED_EVENT;
   public readonly occurredAt: string;
   public readonly payload: PhoneNumberVerifiedIntegrationEventPayload;
 
@@ -23,6 +26,7 @@ export class PhoneNumberVerifiedIntegrationEvent implements IntegrationEvent<Pho
       payload: { userId, phoneNumber },
     } = config;
 
+    this.eventName = AGGREGATE_EVENT;
     this.eventId = eventId;
     this.occurredAt = occurredAt;
     this.payload = {

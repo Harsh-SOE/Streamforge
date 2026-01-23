@@ -1,8 +1,10 @@
 import { Consumer, EachBatchPayload, KafkaMessage, Producer } from 'kafkajs';
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 
+import { Entity } from '@app/common';
 import { KafkaClient } from '@app/clients/kafka';
-import { BUFFER_EVENTS } from '@app/common/events';
+import { BufferMessage } from '@app/common/buffer';
+import { INTERNAL_BUFFER } from '@app/common/events';
 import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
 
 import {
@@ -12,7 +14,8 @@ import {
 } from '@comments/application/ports';
 import { CommentAggregate } from '@comments/domain/aggregates';
 
-import { CommentMessage } from '../types';
+import { CommentBufferMessage } from '../types';
+import { isCommentBufferMessage } from '../gaurds';
 
 @Injectable()
 export class KafkaBufferAdapter implements OnModuleInit, CommentBufferPort {
@@ -30,8 +33,9 @@ export class KafkaBufferAdapter implements OnModuleInit, CommentBufferPort {
   }
 
   public async onModuleInit() {
+    // subscribe to buffer event
     await this.consumer.subscribe({
-      topic: BUFFER_EVENTS.COMMENT_BUFFER_EVENT,
+      topic: INTERNAL_BUFFER,
       fromBeginning: false,
     });
 
@@ -39,11 +43,13 @@ export class KafkaBufferAdapter implements OnModuleInit, CommentBufferPort {
       eachBatch: async (payload: EachBatchPayload) => {
         const { batch } = payload;
 
-        if (batch.topic !== BUFFER_EVENTS.COMMENT_BUFFER_EVENT.toString()) {
+        // reject all messages that are not from buffer event (optional, as the consumer itself will subscribe to topic 'INTERNAL_BUFFER')
+        if (batch.topic !== INTERNAL_BUFFER) {
           return;
         }
 
-        await this.processCommentMessages(batch.messages);
+        // process all comment buffer messages only...
+        await this.processCommentMessages(this.getCommentBufferMessages(batch.messages));
       },
     });
   }
@@ -59,22 +65,35 @@ export class KafkaBufferAdapter implements OnModuleInit, CommentBufferPort {
   }
 
   public async bufferComment(comment: CommentAggregate): Promise<void> {
+    const commentPayload = comment.getSnapshot();
+
+    const commentProjectionEvent = new CommentBufferMessage({
+      commentId: commentPayload.id,
+      commentText: commentPayload.commentText,
+      userId: commentPayload.userId,
+      videoId: commentPayload.videoId,
+    });
+
     await this.producer.send({
-      topic: BUFFER_EVENTS.COMMENT_BUFFER_EVENT,
-      messages: [{ value: JSON.stringify(comment.getSnapshot()) }],
+      topic: INTERNAL_BUFFER,
+      messages: [{ value: JSON.stringify(commentProjectionEvent) }],
     });
   }
 
-  private async processCommentMessages(messages: KafkaMessage[]) {
-    const commentMessages = messages
-      .filter((message) => message.value)
-      .map((message) => JSON.parse(message.value!.toString()) as CommentMessage);
+  private getCommentBufferMessages(messages: KafkaMessage[]): CommentBufferMessage[] {
+    return messages
+      .map((message) => JSON.parse(message.value!.toString()) as BufferMessage<Entity, any>)
+      .filter(isCommentBufferMessage);
+  }
 
-    const models = commentMessages.map((message) =>
+  private async processCommentMessages(messages: CommentBufferMessage[]) {
+    const payload = messages.map((message) => message.payload);
+
+    const models = payload.map((payload) =>
       CommentAggregate.create({
-        userId: message.userId,
-        videoId: message.videoId,
-        commentText: message.commentText,
+        userId: payload.userId,
+        videoId: payload.videoId,
+        commentText: payload.commentText,
       }),
     );
 

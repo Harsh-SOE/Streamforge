@@ -1,4 +1,4 @@
-import { CHANNEL_EVENTS, IntegrationEvent } from '@app/common/events';
+import { AGGREGATE_EVENT, IntegrationEvent } from '@app/common/events';
 
 export interface ChannelCreatedIntegrationEventPayload {
   channelId: string;
@@ -10,6 +10,7 @@ export interface ChannelCreatedIntegrationEventPayload {
 }
 
 export class ChannelCreatedIntegrationEvent implements IntegrationEvent<ChannelCreatedIntegrationEventPayload> {
+  public readonly eventType: string;
   public readonly eventName: string;
   public readonly eventVersion: number = 1;
   public readonly eventId: string;
@@ -29,7 +30,8 @@ export class ChannelCreatedIntegrationEvent implements IntegrationEvent<ChannelC
       payload: { channelId, userId, bio, coverImage, isChannelMonitized, isChannelVerified },
     } = channelCreatedDomainEvent;
     this.eventId = eventId;
-    this.eventName = CHANNEL_EVENTS.CHANNEL_CREATED;
+    this.eventName = AGGREGATE_EVENT;
+    this.eventType = 'CHANNEL_CREATED';
     this.occurredAt = occurredAt.toISOString();
     this.payload = {
       channelId,

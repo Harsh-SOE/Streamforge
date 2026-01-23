@@ -1,4 +1,4 @@
-import { IntegrationEvent, VIDEO_EVENTS } from '@app/common/events';
+import { AGGREGATE_EVENT, IntegrationEvent } from '@app/common/events';
 
 export interface VideoPublishedIntegrationEventPayload {
   videoId: string;
@@ -13,10 +13,11 @@ export interface VideoPublishedIntegrationEventPayload {
 }
 
 export class VideoPublishedIntegrationEvent implements IntegrationEvent<VideoPublishedIntegrationEventPayload> {
+  public readonly eventName: string;
   public readonly eventId: string;
   public readonly occurredAt: string;
   public readonly eventVersion: number = 1;
-  public readonly eventName: string = VIDEO_EVENTS.VIDEO_PUBLISHED_EVENT;
+  public readonly eventType: string = 'VIDEO_PUBLISHED_EVENT';
   public readonly payload: VideoPublishedIntegrationEventPayload;
 
   public constructor(config: {
@@ -26,6 +27,7 @@ export class VideoPublishedIntegrationEvent implements IntegrationEvent<VideoPub
   }) {
     const { eventId, occurredAt, payload } = config;
 
+    this.eventName = AGGREGATE_EVENT;
     this.eventId = eventId;
     this.occurredAt = occurredAt;
     this.payload = payload;

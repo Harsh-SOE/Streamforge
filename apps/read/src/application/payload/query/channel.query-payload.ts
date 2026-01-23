@@ -1,4 +1,4 @@
-export interface ChannelReadModel {
+export interface ChannelQuery {
   channelId: string;
   userId: string;
   coverImage: string;

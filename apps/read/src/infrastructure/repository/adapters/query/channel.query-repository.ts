@@ -2,7 +2,7 @@ import { Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
-import { ChannelReadModel } from '@read/application/models';
+import { ChannelQuery } from '@read/application/payload/query';
 import { ChannelQueryACL } from '@read/infrastructure/anti-corruption';
 import { ChannelReadMongooseModel } from '@read/infrastructure/repository/models';
 import { ChannelQueryRepositoryPort } from '@read/application/ports/query-repository';
@@ -15,13 +15,13 @@ export class ChannelQueryRepository implements ChannelQueryRepositoryPort {
     private readonly channelQueryACL: ChannelQueryACL,
   ) {}
 
-  public async getChannelFromId(id: string): Promise<ChannelReadModel | null> {
+  public async getChannelFromId(id: string): Promise<ChannelQuery | null> {
     const channel = await this.projectedChannelModel.findById(id);
 
     return channel ? this.channelQueryACL.channelProjectionSchemaToQueryModel(channel) : null;
   }
 
-  public async getChannelFromUserId(userId: string): Promise<ChannelReadModel | null> {
+  public async getChannelFromUserId(userId: string): Promise<ChannelQuery | null> {
     const channel = await this.projectedChannelModel.findOne({ userAuthId: userId });
 
     return channel ? this.channelQueryACL.channelProjectionSchemaToQueryModel(channel) : null;

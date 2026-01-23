@@ -1,10 +1,12 @@
 import { Consumer, EachBatchPayload, KafkaMessage, Producer } from 'kafkajs';
 import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 
+import { Entity } from '@app/common';
 import { KafkaClient } from '@app/clients/kafka';
-import { BUFFER_EVENTS } from '@app/common/events';
-import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
+import { BufferMessage } from '@app/common/buffer';
+import { INTERNAL_BUFFER } from '@app/common/events';
 import { KafkaBufferHandler } from '@app/handlers/buffer/kafka';
+import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
 
 import {
   UsersBufferPort,
@@ -13,7 +15,8 @@ import {
 } from '@users/application/ports';
 import { UserAggregate } from '@users/domain/aggregates';
 
-import { UserMessage } from '../types';
+import { UserOnBoardedBufferMessage } from '../types';
+import { isUserOnBoardedBufferMessage } from '../guards';
 
 @Injectable()
 export class UsersKafkaBuffer implements UsersBufferPort, OnModuleInit, OnModuleDestroy {
@@ -33,6 +36,44 @@ export class UsersKafkaBuffer implements UsersBufferPort, OnModuleInit, OnModule
     this.logger.alert(`Using kafka as buffer for users service`);
   }
 
+  public async onModuleInit() {
+    await this.handler.execute(async () => await this.connect(), {
+      operationType: 'CONNECT',
+    });
+
+    await this.handler.execute(
+      async () =>
+        await this.consumer.subscribe({
+          topic: INTERNAL_BUFFER,
+          fromBeginning: false,
+        }),
+      {
+        operationType: 'CONNECT',
+      },
+    );
+
+    const startConsumerOperation = async () =>
+      await this.consumer.run({
+        eachBatch: async (payload: EachBatchPayload) => {
+          const { batch } = payload;
+
+          if (batch.topic !== INTERNAL_BUFFER) {
+            return;
+          }
+
+          await this.processUsersMessages(this.getUserBufferMessage(batch.messages));
+        },
+      });
+
+    await this.handler.execute(startConsumerOperation, { operationType: 'FLUSH' });
+  }
+
+  public async onModuleDestroy() {
+    await this.handler.execute(async () => await this.disconnect(), {
+      operationType: 'DISCONNECT',
+    });
+  }
+
   public async connect(): Promise<void> {
     this.logger.alert(`Kafka buffer connecting...`);
     await this.producer.connect();
@@ -47,49 +88,40 @@ export class UsersKafkaBuffer implements UsersBufferPort, OnModuleInit, OnModule
     this.logger.alert(`Kafka buffer disconnected successfully`);
   }
 
-  public async onModuleInit() {
-    await this.handler.execute(async () => await this.connect(), {
-      operationType: 'CONNECT',
-    });
-
-    await this.handler.execute(
-      async () =>
-        await this.consumer.subscribe({
-          topic: BUFFER_EVENTS.USER_BUFFER_EVENT,
-          fromBeginning: false,
-        }),
-      {
-        operationType: 'CONNECT',
-      },
-    );
-
-    const startConsumerOperation = async () =>
-      await this.consumer.run({
-        eachBatch: async (payload: EachBatchPayload) => {
-          const { batch } = payload;
-
-          if (batch.topic !== BUFFER_EVENTS.USER_BUFFER_EVENT.toString()) {
-            return;
-          }
-
-          await this.processUsersMessages(batch.messages);
-        },
-      });
-
-    await this.handler.execute(startConsumerOperation, { operationType: 'FLUSH' });
-  }
-
-  public async onModuleDestroy() {
-    await this.handler.execute(async () => await this.disconnect(), {
-      operationType: 'DISCONNECT',
-    });
-  }
-
   public async bufferUser(user: UserAggregate): Promise<void> {
+    const {
+      id,
+      handle,
+      email,
+      userAuthId,
+      avatarUrl,
+      isPhoneNumbetVerified,
+      languagePreference,
+      notification,
+      region,
+      themePreference,
+      dob,
+      phoneNumber,
+    } = user.getUserSnapshot();
+    const userBufferMessage = new UserOnBoardedBufferMessage({
+      id,
+      handle,
+      avatarUrl,
+      email,
+      isPhoneNumbetVerified,
+      languagePreference,
+      notification,
+      region,
+      themePreference,
+      userAuthId,
+      phoneNumber,
+      dob: dob?.toISOString(),
+    });
+
     const publishToKafkaBufferOperation = async () =>
       await this.producer.send({
-        topic: BUFFER_EVENTS.USER_BUFFER_EVENT,
-        messages: [{ value: JSON.stringify(user.getUserSnapshot()) }],
+        topic: INTERNAL_BUFFER,
+        messages: [{ value: JSON.stringify(userBufferMessage) }],
       });
 
     await this.handler.execute(publishToKafkaBufferOperation, {
@@ -98,10 +130,14 @@ export class UsersKafkaBuffer implements UsersBufferPort, OnModuleInit, OnModule
     });
   }
 
-  private async processUsersMessages(messages: KafkaMessage[]) {
-    const usersMessages = messages
-      .filter((message) => message.value)
-      .map((message) => JSON.parse(message.value!.toString()) as UserMessage);
+  public getUserBufferMessage(messages: KafkaMessage[]): UserOnBoardedBufferMessage[] {
+    return messages
+      .map((message) => JSON.parse(message.value!.toString()) as BufferMessage<Entity, any>)
+      .filter(isUserOnBoardedBufferMessage);
+  }
+
+  private async processUsersMessages(messages: UserOnBoardedBufferMessage[]) {
+    const usersMessages = messages.map((message) => message.payload);
 
     const models = usersMessages.map((message) => {
       return UserAggregate.create({

@@ -5,7 +5,7 @@ import { ENVIRONMENT } from '@app/utils/enums';
 import { KafkaClient } from '@app/clients/kafka';
 import { EventsConsumerPort } from '@app/common/ports/events';
 import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
-import { COMMENT_EVENTS, IntegrationEvent } from '@app/common/events';
+import { INTERACTION_EVENTS, IntegrationEvent } from '@app/common/events';
 import { KafkaEventConsumerHandler } from '@app/handlers/events-consumer/kafka';
 
 import { CommentsConfigService } from '@comments/infrastructure/config';
@@ -41,7 +41,7 @@ export class CommentsKafkaConsumerAdapter
     await this.consumer.connect();
     this.logger.alert('Kafka Consumer connected successfully');
 
-    const eventsToSubscribe = [COMMENT_EVENTS.COMMENT_CREATED];
+    const eventsToSubscribe = [INTERACTION_EVENTS];
     await this.subscribe(eventsToSubscribe.map((event) => event.toString()));
 
     this.logger.info(`Kafka Consumer subscribed to events: [${eventsToSubscribe.join(', ')}]`);
@@ -60,7 +60,7 @@ export class CommentsKafkaConsumerAdapter
   }
 
   public async consumeMessage(
-    onConsumeMessageHandler: (message: IntegrationEvent<any>) => Promise<void>,
+    onConsumeMessageHandler: (message: IntegrationEvent<unknown>) => Promise<void>,
   ): Promise<void> {
     await this.consumer.run({
       eachMessage: async ({ topic, message }) => {
@@ -68,7 +68,7 @@ export class CommentsKafkaConsumerAdapter
           return;
         }
 
-        const eventMessage = JSON.parse(message.value.toString()) as IntegrationEvent<any>;
+        const eventMessage = JSON.parse(message.value.toString()) as IntegrationEvent<unknown>;
 
         const consumeMessageOperation = async () => await onConsumeMessageHandler(eventMessage);
 

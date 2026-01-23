@@ -66,7 +66,7 @@ export class UsersKafkaEventsConsumerAdapter
   }
 
   public async consumeMessage(
-    onConsumeMessageHandler: (message: IntegrationEvent<any>) => Promise<void>,
+    onConsumeMessageHandler: (message: IntegrationEvent<unknown>) => Promise<void>,
   ): Promise<void> {
     const startConsumerOperation = async () =>
       await this.consumer.run({
@@ -75,7 +75,7 @@ export class UsersKafkaEventsConsumerAdapter
             return;
           }
 
-          const eventMessage = JSON.parse(message.value.toString()) as IntegrationEvent<any>;
+          const eventMessage = JSON.parse(message.value.toString()) as IntegrationEvent<unknown>;
 
           const consumeMessageOperation = async () => await onConsumeMessageHandler(eventMessage);
 

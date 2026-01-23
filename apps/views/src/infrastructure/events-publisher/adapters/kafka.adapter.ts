@@ -21,6 +21,14 @@ export class ViewsKafkaPublisherAdapter
     this.producer = kafka.getProducer({ allowAutoTopicCreation: true });
   }
 
+  public async onModuleInit() {
+    await this.connect();
+  }
+
+  public async onModuleDestroy() {
+    await this.disconnect();
+  }
+
   public async connect(): Promise<void> {
     await this.producer.connect();
     this.logger.alert('Kafka producer connected successfully');
@@ -29,14 +37,6 @@ export class ViewsKafkaPublisherAdapter
   public async disconnect(): Promise<void> {
     await this.producer.disconnect();
     this.logger.alert('Kafka producer disconnected successfully');
-  }
-
-  public async onModuleInit() {
-    await this.connect();
-  }
-
-  public async onModuleDestroy() {
-    await this.disconnect();
   }
 
   public async publishMessage<TPayload extends { userId?: string }>(

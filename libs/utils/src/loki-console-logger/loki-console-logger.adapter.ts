@@ -83,18 +83,22 @@ export class LokiConsoleLogger implements LoggerPort {
   }
 
   public info(message: string, ...meta: Record<string, any>[]): void {
+    if (process.env.LOGGING === 'DISABLED') return;
     this.logger.log('info', message, ...meta);
   }
 
   public error(message: string, ...meta: Record<string, any>[]): void {
+    if (process.env.LOGGING === 'DISABLED') return;
     this.logger.log('error', message, meta);
   }
 
   public alert(message: string, ...meta: Record<string, any>[]): void {
+    if (process.env.LOGGING === 'DISABLED') return;
     this.logger.log('alert', message, meta);
   }
 
   public fatal(message: string, ...meta: Record<string, any>[]): void {
+    if (process.env.LOGGING === 'DISABLED') return;
     this.logger.log('fatal', message, meta);
   }
 }

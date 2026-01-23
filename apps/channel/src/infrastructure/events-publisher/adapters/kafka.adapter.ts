@@ -14,11 +14,21 @@ export class ChannelKafkaPublisherAdapter
   private readonly producer: Producer;
 
   public constructor(
+    @Inject(LOGGER_PORT)
+    private readonly logger: LoggerPort,
+
     private readonly handler: KafkaEventPublisherHandler,
     private readonly kafka: KafkaClient,
-    @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
   ) {
     this.producer = kafka.getProducer({ allowAutoTopicCreation: true });
+  }
+
+  public async onModuleInit() {
+    await this.connect();
+  }
+
+  public async onModuleDestroy() {
+    await this.disconnect();
   }
 
   public async connect(): Promise<void> {
@@ -31,17 +41,7 @@ export class ChannelKafkaPublisherAdapter
     this.logger.alert('Kafka Producer disconnected successfully');
   }
 
-  public async onModuleInit() {
-    await this.connect();
-  }
-
-  public async onModuleDestroy() {
-    await this.disconnect();
-  }
-
-  public async publishMessage<TPayload extends { userId?: string }>(
-    message: IntegrationEvent<TPayload>,
-  ): Promise<void> {
+  public async publishMessage<TPayload>(message: IntegrationEvent<TPayload>): Promise<void> {
     const sendMessageOperation = async () =>
       await this.producer.send({
         topic: message.eventName,

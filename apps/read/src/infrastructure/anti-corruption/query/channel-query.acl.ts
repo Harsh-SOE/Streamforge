@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 
-import { ChannelReadModel } from '@read/application/models';
+import { ChannelQuery } from '@read/application/payload/query';
 import { ChannelReadMongooseModel } from '@read/infrastructure/repository/models';
 
 @Injectable()
 export class ChannelQueryACL {
   public channelProjectionSchemaToQueryModel(
     channelReadModel: ChannelReadMongooseModel,
-  ): ChannelReadModel {
+  ): ChannelQuery {
     return {
       channelId: channelReadModel.channelId,
       userId: channelReadModel.userId,

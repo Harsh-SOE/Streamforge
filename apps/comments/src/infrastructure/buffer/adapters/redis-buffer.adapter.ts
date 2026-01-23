@@ -3,8 +3,8 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { Inject, Injectable, OnModuleDestroy, OnModuleInit, Optional } from '@nestjs/common';
 
 import { RedisClient } from '@app/clients/redis';
-import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
 import { RedisBufferHandler } from '@app/handlers/buffer/redis';
+import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
 
 import {
   CommentBufferPort,
@@ -14,7 +14,7 @@ import {
 import { CommentAggregate } from '@comments/domain/aggregates';
 import { CommentsConfigService } from '@comments/infrastructure/config';
 
-import { CommentMessage, StreamData } from '../types';
+import { CommentBufferMessagePayload, StreamData } from '../types';
 
 export interface RedisBufferConfig {
   key: string;
@@ -134,20 +134,20 @@ export class RedisStreamBufferAdapter implements OnModuleInit, OnModuleDestroy, 
   }
 
   public extractMessageFromStream(stream: StreamData[]) {
-    const messages: CommentMessage[] = [];
+    const messages: CommentBufferMessagePayload[] = [];
     const ids: string[] = [];
     for (const [streamKey, entities] of stream) {
       this.logger.info(`Processing stream: ${streamKey}`);
       for (const [id, message] of entities) {
         this.logger.info(`Recieved an element with id:${id}`);
         ids.push(id);
-        messages.push(JSON.parse(message[1]) as CommentMessage);
+        messages.push(JSON.parse(message[1]) as CommentBufferMessagePayload);
       }
     }
     return { ids: ids, extractedMessages: messages };
   }
 
-  public async processMessages(ids: string[], messages: CommentMessage[]) {
+  public async processMessages(ids: string[], messages: CommentBufferMessagePayload[]) {
     const models = messages.map((message) =>
       CommentAggregate.create({
         userId: message.userId,
