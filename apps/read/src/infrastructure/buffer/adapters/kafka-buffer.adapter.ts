@@ -1,14 +1,13 @@
-// todo: FIX THIS...
+// todo: remove user buffer message type and use user projection payload??
+// todo: make a handler for kafka buffer handler
 import { Consumer, EachBatchPayload, KafkaMessage, Producer } from 'kafkajs';
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 
+import { Entity } from '@app/common';
 import { KafkaClient } from '@app/clients/kafka';
-import { PROJECTION_EVENTS } from '@app/common/events';
+import { BufferMessage } from '@app/common/buffer';
+import { INTERNAL_BUFFER } from '@app/common/events';
 import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
-import { OnboardedIntegrationEvent } from '@app/common/events/users';
-import { VideoPublishedIntegrationEvent } from '@app/common/events/videos';
-import { KafkaEventConsumerHandler } from '@app/handlers/events-consumer/kafka';
-import { KafkaEventPublisherHandler } from '@app/handlers/events-publisher/kafka';
 
 import {
   USER_PROJECTION_REPOSITORY_PORT,
@@ -17,6 +16,13 @@ import {
   VIDEO_PROJECTION_REPOSITORY_PORT,
   VideoProjectionRepositoryPort,
 } from '@read/application/ports';
+import {
+  UserOnBoardedProjection,
+  VideoPublishedProjection,
+} from '@read/application/payload/projection';
+
+import { UserProjectionBufferMessage, VideoProjectionBufferMessage } from '../types';
+import { isUserProjectionBufferMessage, isVideoProjectionBufferMessage } from '../guards';
 
 @Injectable()
 export class KafkaBufferAdapter implements OnModuleInit, ProjectionBufferPort {
@@ -30,104 +36,70 @@ export class KafkaBufferAdapter implements OnModuleInit, ProjectionBufferPort {
     private readonly videoProjectionRepo: VideoProjectionRepositoryPort,
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
     private readonly kafka: KafkaClient,
-    private readonly consumerhandler: KafkaEventConsumerHandler,
-    private readonly publisherhandler: KafkaEventPublisherHandler,
   ) {
     this.consumer = kafka.getConsumer({ groupId: 'projection', allowAutoTopicCreation: true });
     this.producer = kafka.getProducer({ allowAutoTopicCreation: true });
   }
 
   public async onModuleInit() {
-    const userSubscribeOperation = async () =>
-      await this.consumer.subscribe({
-        topic: PROJECTION_EVENTS.SAVE_USER_EVENT,
-        fromBeginning: false,
-      });
-
-    const videosubscribeOperation = async () =>
-      await this.consumer.subscribe({
-        topic: PROJECTION_EVENTS.SAVE_VIDEO_EVENT,
-        fromBeginning: false,
-      });
-
-    await this.consumerhandler.execute(userSubscribeOperation, {
-      operationType: 'CONNECT',
-    });
-
-    await this.consumerhandler.execute(videosubscribeOperation, {
-      operationType: 'CONNECT',
+    await this.consumer.subscribe({
+      topic: INTERNAL_BUFFER,
+      fromBeginning: false,
     });
 
     await this.consumer.run({
       eachBatch: async (payload: EachBatchPayload) => {
         const { batch } = payload;
 
-        const topic = batch.topic;
-        switch (topic) {
-          case PROJECTION_EVENTS.SAVE_USER_EVENT.toString():
-            await this.handleUserBatch(batch.messages);
-            break;
-
-          case PROJECTION_EVENTS.SAVE_VIDEO_EVENT.toString():
-            await this.handleVideoBatch(batch.messages);
-            break;
-
-          default:
-            this.logger.alert(`Received batch for unknown topic: ${batch.topic}`);
-        }
+        await this.handleUserBatch(this.getUsersBufferMessages(batch.messages));
+        await this.handleVideoBatch(this.getVideoBufferMessages(batch.messages));
       },
     });
   }
 
-  async bufferUser(event: OnboardedIntegrationEvent): Promise<void> {
-    await this.publisherhandler.execute(
-      async () =>
-        await this.producer.send({
-          topic: PROJECTION_EVENTS.SAVE_USER_EVENT,
-          messages: [{ value: JSON.stringify(event) }],
-        }),
-      {
-        operationType: 'PUBLISH',
-        topic: PROJECTION_EVENTS.SAVE_USER_EVENT,
-        message: event,
-      },
-    );
+  public getUsersBufferMessages(messages: KafkaMessage[]): UserProjectionBufferMessage[] {
+    return messages
+      .map((message) => JSON.parse(message.value!.toString()) as BufferMessage<Entity, any>)
+      .filter(isUserProjectionBufferMessage);
   }
 
-  async bufferVideo(event: VideoPublishedIntegrationEvent): Promise<void> {
-    await this.publisherhandler.execute(
-      async () =>
-        await this.producer.send({
-          topic: PROJECTION_EVENTS.SAVE_VIDEO_EVENT,
-          messages: [{ value: JSON.stringify(event) }],
-        }),
-      {
-        operationType: 'PUBLISH',
-        topic: PROJECTION_EVENTS.SAVE_USER_EVENT,
-        message: event,
-      },
-    );
+  public getVideoBufferMessages(messages: KafkaMessage[]): VideoProjectionBufferMessage[] {
+    return messages
+      .map((message) => JSON.parse(message.value!.toString()) as BufferMessage<Entity, any>)
+      .filter(isVideoProjectionBufferMessage);
   }
 
-  private async handleUserBatch(messages: KafkaMessage[]) {
-    const userEvents = messages
-      .filter((msg) => msg.value)
-      .map((msg) => JSON.parse(msg.value!.toString()) as OnboardedIntegrationEvent);
+  async bufferUserOnBoardedProjection(payload: UserOnBoardedProjection): Promise<void> {
+    const userBufferMessage = new UserProjectionBufferMessage(payload);
 
-    if (userEvents.length > 0) {
-      this.logger.info(`Saving ${userEvents.length} users to projection`);
-      await this.userProjectionRepo.saveManyUser(userEvents);
+    await this.producer.send({
+      topic: INTERNAL_BUFFER,
+      messages: [{ value: JSON.stringify(userBufferMessage) }],
+    });
+  }
+
+  async bufferVideoPublishedProjection(payload: VideoPublishedProjection): Promise<void> {
+    const videoBufferMessage = new VideoProjectionBufferMessage(payload);
+
+    await this.producer.send({
+      topic: INTERNAL_BUFFER,
+      messages: [{ value: JSON.stringify(videoBufferMessage) }],
+    });
+  }
+
+  private async handleUserBatch(messages: UserProjectionBufferMessage[]) {
+    const payload = messages.map((message) => message.payload);
+    if (messages.length > 0) {
+      this.logger.info(`Saving ${messages.length} users to projection`);
+      await this.userProjectionRepo.saveManyUser(payload);
     }
   }
 
-  private async handleVideoBatch(messages: KafkaMessage[]) {
-    const videoEvents = messages
-      .filter((msg) => msg.value)
-      .map((msg) => JSON.parse(msg.value!.toString()) as VideoPublishedIntegrationEvent);
-
-    if (videoEvents.length > 0) {
-      this.logger.info(`Saving ${videoEvents.length} videos to projection`);
-      await this.videoProjectionRepo.saveManyVideos(videoEvents);
+  private async handleVideoBatch(messages: VideoProjectionBufferMessage[]) {
+    const payload = messages.map((message) => message.payload);
+    if (messages.length > 0) {
+      this.logger.info(`Saving ${messages.length} videos to projection`);
+      await this.videoProjectionRepo.saveManyVideos(payload);
     }
   }
 }

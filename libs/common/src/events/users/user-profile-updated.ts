@@ -1,4 +1,6 @@
-import { IntegrationEvent, USERS_EVENTS } from '@app/common/events';
+import { AGGREGATE_EVENT, IntegrationEvent } from '@app/common/events';
+
+import { USER_EVENTS } from './event-types';
 
 export interface ProfileUpdatedIntegrationEventPayload {
   userId: string;
@@ -8,9 +10,10 @@ export interface ProfileUpdatedIntegrationEventPayload {
 }
 
 export class ProfileUpdatedIntegrationEvent implements IntegrationEvent<ProfileUpdatedIntegrationEventPayload> {
+  public readonly eventName: string;
   public readonly eventId: string;
   public readonly eventVersion: number = 1;
-  public readonly eventName: string = USERS_EVENTS.USER_PROFILE_UPDATED_EVENT;
+  public readonly eventType: string = USER_EVENTS.USER_PROFILE_UPDATED_EVENT;
   public readonly occurredAt: string;
   public readonly payload: ProfileUpdatedIntegrationEventPayload;
 
@@ -25,6 +28,7 @@ export class ProfileUpdatedIntegrationEvent implements IntegrationEvent<ProfileU
       payload: { userId, avatar, dob, phoneNumber },
     } = config;
 
+    this.eventName = AGGREGATE_EVENT;
     this.eventId = eventId;
     this.occurredAt = occurredAt.toISOString();
     this.payload = {

@@ -21,14 +21,6 @@ export class VideosKafkaPublisherAdapter
     this.producer = kafka.getProducer({ allowAutoTopicCreation: true });
   }
 
-  public async connect(): Promise<void> {
-    await this.producer.connect();
-  }
-
-  public async disconnect(): Promise<void> {
-    await this.producer.disconnect();
-  }
-
   public async onModuleInit() {
     await this.connect();
     this.logger.alert('Kafka Producer connected successfully');
@@ -37,6 +29,14 @@ export class VideosKafkaPublisherAdapter
   public async onModuleDestroy() {
     await this.disconnect();
     this.logger.alert('Kafka Producer disconnected successfully');
+  }
+
+  public async connect(): Promise<void> {
+    await this.producer.connect();
+  }
+
+  public async disconnect(): Promise<void> {
+    await this.producer.disconnect();
   }
 
   public async publishMessage<TPayload extends { userId?: string }>(

@@ -1,12 +1,10 @@
-import {
-  OnboardedIntegrationEvent,
-  ProfileUpdatedIntegrationEvent,
-} from '@app/common/events/users';
+import { ProfileUpdatedIntegrationEvent } from '@app/common/events/users';
+import { UserOnBoardedProjection } from '@read/application/payload/projection';
 
 export interface UserProjectionRepositoryPort {
-  saveUser(data: OnboardedIntegrationEvent): Promise<boolean>;
+  saveUser(data: UserOnBoardedProjection): Promise<boolean>;
 
-  saveManyUser(data: OnboardedIntegrationEvent[]): Promise<number>;
+  saveManyUser(data: UserOnBoardedProjection[]): Promise<number>;
 
   updateUser(userId: string, data: Partial<ProfileUpdatedIntegrationEvent>): Promise<boolean>;
 

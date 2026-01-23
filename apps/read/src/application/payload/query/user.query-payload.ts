@@ -1,4 +1,4 @@
-export interface UserReadModel {
+export interface UserQuery {
   userId: string;
   email: string;
   userAuthId: string;

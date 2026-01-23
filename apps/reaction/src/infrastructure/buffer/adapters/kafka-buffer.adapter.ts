@@ -1,9 +1,11 @@
 // TODO add handler here
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Consumer, EachBatchPayload, KafkaMessage, Producer } from 'kafkajs';
 
+import { Entity } from '@app/common';
 import { KafkaClient } from '@app/clients/kafka';
-import { BUFFER_EVENTS } from '@app/common/events';
+import { BufferMessage } from '@app/common/buffer';
+import { INTERNAL_BUFFER } from '@app/common/events';
 import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
 
 import {
@@ -11,13 +13,17 @@ import {
   ReactionRepositoryPort,
   REACTION_DATABASE_PORT,
 } from '@reaction/application/ports';
+import {
+  DomainTransportReactionStatusEnumMapper,
+  TransportDomainReactionStatusEnumMapper,
+} from '@reaction/infrastructure/anti-corruption';
 import { ReactionAggregate } from '@reaction/domain/aggregates';
-import { TransportDomainReactionStatusEnumMapper } from '@reaction/infrastructure/anti-corruption';
 
-import { ReactionMessage } from '../types';
+import { ReactionBufferMessage } from '../types';
+import { isReactionBufferMessage } from '../guards';
 
 @Injectable()
-export class KafkaBufferAdapter implements OnModuleInit, ReactionBufferPort {
+export class KafkaBufferAdapter implements OnModuleInit, OnModuleDestroy, ReactionBufferPort {
   private readonly consumer: Consumer;
   private readonly producer: Producer;
 
@@ -31,6 +37,30 @@ export class KafkaBufferAdapter implements OnModuleInit, ReactionBufferPort {
     this.producer = kafka.getProducer({ allowAutoTopicCreation: true });
   }
 
+  public async onModuleInit() {
+    await this.consumer.subscribe({
+      topic: INTERNAL_BUFFER,
+      fromBeginning: false,
+    });
+
+    await this.consumer.run({
+      eachBatch: async (payload: EachBatchPayload) => {
+        const { batch } = payload;
+
+        // reject all messages that comes from topics other than BUFFER_EVENT (optional)
+        if (batch.topic !== INTERNAL_BUFFER) {
+          return;
+        }
+
+        await this.processCommentMessages(this.getReactionBufferMessages(batch.messages));
+      },
+    });
+  }
+
+  public async onModuleDestroy() {
+    await this.disconnect();
+  }
+
   public async connect(): Promise<void> {
     await this.consumer.connect();
     await this.producer.connect();
@@ -41,45 +71,35 @@ export class KafkaBufferAdapter implements OnModuleInit, ReactionBufferPort {
     await this.producer.disconnect();
   }
 
-  public async onModuleInit() {
-    await this.consumer.subscribe({
-      topic: BUFFER_EVENTS.REACTION_BUFFER_EVENT,
-      fromBeginning: false,
-    });
-
-    await this.consumer.run({
-      eachBatch: async (payload: EachBatchPayload) => {
-        const { batch } = payload;
-
-        if (batch.topic !== BUFFER_EVENTS.REACTION_BUFFER_EVENT.toString()) {
-          return;
-        }
-
-        await this.processCommentMessages(batch.messages);
-      },
-    });
-  }
-
   public async bufferReaction(reaction: ReactionAggregate): Promise<void> {
+    const { reactionStatus, userId, videoId } = reaction.getSnapshot();
+
+    const reactionProjectionEvent = new ReactionBufferMessage({
+      userId: userId,
+      videoId: videoId,
+      reactionStatus: DomainTransportReactionStatusEnumMapper[reactionStatus],
+    });
+
     await this.producer.send({
-      topic: BUFFER_EVENTS.REACTION_BUFFER_EVENT,
-      messages: [{ value: JSON.stringify(reaction) }],
+      topic: INTERNAL_BUFFER,
+      messages: [{ value: JSON.stringify(reactionProjectionEvent) }],
     });
   }
 
-  private async processCommentMessages(messages: KafkaMessage[]) {
-    const ReactionMessages = messages
-      .filter((message) => message.value)
-      .map((message) => JSON.parse(message.value!.toString()) as ReactionMessage);
+  public getReactionBufferMessages(messages: KafkaMessage[]): ReactionBufferMessage[] {
+    return messages
+      .map((message) => JSON.parse(message.value!.toString()) as BufferMessage<Entity, any>)
+      .filter(isReactionBufferMessage);
+  }
 
-    const models = ReactionMessages.map((message) => {
-      const reactionStatus = TransportDomainReactionStatusEnumMapper[message.reactionStatus];
-      return ReactionAggregate.create({
-        userId: message.userId,
-        videoId: message.videoId,
-        reactionStatus,
-      });
-    });
+  private async processCommentMessages(messages: ReactionBufferMessage[]) {
+    const models = messages.map((message) =>
+      ReactionAggregate.create({
+        userId: message.payload.userId,
+        videoId: message.payload.videoId,
+        reactionStatus: TransportDomainReactionStatusEnumMapper[message.payload.reactionStatus],
+      }),
+    );
 
     this.logger.info(`Saving ${models.length} reactions in database`);
 

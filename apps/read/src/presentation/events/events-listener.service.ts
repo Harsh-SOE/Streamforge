@@ -7,7 +7,6 @@ import {
 import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
 import { VideoPublishedIntegrationEvent } from '@app/common/events/videos';
 import { ChannelCreatedIntegrationEvent } from '@app/common/events/channel';
-import { CHANNEL_EVENTS, USERS_EVENTS, VIDEO_EVENTS } from '@app/common/events';
 import { EVENT_CONSUMER_PORT, EventsConsumerPort } from '@app/common/ports/events';
 
 import { UsersEventsService } from './users-events.service';
@@ -27,24 +26,24 @@ export class EventsListenerService implements OnModuleInit {
   public async onModuleInit() {
     await this.eventConsumer.consumeMessage(async (event) => {
       this.logger.info(`projection event recieved`, event);
-      switch (event.eventName) {
-        case USERS_EVENTS.USER_ONBOARDED_EVENT.toString(): {
+      switch (event.eventType) {
+        case 'USER_ONBOARDED_EVENT': {
           await this.usersEventService.onUserProfileOnBoarded(event as OnboardedIntegrationEvent);
           break;
         }
-        case USERS_EVENTS.USER_PROFILE_UPDATED_EVENT.toString(): {
+        case 'USER_PROFILE_UPDATED_EVENT': {
           await this.usersEventService.onUserProfileUpdated(
             event.payload as ProfileUpdatedIntegrationEvent,
           );
           break;
         }
-        case CHANNEL_EVENTS.CHANNEL_CREATED.toString(): {
+        case 'CHANNEL_CREATED': {
           await this.channelEventsService.onChannelCreated(
             event.payload as ChannelCreatedIntegrationEvent,
           );
           break;
         }
-        case VIDEO_EVENTS.VIDEO_PUBLISHED_EVENT.toString(): {
+        case 'VIDEO_PUBLISHED_EVENT': {
           await this.videoEventsService.onVideoPublished(
             event.payload as VideoPublishedIntegrationEvent,
           );

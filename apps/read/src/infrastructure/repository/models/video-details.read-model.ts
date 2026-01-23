@@ -16,7 +16,7 @@ export class VideoDetailsReadMongooseModel extends Document {
   title: string;
 
   @Prop()
-  description: string;
+  description?: string;
 
   @Prop({ type: [String], index: true })
   categories: string[];

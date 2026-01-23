@@ -14,7 +14,7 @@ import {
 import { VideoAggregate } from '@videos/domain/aggregates';
 import { VideosConfigService } from '@videos/infrastructure/config';
 
-import { VideoMessage, StreamData } from '../types';
+import { VideoBufferMessagePayload, StreamData } from '../types';
 
 export interface StreamConfig {
   key: string;
@@ -131,20 +131,20 @@ export class RedisStreamBufferAdapter implements VideosBufferPort, OnModuleInit,
   }
 
   public extractMessageFromStream(stream: StreamData[]) {
-    const messages: VideoMessage[] = [];
+    const messages: VideoBufferMessagePayload[] = [];
     const ids: string[] = [];
     for (const [streamKey, entities] of stream) {
       this.logger.info(`Processing stream: ${streamKey}`);
       for (const [id, message] of entities) {
         this.logger.info(`Recieved an element with id:${id}`);
         ids.push(id);
-        messages.push(JSON.parse(message[1]) as VideoMessage);
+        messages.push(JSON.parse(message[1]) as VideoBufferMessagePayload);
       }
     }
     return { ids: ids, extractedMessages: messages };
   }
 
-  public async processMessages(ids: string[], messages: VideoMessage[]) {
+  public async processMessages(ids: string[], messages: VideoBufferMessagePayload[]) {
     const models = messages.map((message) => {
       return VideoAggregate.create({
         id: message.id,

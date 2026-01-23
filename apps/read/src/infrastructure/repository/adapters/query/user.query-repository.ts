@@ -4,7 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 
 import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
 
-import { UserReadModel } from '@read/application/models';
+import { UserQuery } from '@read/application/payload/query';
 import { UserQueryRepositoryPort } from '@read/application/ports';
 import { UserQueryACL } from '@read/infrastructure/anti-corruption';
 import { UserReadMongooseModel } from '@read/infrastructure/repository/models';
@@ -18,13 +18,13 @@ export class UserQueryRepository implements UserQueryRepositoryPort {
     @Inject(LOGGER_PORT) private readonly logger: LoggerPort,
   ) {}
 
-  public async getUserFromId(userId: string): Promise<UserReadModel | null> {
+  public async getUserFromId(userId: string): Promise<UserQuery | null> {
     const user = await this.projectedUserInfo.findOne({ userId });
 
     return user ? this.userQueryACL.userProjectionSchemaToQueryModel(user) : null;
   }
 
-  public async getUserFromAuthId(userAuthId: string): Promise<UserReadModel | null> {
+  public async getUserFromAuthId(userAuthId: string): Promise<UserQuery | null> {
     this.logger.info(`AuthId is: ${userAuthId}`);
 
     const user = await this.projectedUserInfo.findOne({ userAuthId: userAuthId });

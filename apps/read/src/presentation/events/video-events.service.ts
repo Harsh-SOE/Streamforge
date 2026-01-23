@@ -18,6 +18,6 @@ export class VideoEventsService {
   public async onVideoPublished(videoPublishedIntegrationEvent: VideoPublishedIntegrationEvent) {
     // Implementation for handling video uploaded projection event
     this.logger.info(`saving video projection`);
-    await this.videoProjectionRespository.saveVideo(videoPublishedIntegrationEvent);
+    await this.videoProjectionRespository.saveVideo(videoPublishedIntegrationEvent.payload);
   }
 }

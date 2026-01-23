@@ -3,8 +3,8 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { Inject, Injectable, OnModuleDestroy, OnModuleInit, Optional } from '@nestjs/common';
 
 import { RedisClient } from '@app/clients/redis';
-import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
 import { RedisBufferHandler } from '@app/handlers/buffer/redis';
+import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
 
 import {
   ReactionBufferPort,
@@ -15,7 +15,7 @@ import { ReactionAggregate } from '@reaction/domain/aggregates';
 import { ReactionConfigService } from '@reaction/infrastructure/config';
 import { TransportDomainReactionStatusEnumMapper } from '@reaction/infrastructure/anti-corruption';
 
-import { ReactionMessage, StreamData } from '../types';
+import { ReactionBufferMessagePayload, StreamData } from '../types';
 
 export interface RedisStreamConfig {
   key: string;
@@ -136,20 +136,20 @@ export class RedisStreamBufferAdapter implements ReactionBufferPort, OnModuleIni
   }
 
   public extractMessageFromStream(stream: StreamData[]) {
-    const messages: ReactionMessage[] = [];
+    const messages: ReactionBufferMessagePayload[] = [];
     const ids: string[] = [];
     for (const [streamKey, entities] of stream) {
       this.logger.info(`Processing stream: ${streamKey}`);
       for (const [id, message] of entities) {
         this.logger.info(`Recieved an element with id:${id}`);
         ids.push(id);
-        messages.push(JSON.parse(message[1]) as ReactionMessage);
+        messages.push(JSON.parse(message[1]) as ReactionBufferMessagePayload);
       }
     }
     return { ids: ids, extractedMessages: messages };
   }
 
-  public async processMessages(ids: string[], messages: ReactionMessage[]) {
+  public async processMessages(ids: string[], messages: ReactionBufferMessagePayload[]) {
     const models = messages.map((message) => {
       const reactionStatus = TransportDomainReactionStatusEnumMapper[message.reactionStatus];
       return ReactionAggregate.create({

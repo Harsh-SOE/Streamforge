@@ -1,4 +1,4 @@
-import { COMMENT_EVENTS, IntegrationEvent } from '@app/common/events';
+import { INTERACTION_EVENTS, IntegrationEvent } from '@app/common/events';
 
 export interface CommentCreatedIntegrationEventPayload {
   commentId: string;
@@ -8,10 +8,11 @@ export interface CommentCreatedIntegrationEventPayload {
 }
 
 export class CommentCreatedIntegrationEvent implements IntegrationEvent<CommentCreatedIntegrationEventPayload> {
+  public readonly eventName: string;
   public readonly eventId: string;
   public readonly occurredAt: string;
   public readonly eventVersion: number = 1;
-  public readonly eventName: string = COMMENT_EVENTS.COMMENT_CREATED;
+  public readonly eventType: string = 'COMMENT_CREATED';
   public readonly payload: CommentCreatedIntegrationEventPayload;
 
   public constructor(
@@ -27,6 +28,7 @@ export class CommentCreatedIntegrationEvent implements IntegrationEvent<CommentC
       payload: { comment, commentId, commentedBy, commentedOn },
     } = config;
 
+    this.eventName = INTERACTION_EVENTS;
     this.eventId = eventId;
     this.occurredAt = occurredAt;
     this.payload = {

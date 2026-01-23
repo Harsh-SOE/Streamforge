@@ -1,11 +1,11 @@
-import { IntegrationEvent } from '@app/common/events';
+import {
+  UserOnBoardedProjection,
+  VideoPublishedProjection,
+} from '@read/application/payload/projection';
 
 export interface ProjectionBufferPort {
-  // todo: fix this integration event payload...
-  bufferUser(event: IntegrationEvent<any>): Promise<void>;
-
-  // todo: fix this integration event payload...
-  bufferVideo(event: IntegrationEvent<any>): Promise<void>;
+  bufferUserOnBoardedProjection(event: UserOnBoardedProjection): Promise<void>;
+  bufferVideoPublishedProjection(event: VideoPublishedProjection): Promise<void>;
 }
 
 export const PROJECTION_BUFFER_PORT = Symbol('PROJECTION_BUFFER_PORT');

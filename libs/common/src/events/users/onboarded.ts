@@ -1,4 +1,6 @@
-import { IntegrationEvent, USERS_EVENTS } from '@app/common/events';
+import { AGGREGATE_EVENT, IntegrationEvent } from '@app/common/events';
+
+import { USER_EVENTS } from './event-types';
 
 export interface OnboardedIntegrationEventPayload {
   userId: string;
@@ -9,9 +11,10 @@ export interface OnboardedIntegrationEventPayload {
 }
 
 export class OnboardedIntegrationEvent implements IntegrationEvent<OnboardedIntegrationEventPayload> {
+  public readonly eventName: string;
   public readonly eventId: string;
   public readonly eventVersion: number = 1;
-  public readonly eventName: string = USERS_EVENTS.USER_ONBOARDED_EVENT;
+  public readonly eventType: string = USER_EVENTS.USER_ONBOARDED_EVENT;
   public readonly occurredAt: string;
   public readonly payload: OnboardedIntegrationEventPayload;
 
@@ -22,6 +25,7 @@ export class OnboardedIntegrationEvent implements IntegrationEvent<OnboardedInte
   }) {
     const { eventId, occuredAt, payload } = config;
 
+    this.eventName = AGGREGATE_EVENT;
     this.eventId = eventId;
     this.occurredAt = occuredAt;
     this.payload = payload;

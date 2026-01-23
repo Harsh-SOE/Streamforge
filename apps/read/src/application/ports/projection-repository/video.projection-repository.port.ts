@@ -1,14 +1,11 @@
-import { VideoPublishedIntegrationEvent } from '@app/common/events/videos';
+import { VideoPublishedProjection } from '@read/application/payload/projection';
 
 export interface VideoProjectionRepositoryPort {
-  saveVideo(data: VideoPublishedIntegrationEvent): Promise<boolean>;
+  saveVideo(data: VideoPublishedProjection): Promise<boolean>;
 
-  saveManyVideos(data: VideoPublishedIntegrationEvent[]): Promise<number>;
+  saveManyVideos(data: VideoPublishedProjection[]): Promise<number>;
 
-  // todo: make an integration event for video updated event...
-  // updateVideo(videoId: string, data: Partial<VideoUploadedEventDto>): Promise<boolean>;
-
-  // deleteVideo(videoId: string): Promise<boolean>;
+  // todo: make an integration event for video updated and deleted events...
 }
 
 export const VIDEO_PROJECTION_REPOSITORY_PORT = Symbol('VIDEO_PROJECTION_REPOSITORY_PORT');

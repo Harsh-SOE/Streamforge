@@ -1,6 +1,6 @@
 import { DomainThemePreference } from '@users/domain/enums';
 
-export interface UserMessage {
+export interface UserOnBoardedBufferMessagePayload {
   id: string;
   userAuthId: string;
   handle: string;

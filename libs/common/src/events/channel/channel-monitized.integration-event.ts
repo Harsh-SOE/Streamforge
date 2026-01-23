@@ -1,4 +1,4 @@
-import { CHANNEL_EVENTS, IntegrationEvent } from '@app/common/events';
+import { AGGREGATE_EVENT, IntegrationEvent } from '@app/common/events';
 
 export interface ChannelMonitizedIntegrationEventPayload {
   channelId: string;
@@ -6,10 +6,11 @@ export interface ChannelMonitizedIntegrationEventPayload {
 }
 
 export class ChannelMonitizedIntegrationEvent implements IntegrationEvent<ChannelMonitizedIntegrationEventPayload> {
+  public readonly eventName: string;
   public readonly eventId: string;
   public readonly occurredAt: string;
   public readonly eventVersion: number = 1;
-  public readonly eventName: string = CHANNEL_EVENTS.CHANNEL_MONITIZED;
+  public readonly eventType: string = 'CHANNEL_MONITIZED';
   public readonly payload: ChannelMonitizedIntegrationEventPayload;
 
   public constructor(
@@ -25,6 +26,7 @@ export class ChannelMonitizedIntegrationEvent implements IntegrationEvent<Channe
       payload: { channelId, isChannelMonitized },
     } = channelMonitizedDomainEvent;
 
+    this.eventName = AGGREGATE_EVENT;
     this.eventId = eventId;
     this.occurredAt = occurredAt;
     this.payload = {

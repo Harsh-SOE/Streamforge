@@ -14,7 +14,7 @@ import {
 import { ViewAggregate } from '@views/domain/aggregates';
 import { ViewsConfigService } from '@views/infrastructure/config';
 
-import { ViewMessage, StreamData } from '../types';
+import { ViewBufferMessagePayload, StreamData } from '../types';
 
 export interface StreamConfig {
   key: string;
@@ -129,20 +129,20 @@ export class RedisStreamBufferAdapter implements OnModuleInit, OnModuleDestroy, 
   }
 
   public extractMessageFromStream(stream: StreamData[]) {
-    const messages: ViewMessage[] = [];
+    const messages: ViewBufferMessagePayload[] = [];
     const ids: string[] = [];
     for (const [streamKey, entities] of stream) {
       this.logger.info(`Processing stream: ${streamKey}`);
       for (const [id, message] of entities) {
         this.logger.info(`Recieved an element with id:${id}`);
         ids.push(id);
-        messages.push(JSON.parse(message[1]) as ViewMessage);
+        messages.push(JSON.parse(message[1]) as ViewBufferMessagePayload);
       }
     }
     return { ids: ids, extractedMessages: messages };
   }
 
-  public async processMessages(ids: string[], messages: ViewMessage[]) {
+  public async processMessages(ids: string[], messages: ViewBufferMessagePayload[]) {
     const models = messages.map((message) => {
       return ViewAggregate.create({ userId: message.userId, videoId: message.videoId });
     });

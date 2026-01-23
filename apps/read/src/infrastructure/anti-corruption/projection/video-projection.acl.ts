@@ -1,9 +1,8 @@
 import { Model } from 'mongoose';
-import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
 
-import { VideoPublishedIntegrationEvent } from '@app/common/events/videos';
-
+import { VideoPublishedProjection } from '@read/application/payload/projection';
 import { VideoWatchReadMongooseModel } from '@read/infrastructure/repository/models';
 
 @Injectable()
@@ -14,7 +13,7 @@ export class VideoProjectionACL {
   ) {}
 
   public videoUploadedEventToProjectionModel(
-    event: VideoPublishedIntegrationEvent,
+    payload: VideoPublishedProjection,
   ): VideoWatchReadMongooseModel {
     const {
       videoId,
@@ -26,7 +25,7 @@ export class VideoProjectionACL {
       categories,
       visibility,
       description,
-    } = event.payload;
+    } = payload;
 
     const videoCard = {
       videoId,

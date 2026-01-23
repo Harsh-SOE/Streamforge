@@ -5,7 +5,7 @@ import { ENVIRONMENT } from '@app/utils/enums';
 import { KafkaClient } from '@app/clients/kafka';
 import { EventsConsumerPort } from '@app/common/ports/events';
 import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
-import { IntegrationEvent, VIDEO_TRANSCODER_EVENTS } from '@app/common/events';
+import { AGGREGATE_EVENT, IntegrationEvent } from '@app/common/events';
 import { KafkaEventConsumerHandler } from '@app/handlers/events-consumer/kafka';
 
 import { TranscoderConfigService } from '@transcoder/infrastructure/config';
@@ -40,10 +40,7 @@ export class TranscoderKafkaConsumerAdapter
   public async connect(): Promise<void> {
     await this.consumer.connect();
     this.logger.alert('Kafka Consumer connected successfully');
-    const eventsToSubscribe = [
-      VIDEO_TRANSCODER_EVENTS.VIDEO_TRANSCODE_EVENT,
-      VIDEO_TRANSCODER_EVENTS.VIDEO_TRANSCODED_EVENT,
-    ];
+    const eventsToSubscribe = [AGGREGATE_EVENT];
     await this.subscribe(eventsToSubscribe.map((e) => e.toString()));
     this.logger.info('Kafka Consumer subscribed to events: ' + eventsToSubscribe.join(', '));
   }
@@ -61,7 +58,7 @@ export class TranscoderKafkaConsumerAdapter
   }
 
   public async consumeMessage(
-    onConsumeMessageHandler: (message: IntegrationEvent<any>) => Promise<void>,
+    onConsumeMessageHandler: (message: IntegrationEvent<unknown>) => Promise<void>,
   ): Promise<void> {
     await this.consumer.run({
       eachMessage: async ({ topic, message }) => {
@@ -69,7 +66,7 @@ export class TranscoderKafkaConsumerAdapter
           return;
         }
 
-        const eventMessage = JSON.parse(message.value.toString()) as IntegrationEvent<any>;
+        const eventMessage = JSON.parse(message.value.toString()) as IntegrationEvent<unknown>;
 
         const consumeMessageOperation = async () => await onConsumeMessageHandler(eventMessage);
 

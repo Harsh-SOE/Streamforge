@@ -21,7 +21,7 @@ export class UsersEventsService {
 
   public async onUserProfileOnBoarded(userProfileCreatedEventDto: OnboardedIntegrationEvent) {
     this.logger.info(`saving user projection`);
-    await this.userProjectionRespository.saveUser(userProfileCreatedEventDto);
+    await this.userProjectionRespository.saveUser(userProfileCreatedEventDto.payload);
   }
 
   public async onUserProfileUpdated(

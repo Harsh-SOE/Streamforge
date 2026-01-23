@@ -1,4 +1,6 @@
-import { IntegrationEvent, USERS_EVENTS } from '@app/common/events';
+import { AGGREGATE_EVENT, IntegrationEvent } from '@app/common/events';
+
+import { USER_EVENTS } from './event-types';
 
 export interface NotificationStatusChangedIntegrationEventPayload {
   userId: string;
@@ -6,10 +8,11 @@ export interface NotificationStatusChangedIntegrationEventPayload {
 }
 
 export class NotificationStatusChangedIntegrationEvent implements IntegrationEvent<NotificationStatusChangedIntegrationEventPayload> {
+  public readonly eventName: string;
   public readonly eventId: string;
   public readonly occurredAt: string;
   public readonly eventVersion: number = 1;
-  public readonly eventName: string = USERS_EVENTS.USER_NOTIFICATION_CHANGED_EVENT;
+  public readonly eventType: string = USER_EVENTS.USER_NOTIFICATION_CHANGED_EVENT;
   public readonly payload: NotificationStatusChangedIntegrationEventPayload;
 
   public constructor(config: {
@@ -23,6 +26,7 @@ export class NotificationStatusChangedIntegrationEvent implements IntegrationEve
       payload: { userId, status },
     } = config;
 
+    this.eventName = AGGREGATE_EVENT;
     this.eventId = eventId;
     this.occurredAt = occurredAt;
     this.payload = {

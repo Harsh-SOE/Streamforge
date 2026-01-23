@@ -11,7 +11,7 @@ import { UserConfigService } from '@users/infrastructure/config';
 import { USER_REROSITORY_PORT, UsersBufferPort } from '@users/application/ports';
 import { UserRepositoryAdapter } from '@users/infrastructure/repository/adapters';
 
-import { UserMessage, StreamData } from '../types';
+import { UserOnBoardedBufferMessagePayload, StreamData } from '../types';
 
 export interface RedisBufferConfig {
   key: string;
@@ -135,20 +135,20 @@ export class UsersRedisBuffer implements UsersBufferPort, OnModuleInit, OnModule
   }
 
   public extractMessageFromStream(stream: StreamData[]) {
-    const messages: UserMessage[] = [];
+    const messages: UserOnBoardedBufferMessagePayload[] = [];
     const ids: string[] = [];
     for (const [streamKey, entities] of stream) {
       this.logger.info(`Processing stream: ${streamKey}`);
       for (const [id, message] of entities) {
         this.logger.info(`Recieved an element with id:${id}`);
         ids.push(id);
-        messages.push(JSON.parse(message[1]) as UserMessage);
+        messages.push(JSON.parse(message[1]) as UserOnBoardedBufferMessagePayload);
       }
     }
     return { ids: ids, extractedMessages: messages };
   }
 
-  public async processMessages(ids: string[], messages: UserMessage[]) {
+  public async processMessages(ids: string[], messages: UserOnBoardedBufferMessagePayload[]) {
     const models = messages.map((message) => {
       return UserAggregate.create({
         id: message.id,

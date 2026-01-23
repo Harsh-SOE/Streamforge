@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
-import { UserReadModel } from '@read/application/models';
+import { UserQuery } from '@read/application/payload/query';
 import { UserReadMongooseModel } from '@read/infrastructure/repository/models';
 
 @Injectable()
 export class UserQueryACL {
-  public userProjectionSchemaToQueryModel(projectionModel: UserReadMongooseModel): UserReadModel {
+  public userProjectionSchemaToQueryModel(projectionModel: UserReadMongooseModel): UserQuery {
     return {
       userId: projectionModel.userId,
       userAuthId: projectionModel.userAuthId,
