@@ -5,6 +5,7 @@ import { ChannelCreatedIntegrationEvent } from '@app/common/events/channel';
 import { EVENT_PUBLISHER_PORT, EventsPublisherPort } from '@app/common/ports/events';
 
 import { ChannelCreatedDomainEvent } from '@channel/domain/domain-events';
+import { ChannelCreatedProjectionEvent } from '@app/common/events/projections';
 
 @EventsHandler(ChannelCreatedDomainEvent)
 export class ChannelCreatedEventHandler implements IEventHandler<ChannelCreatedDomainEvent> {
@@ -27,5 +28,11 @@ export class ChannelCreatedEventHandler implements IEventHandler<ChannelCreatedD
     });
 
     await this.eventPublisher.publishMessage(channelCreatedIntegrationEvent);
+
+    const channelCreatedProjectionEvent = new ChannelCreatedProjectionEvent(
+      channelCreatedDomainEvent,
+    );
+
+    await this.eventPublisher.publishMessage(channelCreatedProjectionEvent);
   }
 }

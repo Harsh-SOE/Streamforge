@@ -5,8 +5,8 @@ import { ENVIRONMENT } from '@app/utils/enums';
 import { KafkaClient } from '@app/clients/kafka';
 import { EventsConsumerPort } from '@app/common/ports/events';
 import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
-import { KafkaEventConsumerHandler } from '@app/handlers/events-consumer/kafka';
 import { PROJECTION_EVENT, IntegrationEvent } from '@app/common/events';
+import { KafkaEventConsumerHandler } from '@app/handlers/events-consumer/kafka';
 
 import { ReadConfigService } from '@read/infrastructure/config';
 

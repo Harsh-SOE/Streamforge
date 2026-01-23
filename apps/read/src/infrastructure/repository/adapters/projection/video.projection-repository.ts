@@ -32,21 +32,4 @@ export class VideoProjectionRepository implements VideoProjectionRepositoryPort 
 
     return savedCards.length;
   }
-
-  /*
-  public async updateVideo(videoId: string, event: VideoUploadedEventDto): Promise<boolean> {
-    const updated = await this.projectedVideoCard.findOneAndUpdate(
-      { videoId },
-      { $set: this.videoCardACL.videoUpdatedEventToPersistance(event) },
-      { new: true },
-    );
-
-    return updated ? true : false;
-  }
-
-  public async deleteVideo(videoId: string): Promise<boolean> {
-    const result = await this.projectedVideoCard.deleteOne({ videoId });
-    return result.acknowledged;
-  }
-  */
 }

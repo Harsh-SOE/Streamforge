@@ -1,9 +1,8 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 
 import { LOGGER_PORT, LoggerPort } from '@app/common/ports/logger';
-import { ProfileUpdatedIntegrationEvent } from '@app/common/events/users';
 import { VideoPublishedIntegrationEvent } from '@app/common/events/videos';
-import { ChannelCreatedIntegrationEvent } from '@app/common/events/channel';
+import { ChannelCreatedProjectionEvent } from '@app/common/events/projections';
 import { EVENT_CONSUMER_PORT, EventsConsumerPort } from '@app/common/ports/events';
 import { PROJECTION_EVENTS, UserProjectionEvent } from '@app/common/events/projections';
 
@@ -30,19 +29,17 @@ export class EventsListenerService implements OnModuleInit {
           await this.usersEventService.onUserProfileOnBoarded(event as UserProjectionEvent);
           break;
         }
-        case 'USER_PROFILE_UPDATED_EVENT': {
-          await this.usersEventService.onUserProfileUpdated(
-            event.payload as ProfileUpdatedIntegrationEvent,
-          );
+        case PROJECTION_EVENTS.USER_PROFILE_UPDATED_PROJECTION_EVENT.toString(): {
+          this.logger.info(`Updating user projection`);
           break;
         }
-        case 'CHANNEL_CREATED': {
+        case PROJECTION_EVENTS.CHANNEL_CREATED_PROJECTION_EVENT.toString(): {
           await this.channelEventsService.onChannelCreated(
-            event.payload as ChannelCreatedIntegrationEvent,
+            event.payload as ChannelCreatedProjectionEvent,
           );
           break;
         }
-        case 'VIDEO_PUBLISHED_EVENT': {
+        case PROJECTION_EVENTS.VIDEO_PUBLISHED_PROJECTION_EVENT.toString(): {
           await this.videoEventsService.onVideoPublished(
             event.payload as VideoPublishedIntegrationEvent,
           );

@@ -1,4 +1,3 @@
-import { ProfileUpdatedIntegrationEvent } from '@app/common/events/users';
 import { UserOnBoardedProjection } from '@read/application/payload/projection';
 
 export interface UserProjectionRepositoryPort {
@@ -6,9 +5,7 @@ export interface UserProjectionRepositoryPort {
 
   saveManyUser(data: UserOnBoardedProjection[]): Promise<number>;
 
-  updateUser(userId: string, data: Partial<ProfileUpdatedIntegrationEvent>): Promise<boolean>;
-
-  deleteUser(userId: string): Promise<boolean>;
+  // todo: make projection events for user updated and deleted
 }
 
 export const USER_PROJECTION_REPOSITORY_PORT = Symbol('USER_PROJECTION_REPOSITORY_PORT');

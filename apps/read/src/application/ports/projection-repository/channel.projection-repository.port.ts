@@ -1,16 +1,11 @@
-import {
-  ChannelCreatedIntegrationEvent,
-  ChannelUpdatedIntegrationEvent,
-} from '@app/common/events/channel';
+import { ChannelCreatedProjection } from '@read/application/payload/projection';
 
 export interface ChannelProjectionRepositoryPort {
-  saveChannel(data: ChannelCreatedIntegrationEvent): Promise<boolean>;
+  saveChannel(data: ChannelCreatedProjection): Promise<boolean>;
 
-  saveManyChannels(data: ChannelCreatedIntegrationEvent[]): Promise<number>;
+  saveManyChannels(data: ChannelCreatedProjection[]): Promise<number>;
 
-  updateChannel(videoId: string, data: Partial<ChannelUpdatedIntegrationEvent>): Promise<boolean>;
-
-  deleteChannel(videoId: string): Promise<boolean>;
+  // todo: make projection events for channel updated and deleted
 }
 
 export const CHANNEL_PROJECTION_REPOSITORY_PORT = Symbol('CHANNEL_PROJECTION_REPOSITORY_PORT');

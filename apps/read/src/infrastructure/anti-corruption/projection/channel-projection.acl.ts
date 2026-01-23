@@ -2,12 +2,8 @@ import { Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
-import {
-  ChannelCreatedIntegrationEvent,
-  ChannelUpdatedIntegrationEvent,
-} from '@app/common/events/channel';
-
 import { ChannelReadMongooseModel } from '@read/infrastructure/repository/models';
+import { ChannelCreatedProjection } from '@read/application/payload/projection';
 
 @Injectable()
 export class ChannelProjectionACL {
@@ -17,22 +13,9 @@ export class ChannelProjectionACL {
   ) {}
 
   public channelCreatedEventToProjectionModel(
-    event: ChannelCreatedIntegrationEvent,
+    payload: ChannelCreatedProjection,
   ): ChannelReadMongooseModel {
-    const { channelId, userId, bio, coverImage } = event.payload;
-
-    return new this.channelProjectionModel({
-      userId,
-      channelId,
-      bio,
-      coverImage,
-    });
-  }
-
-  public channelUpdatedEventToProjectionModel(
-    event: ChannelUpdatedIntegrationEvent,
-  ): ChannelReadMongooseModel {
-    const { channelId, userId, bio, coverImage } = event.payload;
+    const { channelId, userId, bio, coverImage } = payload;
 
     return new this.channelProjectionModel({
       userId,

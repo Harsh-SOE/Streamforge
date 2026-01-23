@@ -43,25 +43,4 @@ export class VideoProjectionACL {
 
     return new this.videoProjectionModel(videoCard);
   }
-
-  /*
-  public videoUpdatedEventToPersistance(
-    event: VideoUpatedEventDto,
-  ): Partial<VideoWatchProjectionModel> {
-    const videoCard = {
-      videoId: event.videoId,
-      title: event.title,
-      thumbnailUrl: event.thumbnailUrl,
-      videoUrl: event.videoUrl,
-      categories: event.categories,
-      views: event.views,
-      commentsCount: event.commentsCount,
-      durationSeconds: event.durationSeconds,
-      likes: event.likes,
-      visibility: event.visibility,
-    };
-
-    return new this.videoCard(videoCard);
-  }
-  */
 }
