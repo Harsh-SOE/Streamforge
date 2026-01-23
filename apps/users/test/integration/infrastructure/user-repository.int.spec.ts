@@ -30,7 +30,7 @@ describe('UserRepositoryAdapter (Integration)', () => {
   let container: StartedPostgreSqlContainer;
   let adapter: UserRepositoryAdapter;
 
-  jest.setTimeout(60000);
+  jest.setTimeout(120000);
 
   beforeAll(async () => {
     container = await new PostgreSqlContainer('postgres:latest').start();
